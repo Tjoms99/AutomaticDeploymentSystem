@@ -1,0 +1,6 @@
+/.metadata/
+*.jxbrowser.userdata
+*.metadata
+*.settings
+*.project
+**RemoteSystemsTempFiles	

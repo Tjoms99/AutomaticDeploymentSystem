@@ -1,6 +1,0 @@
-"./i2c.obj"
-"./main.obj"
-"./temp.obj"
-"../lnk_msp430fr2475.cmd"
--lfrwp_init.a
--llibc.a
