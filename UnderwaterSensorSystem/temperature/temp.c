@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "temp.h"
-#include "i2c.h"
+#include "../i2c/i2c.h"
 
 static void set_coefficients(uint8_t coefficient)
 {

@@ -3,4 +3,5 @@
 *.metadata
 *.settings
 *.project
-**RemoteSystemsTempFiles	
+**RemoteSystemsTempFiles
+**Debug
