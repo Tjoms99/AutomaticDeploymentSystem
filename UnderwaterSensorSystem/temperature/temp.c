@@ -56,20 +56,25 @@ static void read_adc_temperature()
     for(index = 0; index <10000; index++);
 
     i2c_write(GET_TEMP_VALUE, TEMPERATURE_ADDRESS);   // read adc temp value
-    i2c_read(READ_3_BYTES);
+    i2c_read(READ_2_BYTES);
 }
-static double calculate_temperature()
+static float calculate_temperature()
 {
-    volatile static double adc  = 9378708;
-    volatile static double temp = 10;
+    volatile static double adc  = 9378708/256;
+    volatile static double k4_t = 4;
+    volatile static double k3_t = 3;
+    volatile static double k2_t = 2;
+    volatile static double k1_t = 1;
+    volatile static double k0_t = 0;
+    volatile static double temp = 0;
 
     adc = data_in;
 
-    volatile float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
-    volatile float k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
-    volatile float k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
-    volatile float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
-    volatile float k0_t = -1 * (1.5f * k0 / 100.0f);
+    k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
+    k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
+    k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
+    k1_t =      (1.0f * k1 / 1000000.0f  * adc);
+    k0_t = -1 * (1.5f * k0 / 100.0f);
 
     temp = k4_t + k3_t + k2_t + k1_t + k0_t;
     return temp;

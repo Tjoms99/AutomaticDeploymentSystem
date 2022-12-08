@@ -22,6 +22,7 @@ int main(void)
         volatile static double temperature = 1;
 
         temperature = get_temperature();
+
         for(index = 0; index <10000; index++);
 
     }
