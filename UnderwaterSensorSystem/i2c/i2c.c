@@ -20,7 +20,7 @@ void init_i2c()
         UCB1CTLW0 |= UCMODE_3;  // put in I2C mode
         UCB1CTLW0 |= UCMST;     // set as master
         UCB1CTLW0 |= UCTR;      // put into TX mode (WRITE)
-        UCB1I2CSA = 0X77;       // set slave address RTC = 0x77
+               // set slave address RTC = 0x77
 
         UCB1CTLW1 |= UCASTP_2;  // auto STOP mode
         UCB1TBCNT = 1;          // count = 1 byte
@@ -78,12 +78,15 @@ __interrupt void EUSCI_B1_I2C_ISR(void)
         switch(UCB1IV)
         {
             case RXIF0: // read Rx buffer
+
                 data_in = data_in << 8*byte_pos | UCB1RXBUF;
                 byte_pos++;
                 break;
 
+
             case TXIF0: // set Tx buffer
                 UCB1TXBUF = data_out;
+
                 byte_pos = 0;
                 data_in = 0;
                 break;
