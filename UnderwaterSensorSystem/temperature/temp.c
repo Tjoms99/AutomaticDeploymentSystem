@@ -6,8 +6,11 @@
  */
 
 #include <stdint.h>
+#include <MSP430.h>
 #include "temp.h"
 #include "../i2c/i2c.h"
+
+
 
 static void set_coefficients(uint8_t coefficient)
 {
@@ -44,6 +47,7 @@ void init_temp()
     i2c_write(GET_K0, TEMPERATURE_ADDRESS);   // get k0
     i2c_read(BYTES_2);
     set_coefficients(K0);
+
 }
 
 static void read_adc_temperature()
@@ -52,7 +56,7 @@ static void read_adc_temperature()
 
     i2c_write(START_CONVERSION, TEMPERATURE_ADDRESS);   // start conversion
 
-    for(index = 0; index <10000; index++);
+    for(index = 0; index <5000; index++);
 
     i2c_write(GET_TEMP_VALUE,TEMPERATURE_ADDRESS);   // read adc temp value
     i2c_read(BYTES_2);
@@ -80,3 +84,5 @@ double get_temperature()
     read_adc_temperature();
     return calculate_temperature();
 }
+
+
