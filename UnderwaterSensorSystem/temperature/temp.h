@@ -7,15 +7,34 @@
 
 #ifndef TEMP_H_
 #define TEMP_H_
+    #define TEMPERATURE_ADDRESS 0x77
 
-volatile static uint32_t k4 = 28446;
-volatile static uint32_t k3 = 24926;
-volatile static uint32_t k2 = 36016;
-volatile static uint32_t k1 = 32791;
-volatile static uint32_t k0 = 40781;
+    // I2C commands
+    #define RESET_SENSOR 0x1E
+    #define START_CONVERSION 0x48
+    #define GET_TEMP_VALUE 0X00
+    #define GET_K4 0xA2
+    #define GET_K3 0xA4
+    #define GET_K2 0xA6
+    #define GET_K1 0xA8
+    #define GET_K0 0xAA
 
-void init_temp();
-double get_temperature();
+    #define BYTES_2 0X02
+
+    volatile static uint32_t k4 = 28446;
+    volatile static uint32_t k3 = 24926;
+    volatile static uint32_t k2 = 36016;
+    volatile static uint32_t k1 = 32791;
+    volatile static uint32_t k0 = 40781;
+
+    #define K4 0X04
+    #define K3 0X03
+    #define K2 0X02
+    #define K1 0X01
+    #define K0 0X00
+
+    void init_temp();
+    double get_temperature();
 
 
 

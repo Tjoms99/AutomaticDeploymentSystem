@@ -12,7 +12,6 @@ int main(void)
 
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
     init_i2c();
-    for(index = 0; index <10000; index++);
     init_temp();
 
     while(1)
@@ -24,9 +23,4 @@ int main(void)
 
     }
 }
-
-
-//-------------------------------------------------
-
-
 
