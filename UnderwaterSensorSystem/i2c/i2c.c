@@ -44,27 +44,29 @@ void init_i2c()
         __enable_interrupt();   // enable maskables
 }
 
-void i2c_write(uint8_t cmd)
+void i2c_write(uint8_t cmd, uint8_t address)
 {
         //Transmit Data to slave with a WRITE message
-        data_out = cmd;
+        UCB1I2CSA = address;    // set slave address
         UCB1TBCNT = 1;          // count = 1 byte
+        data_out = cmd;
+
         UCB1CTLW0 |= UCTR;      // Put into Tx mode
         UCB1CTLW0 |= UCTXSTT;   // manually start message (START)
 
         while((UCB1IFG & UCSTPIFG) == 0);
-        UCB1IFG &= ~UCSTPIFG;   // Clear the stop flag
+        UCB1IFG &= ~UCSTPIFG;   // clear the stop flag
 }
 
 void i2c_read(uint8_t bytes_to_read)
 {
         //Receive Data from slave with a READ message
-        UCB1TBCNT = bytes_to_read;  // count = 3 byte
+        UCB1TBCNT = bytes_to_read;
         UCB1CTLW0 &= ~UCTR;         // Put into Rx mode
         UCB1CTLW0 |= UCTXSTT;       // manually start message (START)
 
         while((UCB1IFG & UCSTPIFG) == 0);
-        UCB1IFG &= ~UCSTPIFG;       // Clear the stop flag
+        UCB1IFG &= ~UCSTPIFG;       // clear the stop flag
 }
 
 //-- ISRs
@@ -75,14 +77,13 @@ __interrupt void EUSCI_B1_I2C_ISR(void)
 
         switch(UCB1IV)
         {
-            case 0x16:                                      // ID 16: RXIFG0
-                data_in = data_in << 8*byte_pos | UCB1RXBUF;// Read receive register
+            case RXIF0: // read Rx buffer
+                data_in = data_in << 8*byte_pos | UCB1RXBUF;
                 byte_pos++;
                 break;
 
-            case 0x18:                                      // ID 18: TXIFG0
-                UCB1TXBUF = data_out;                       // set Tx buffer
-
+            case TXIF0: // set Tx buffer
+                UCB1TXBUF = data_out;
                 byte_pos = 0;
                 data_in = 0;
                 break;

@@ -6,7 +6,9 @@
 
 uint32_t index;
 
-
+//Note for next time:
+//  Add pressure driver
+//  Add timer interval of 1 sec to sample temperature and pressure
 int main(void)
 {
 
@@ -20,13 +22,8 @@ int main(void)
         volatile static double temperature = 1;
 
         temperature = get_temperature();
+
         for(index = 0; index <10000; index++);
 
     }
 }
-
-
-//-------------------------------------------------
-
-
-
