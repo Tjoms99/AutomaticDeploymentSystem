@@ -1,9 +1,9 @@
 
 #include <MSP430.h>
+#include <pressure/MS5837_30BA.h>
 #include <stdint.h>
 #include <temperature/TSYS01.h>
 #include "i2c/i2c.h"
-#include "pressure/pressure.h"
 
 //Note for next time:
 //  Add pressure driver
@@ -28,10 +28,11 @@ void init_timer1(){
 
 int main(void)
 {
-    volatile static float temperature1 = 0;
-    volatile static float TSYS01_temperature = 0;
+    static float MS5837_30BA_pressure = 0;
+    static float MS5837_30BA_temperature = 0;
+    static float TSYS01_temperature = 0;
 
-    volatile static float pressure = 0;
+    static float pressure_reference = 0;
     volatile static float depth = 0;
 
 
@@ -42,7 +43,9 @@ int main(void)
     init_timer1();
     init_i2c();
     TSYS01_init();
-    init_pressure();
+    MS5837_30BA_init();
+
+    MS5837_30BA_measure(&pressure_reference, &MS5837_30BA_temperature);
 
     while(1)
     {
@@ -50,12 +53,10 @@ int main(void)
         uint32_t i = 0;
 
        if(TEMPFG == 1){
-           TSYS01_measure_temperature(&TSYS01_temperature);
+           TSYS01_measure(&TSYS01_temperature);
+           MS5837_30BA_measure(&MS5837_30BA_pressure, &MS5837_30BA_temperature);
 
-           measure();
-           temperature1 =  get_temperature_p() ;
-           pressure = get_pressure(Pa);
-           depth = get_depth()*100.0f;
+           depth = get_depth(MS5837_30BA_pressure, pressure_reference)*100.0f; // m -> cm
            TEMPFG = 0;
 
        }

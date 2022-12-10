@@ -35,7 +35,7 @@
     #define K0 0X00
 
     void TSYS01_init();
-    void TSYS01_measure_temperature(float* temperature);
+    void TSYS01_measure(float* temperature);
 
 
 

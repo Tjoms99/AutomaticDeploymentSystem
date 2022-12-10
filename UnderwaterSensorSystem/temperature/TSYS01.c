@@ -87,7 +87,7 @@ static void read_adc()
 
 }
 
-static void TSYS01_calculate_temperature()
+static void TSYS01_calculate_temperature(float *temperature)
 {
     volatile static float adc  = 9378708/256;
     adc = data_in;
@@ -98,15 +98,13 @@ static void TSYS01_calculate_temperature()
     volatile float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
     volatile float k0_t = -1 * (1.5f * k0 / 100.0f);
 
-    temp = k4_t + k3_t + k2_t + k1_t + k0_t;
+    *temperature = k4_t + k3_t + k2_t + k1_t + k0_t;
 }
 
-void TSYS01_measure_temperature(float* temperature)
+void TSYS01_measure(float* temperature)
 {
     read_adc();
-    TSYS01_calculate_temperature();
-    *temperature = temp;
-
+    TSYS01_calculate_temperature(temperature);
 }
 
 #pragma vector = TIMER0_A1_VECTOR
