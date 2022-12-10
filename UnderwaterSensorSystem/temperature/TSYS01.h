@@ -7,18 +7,18 @@
 
 #ifndef TEMP_H_
 #define TEMP_H_
-    #define TEMPERATURE_ADDRESS 0x77
+    #define TSYS01_ADDRESS 0x77
 
     // I2C commands
-    #define RESET_SENSOR 0x1E
-    #define START_CONVERSION 0x48
-    #define GET_ADC_VALUE 0X00
+    #define TSYS01_RESET_SENSOR 0x1E
+    #define TSYS01_START_CONVERSION 0x48
+    #define TSYS01_GET_ADC_VALUE 0X00
 
-    #define GET_K4 0xA2
-    #define GET_K3 0xA4
-    #define GET_K2 0xA6
-    #define GET_K1 0xA8
-    #define GET_K0 0xAA
+    #define TSYS01_GET_K4 0xA2
+    #define TSYS01_GET_K3 0xA4
+    #define TSYS01_GET_K2 0xA6
+    #define TSYS01_GET_K1 0xA8
+    #define TSYS01_GET_K0 0xAA
 
     #define BYTES_2 0X02
 
@@ -34,8 +34,8 @@
     #define K1 0X01
     #define K0 0X00
 
-    void init_temperature();
-    double get_temperature();
+    void TSYS01_init();
+    void TSYS01_measure_temperature(float* temperature);
 
 
 

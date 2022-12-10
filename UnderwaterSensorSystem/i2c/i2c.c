@@ -69,28 +69,23 @@ void i2c_read(uint8_t bytes_to_read, uint8_t address)
 
         while((UCB1IFG & UCSTPIFG) == 0);
         UCB1IFG &= ~UCSTPIFG;       // clear the stop flag
-        UCB1IFG &= ~UCNACKIFG;
 }
 
 //-- ISRs
 #pragma vector = EUSCI_B1_VECTOR
 __interrupt void EUSCI_B1_I2C_ISR(void)
 {
-        static uint8_t byte_pos = 0;
-
         switch(UCB1IV)
         {
             case RXIF0: // read Rx buffer
 
-                data_in = data_in << 8*byte_pos | UCB1RXBUF;
-                byte_pos++;
+                data_in = data_in << 8 | UCB1RXBUF;
                 break;
 
 
             case TXIF0: // set Tx buffer
                 UCB1TXBUF = data_out;
 
-                byte_pos = 0;
                 data_in = 0;
                 break;
 

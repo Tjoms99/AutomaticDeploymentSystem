@@ -7,11 +7,15 @@
 
 #include <stdint.h>
 #include <MSP430.h>
-#include "temp.h"
+#include <temperature/TSYS01.h>
 #include "../i2c/i2c.h"
 
 #define TIMER_33MS 2063 //33ms
-void init_timer()
+
+static float temp = 0;
+
+
+static void init_timer()
 {
     TA0CTL |= TASSEL_2; // set timer to system clk
     TA0CTL |= ID_2;     // prescalar 4
@@ -33,31 +37,31 @@ static void set_coefficients(uint8_t coefficient)
     if(coefficient == K0) k0 = data_in;
 }
 
-void init_temperature()
+void TSYS01_init()
 {
     uint32_t index;
 
-    i2c_write(RESET_SENSOR, TEMPERATURE_ADDRESS);   // reset sensor
+    i2c_write(TSYS01_RESET_SENSOR, TSYS01_ADDRESS);   // reset sensor
     for(index = 0; index <10000; index++);
 
-    i2c_write(GET_K4, TEMPERATURE_ADDRESS);   // get k4
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_K4, TSYS01_ADDRESS);   // get k4
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K4);
 
-    i2c_write(GET_K3, TEMPERATURE_ADDRESS);   // get k3
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_K3, TSYS01_ADDRESS);   // get k3
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K3);
 
-    i2c_write(GET_K2, TEMPERATURE_ADDRESS);   // get k2
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_K2, TSYS01_ADDRESS);   // get k2
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K2);
 
-    i2c_write(GET_K1, TEMPERATURE_ADDRESS);   // get k1
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_K1, TSYS01_ADDRESS);   // get k1
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K1);
 
-    i2c_write(GET_K0, TEMPERATURE_ADDRESS);   // get k0
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_K0, TSYS01_ADDRESS);   // get k0
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K0);
 
     init_timer();
@@ -72,22 +76,20 @@ static void wait_for_conversion()
     while((TA0IV & 0X02) == 0);
 }
 
-static void read_adc_temperature()
+static void read_adc()
 {
     TA0CCTL1 |= CCIE;           // enable interrupt
 
-    i2c_write(START_CONVERSION, TEMPERATURE_ADDRESS);   // start conversion
+    i2c_write(TSYS01_START_CONVERSION, TSYS01_ADDRESS);   // start conversion
     wait_for_conversion();
-    i2c_write(GET_ADC_VALUE,TEMPERATURE_ADDRESS);   // read adc temp value
-    i2c_read(BYTES_2, TEMPERATURE_ADDRESS);
+    i2c_write(TSYS01_GET_ADC_VALUE,TSYS01_ADDRESS);   // read adc temp value
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
 
 }
 
-static double calculate_temperature()
+static void TSYS01_calculate_temperature()
 {
     volatile static float adc  = 9378708/256;
-    volatile static float temp = 10;
-
     adc = data_in;
 
     volatile float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
@@ -97,13 +99,14 @@ static double calculate_temperature()
     volatile float k0_t = -1 * (1.5f * k0 / 100.0f);
 
     temp = k4_t + k3_t + k2_t + k1_t + k0_t;
-    return temp;
 }
 
-double get_temperature()
+void TSYS01_measure_temperature(float* temperature)
 {
-    read_adc_temperature();
-    return calculate_temperature();
+    read_adc();
+    TSYS01_calculate_temperature();
+    *temperature = temp;
+
 }
 
 #pragma vector = TIMER0_A1_VECTOR

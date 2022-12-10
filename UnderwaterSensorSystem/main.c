@@ -1,14 +1,17 @@
 
 #include <MSP430.h>
 #include <stdint.h>
+#include <temperature/TSYS01.h>
 #include "i2c/i2c.h"
-#include "temperature/temp.h"
+#include "pressure/pressure.h"
 
 //Note for next time:
 //  Add pressure driver
 //  Add timer interval of 1 sec to sample temperature and pressure
 
 #define TIMER_1S 62500
+
+
 uint8_t TEMPFG = 1;
 
 void init_timer1(){
@@ -26,7 +29,7 @@ void init_timer1(){
 int main(void)
 {
     volatile static float temperature1 = 0;
-    volatile static float temperature2 = 0;
+    volatile static float TSYS01_temperature = 0;
 
     volatile static float pressure = 0;
     volatile static float depth = 0;
@@ -38,7 +41,7 @@ int main(void)
 
     init_timer1();
     init_i2c();
-    init_temperature();
+    TSYS01_init();
     init_pressure();
 
     while(1)
@@ -46,17 +49,20 @@ int main(void)
 
         uint32_t i = 0;
 
-       //if(TEMPFG == 1){
-           measure();
-           temperature1 =  get_temperature_p() / 100.0f;
-           pressure = get_pressure();
-           temperature2 = get_temperature();
+       if(TEMPFG == 1){
+           TSYS01_measure_temperature(&TSYS01_temperature);
 
+           measure();
+           temperature1 =  get_temperature_p() ;
+           pressure = get_pressure(Pa);
+           depth = get_depth()*100.0f;
            TEMPFG = 0;
-           for(i = 0; i <60000; i++);
-       //}
+
+       }
     }
 }
+
+
 
 #pragma vector = TIMER0_A0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
