@@ -22,11 +22,11 @@
 
     #define BYTES_2 0X02
 
-    volatile static uint32_t k4 = 28446;
-    volatile static uint32_t k3 = 24926;
-    volatile static uint32_t k2 = 36016;
-    volatile static uint32_t k1 = 32791;
-    volatile static uint32_t k0 = 40781;
+    static uint32_t k4 = 28446;
+    static uint32_t k3 = 24926;
+    static uint32_t k2 = 36016;
+    static uint32_t k1 = 32791;
+    static uint32_t k0 = 40781;
 
     #define K4 0X04
     #define K3 0X03

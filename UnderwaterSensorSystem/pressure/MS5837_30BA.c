@@ -21,7 +21,7 @@ static uint8_t crc4(uint16_t n_prom[])
     n_prom[7] = 0;
 
     for ( i = 0 ; i < 16; i++ ) {
-        if ( i%2 == 1 ) {
+        if ( i & 0x01 == 1 ) {
             n_rem ^= (uint16_t)((n_prom[i>>1]) & 0x00FF);
         } else {
             n_rem ^= (uint16_t)(n_prom[i>>1] >> 8);

@@ -12,9 +12,6 @@
 
 #define TIMER_33MS 2063 //33ms
 
-static float temp = 0;
-
-
 static void init_timer()
 {
     TA0CTL |= TASSEL_2; // set timer to system clk
@@ -89,21 +86,22 @@ static void read_adc()
 
 static void TSYS01_calculate_temperature(float *temperature)
 {
-    volatile static float adc  = 9378708/256;
+    static float adc = 9378708/256;
+
+    read_adc();
     adc = data_in;
 
-    volatile float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
-    volatile float k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
-    volatile float k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
-    volatile float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
-    volatile float k0_t = -1 * (1.5f * k0 / 100.0f);
+    float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
+    float k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
+    float k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
+    float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
+    float k0_t = -1 * (1.5f * k0 / 100.0f);
 
     *temperature = k4_t + k3_t + k2_t + k1_t + k0_t;
 }
 
 void TSYS01_measure(float* temperature)
 {
-    read_adc();
     TSYS01_calculate_temperature(temperature);
 }
 

@@ -50,8 +50,6 @@ int main(void)
     while(1)
     {
 
-        uint32_t i = 0;
-
        if(TEMPFG == 1){
            TSYS01_measure(&TSYS01_temperature);
            MS5837_30BA_measure(&MS5837_30BA_pressure, &MS5837_30BA_temperature);
