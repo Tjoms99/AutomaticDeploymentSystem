@@ -58,15 +58,18 @@ void i2c_write(uint8_t cmd, uint8_t address)
         UCB1IFG &= ~UCSTPIFG;   // clear the stop flag
 }
 
-void i2c_read(uint8_t bytes_to_read)
+void i2c_read(uint8_t bytes_to_read, uint8_t address)
 {
         //Receive Data from slave with a READ message
         UCB1TBCNT = bytes_to_read;
+        UCB1I2CSA = address;        // set slave address
+
         UCB1CTLW0 &= ~UCTR;         // Put into Rx mode
         UCB1CTLW0 |= UCTXSTT;       // manually start message (START)
 
         while((UCB1IFG & UCSTPIFG) == 0);
         UCB1IFG &= ~UCSTPIFG;       // clear the stop flag
+        UCB1IFG &= ~UCNACKIFG;
 }
 
 //-- ISRs

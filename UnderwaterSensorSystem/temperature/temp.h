@@ -12,7 +12,7 @@
     // I2C commands
     #define RESET_SENSOR 0x1E
     #define START_CONVERSION 0x48
-    #define GET_TEMP_VALUE 0X00
+    #define GET_ADC_VALUE 0X00
 
     #define GET_K4 0xA2
     #define GET_K3 0xA4
@@ -34,7 +34,7 @@
     #define K1 0X01
     #define K0 0X00
 
-    void init_temp();
+    void init_temperature();
     double get_temperature();
 
 
