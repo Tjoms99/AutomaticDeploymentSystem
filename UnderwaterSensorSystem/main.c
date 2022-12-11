@@ -1,16 +1,12 @@
 
 #include <MSP430.h>
-#include <pressure/MS5837_30BA.h>
 #include <stdint.h>
-#include <temperature/TSYS01.h>
-#include "i2c/i2c.h"
 
-//Note for next time:
-//  Add pressure driver
-//  Add timer interval of 1 sec to sample temperature and pressure
+#include <pressure/MS5837_30BA.h>
+#include <temperature/TSYS01.h>
+#include <i2c/i2c.h>
 
 #define TIMER_1S 62500
-
 
 uint8_t TEMPFG = 1;
 

@@ -5,11 +5,26 @@
  *      Author: marcu
  */
 
+#include <MSP430.h>
 #include <pressure/MS5837_30BA.h>
-#include "../i2c/i2c.h"
-#include <stdint.h>
+#include <i2c/i2c.h>
 
 uint32_t i = 0;
+
+#define TIMER_32MS 2020 //20ms
+
+static void init_timer()
+{
+    TA0CTL |= TASSEL_2;   // set timer to system clk
+    TA0CTL |= ID_2;       // prescalar 4
+    TA0CTL |= MC_1;       // up mode
+
+    TA0CCR2 = TIMER_32MS; // set compare register;
+    TA0CCTL2 &= ~CCIFG;   // clear interrupt
+    TA0CCTL2 |= CCIE;     // enable interrupt
+    TA0CCTL2 &= ~CAP;     // compare mode
+    __enable_interrupt();
+}
 
 //Cyclic redundancy check
 static uint8_t crc4(uint16_t n_prom[])
@@ -57,6 +72,8 @@ void MS5837_30BA_init()
     uint8_t crcRead = coefficients[0] >> 12;
     uint8_t crcCalculated = crc4(coefficients);
     if ( crcCalculated != crcRead )  i = 69;
+
+    init_timer();
 }
 
 
@@ -73,9 +90,6 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
 
     static int32_t TEMP;
     static int32_t P;
-
-
-    //init_test_values();
 
     // Temperature conversion first order
    dT = D2_temp - (uint32_t)coefficients[5] * 256l;
@@ -119,16 +133,28 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
    *temperature = TEMP/100.0f;  //Celsius
 }
 
+static void wait_for_conversion()
+{
+    TA0CCTL2 |= CCIE;           // enable interrupt
+
+    //set register to trigger 32ms into the future
+    TA0CCR2 = TA0R + TIMER_32MS; // set compare register
+    if(TA0R + TIMER_32MS > TA0CCR0) TA0CCR2 = TIMER_32MS - (TA0CCR0 - TA0R); // in case of overflow when setting register
+
+    while((TA0IV & 0X04) == 0);
+}
+
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
 {
+
     i2c_write(MS5837_30BA_START_CONVERTION_D1_4096, MS5837_30BA_ADDRESS);   // start conversion of pressure
-    for(i = 0; i <10000; i++);
+    wait_for_conversion();
     i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS);              // request ADC value
     i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                                 // read ADC value
     *D1 = data_in;                                                          // set ADC value (pressure)
 
     i2c_write(MS5837_30BA_START_CONVERTION_D2_4096, MS5837_30BA_ADDRESS);   // start conversion of temperature
-    for(i = 0; i <10000; i++);
+    wait_for_conversion();
     i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS);              // request ADC value
     i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                                 // read ADC value
     *D2 = data_in;                                                          // set ADC value (temperature)
@@ -150,3 +176,15 @@ float get_depth(float pressure, float pressure_reference)
     return (pressure-pressure_reference)/(FRESHWATER_DENSITY*9.80665); // h = P/(R*g)
 }
 
+//#pragma vector = TIMER0_A1_VECTOR
+__interrupt void Timer_A_CCR2_ISR(void)
+{
+    switch(TA0IV){
+    case 0x04:
+        //TA0CCTL2 &= ~CCIE;    // disable interrupt
+        //TA0CCR2 = TA0R - 1;
+        break;
+    default:
+        break;
+    }
+}

@@ -66,6 +66,8 @@ void TSYS01_init()
 
 static void wait_for_conversion()
 {
+    TA0CCTL1 |= CCIE;           // enable interrupt
+
     //set register to trigger 33ms into the future
     TA0CCR1 = TA0R + TIMER_33MS; // set compare register
     if(TA0R + TIMER_33MS > TA0CCR0) TA0CCR1 = TIMER_33MS - (TA0CCR0 - TA0R); // in case of overflow when setting register
@@ -75,7 +77,6 @@ static void wait_for_conversion()
 
 static void read_adc()
 {
-    TA0CCTL1 |= CCIE;           // enable interrupt
 
     i2c_write(TSYS01_START_CONVERSION, TSYS01_ADDRESS);   // start conversion
     wait_for_conversion();
@@ -106,7 +107,7 @@ void TSYS01_measure(float* temperature)
 }
 
 #pragma vector = TIMER0_A1_VECTOR
-__interrupt void Timer_A_CCRx_ISR(void)
+__interrupt void Timer_A_CCR1_ISR(void)
 {
     switch(TA0IV){
     case 0x02:
