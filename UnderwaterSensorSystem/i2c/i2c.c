@@ -9,7 +9,6 @@
 #include <stdint.h>
 #include "i2c.h"
 
-
 void init_i2c()
 {
         UCB1CTLW0 |= UCSWRST;   // SW RST
@@ -75,6 +74,9 @@ void i2c_read(uint8_t bytes_to_read, uint8_t address)
 #pragma vector = EUSCI_B1_VECTOR
 __interrupt void EUSCI_B1_I2C_ISR(void)
 {
+#define RXIF0 0x16
+#define TXIF0 0x18
+
         switch(UCB1IV)
         {
             case RXIF0: // read Rx buffer
