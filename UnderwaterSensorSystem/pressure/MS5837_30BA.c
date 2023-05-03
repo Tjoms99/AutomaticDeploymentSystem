@@ -13,7 +13,7 @@ uint32_t i = 0;
 
 #define TIMER_32MS 2020 //20ms
 
-static void init_timer()
+static void timer_init()
 {
     TA0CTL |= TASSEL_2;   // set timer to system clk
     TA0CTL |= ID_2;       // prescalar 4
@@ -56,7 +56,7 @@ static uint8_t crc4(uint16_t n_prom[])
 }
 
 
-void MS5837_30BA_init()
+void ms5847_30ba_init()
 {
     i2c_write(MS5837_30BA_RESET_SENSOR,MS5837_30BA_ADDRESS);            // reset sensor
     for(i = 0; i <10000; i++);
@@ -73,7 +73,7 @@ void MS5837_30BA_init()
     uint8_t crcCalculated = crc4(coefficients);
     if ( crcCalculated != crcRead )  i = 69;
 
-    init_timer();
+    timer_init();
 }
 
 
@@ -160,7 +160,7 @@ void get_conversion_values(uint32_t *D1, uint32_t *D2)
     *D2 = data_in;                                                          // set ADC value (temperature)
 
 }
-void MS5837_30BA_measure(float *pressure, float *temperature)
+void ms5847_30ba_measure(float *pressure, float *temperature)
 {
     static uint32_t D1_pres, D2_temp;
     get_conversion_values(&D1_pres, &D2_temp);           // get ADC temperature and pressure values
@@ -171,7 +171,7 @@ void MS5837_30BA_measure(float *pressure, float *temperature)
 
 //Calculate relative depth using a pressure reference
 //Pressure reference should be taken just above the water level
-float get_depth(float pressure, float pressure_reference)
+float ms5847_30ba_get_depth(float pressure, float pressure_reference)
 {
     return (pressure-pressure_reference)/(FRESHWATER_DENSITY*9.80665); // h = P/(R*g)
 }

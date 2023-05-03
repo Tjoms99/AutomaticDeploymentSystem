@@ -25,8 +25,8 @@
 
     static uint16_t coefficients[8];
 
-    void  MS5837_30BA_init(void);
-    void  MS5837_30BA_measure(float *pressure, float *temperature);
-    float get_depth( float pressure, float pressure_reference);
+    void  ms5847_30ba_init(void);
+    void  ms5847_30ba_measure(float *pressure, float *temperature);
+    float ms5847_30ba_get_depth( float pressure, float pressure_reference);
 
 #endif /* MS5837_30BA_H_ */

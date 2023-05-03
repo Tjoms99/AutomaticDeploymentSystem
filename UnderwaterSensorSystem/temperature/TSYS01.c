@@ -12,7 +12,7 @@
 
 #define TIMER_33MS 2063 //33ms
 
-static void init_timer()
+static void timer_init()
 {
     TA0CTL |= TASSEL_2; // set timer to system clk
     TA0CTL |= ID_2;     // prescalar 4
@@ -61,7 +61,7 @@ void TSYS01_init()
     i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K0);
 
-    init_timer();
+    timer_init();
 }
 
 static void wait_for_conversion()

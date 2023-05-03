@@ -11,7 +11,7 @@
 
 #define RS485_TX BIT4 //BIT4
 #define RS485_RX BIT5 //BIT5
-#define RS485_DE_NRE BIT6
+#define RS485_TX_EN BIT6
 
 //See datasheet Table 15-4
 void uart_set_mode(uint8_t mode)
@@ -23,8 +23,9 @@ void uart_set_mode(uint8_t mode)
         UCA0MCTLW = 0x0100;
         break;
     case 1:  //115200; TX error: -7.8 6.4; RX error: -9.7 16.1
+        //CAUSES JITTER
         UCA0BR0 = 8;
-        UCA0MCTLW = 0xD600; //0x0600
+        UCA0MCTLW = 0xD600;
         break;
 
     }
@@ -35,10 +36,10 @@ void uart_init()
 
     //Pinout
 
-    P1SEL0 &= (~RS485_DE_NRE); // Set P1.6 SEL for GPIO
-    P1SEL1 &= (~RS485_DE_NRE); // Set P1.6 SEL for GPIO
-    P1DIR |= RS485_DE_NRE;  // Set P1.6 as Output
-    P1OUT &= ~RS485_DE_NRE; // Recieve enabled
+    P1SEL0 &= (~RS485_TX_EN); // Set P1.6 SEL for GPIO
+    P1SEL1 &= (~RS485_TX_EN); // Set P1.6 SEL for GPIO
+    P1DIR |= RS485_TX_EN;  // Set P1.6 as Output
+    P1OUT &= ~RS485_TX_EN; // Recieve enabled
 
 
 
@@ -64,8 +65,11 @@ void uart_init()
 
 void uart_transmit(char data)
 {
-    int ii = 0;
-  P1OUT |= RS485_DE_NRE; // Set transmitt enable
+  int ii = 0;
+  // Rx interrupt disable, transmit enable
+  UCA0IE &= ~UCRXIE;
+  P1OUT |= RS485_TX_EN;
+
   // Wait for the transmit buffer to be ready
   while (!(UCA0IFG & UCTXIFG));
 
@@ -73,8 +77,9 @@ void uart_transmit(char data)
   UCA0TXBUF = data;
   for(ii = 0; ii < 1000; ii++);
 
-  P1OUT &= ~RS485_DE_NRE; // Set recieve enable
-
+  //Rx interrupt enable, receive enable
+  P1OUT &= ~RS485_TX_EN;
+  UCA0IE |= UCRXIE;
 }
 
 void uart_recieve(char *data)
@@ -90,9 +95,11 @@ void uart_recieve(char *data)
 #pragma vector=USCI_A0_VECTOR //A0
 __interrupt void UART_ISR(void)
 {
+    char data = '0';
     if(UCA0RXBUF > 0x00) //A0
     {
-        uart_transmit(UCA0RXBUF);
+        data = UCA0RXBUF;
+        uart_transmit(data);
 
     }
 }
