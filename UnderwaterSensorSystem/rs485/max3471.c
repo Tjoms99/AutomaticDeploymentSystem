@@ -5,16 +5,16 @@
  *      Author: marcus
  */
 
-#include "uart.h"
 #include <stdint.h>
 #include <msp430.h>
+#include <rs485/max3471.h>
 
-#define RS485_TX BIT4 //BIT4
-#define RS485_RX BIT5 //BIT5
-#define RS485_TX_EN BIT6
+#define TX BIT4
+#define RX BIT5
+#define TX_EN BIT6
 
 //See datasheet Table 15-4
-void uart_set_mode(uint8_t mode)
+void max3471_set_mode(uint8_t mode)
 {
 
     switch(mode){
@@ -31,44 +31,39 @@ void uart_set_mode(uint8_t mode)
     }
 }
 
-void uart_init()
+void max3471_init()
 {
 
-    //Pinout
+  //Configure transmit enable
+  P1SEL0 &= (~TX_EN); // Set P1.6 SEL for GPIO
+  P1SEL1 &= (~TX_EN); // Set P1.6 SEL for GPIO
+  P1DIR |= TX_EN;  // Set P1.6 as Output
+  P1OUT &= ~TX_EN; // Recieve enabled
 
-    P1SEL0 &= (~RS485_TX_EN); // Set P1.6 SEL for GPIO
-    P1SEL1 &= (~RS485_TX_EN); // Set P1.6 SEL for GPIO
-    P1DIR |= RS485_TX_EN;  // Set P1.6 as Output
-    P1OUT &= ~RS485_TX_EN; // Recieve enabled
+  // Configure Tx and Rx
+  P1SEL1 &= ~(TX | RX);
+  P1SEL0 |= TX | RX;
 
-
-
-  // Configure UART
+  // Configure UART settings
   UCA0CTLW0 |= UCSWRST;         // SW reset
   UCA0CTLW0 |= UCSSEL__SMCLK;   // SMCLK = BRCLK (115200 BAUD)
-  uart_set_mode(0);
-
-
-  // Configure UART pins
-  P1SEL1 &= ~(RS485_TX | RS485_RX);
-  P1SEL0 |= RS485_TX | RS485_RX;
+  max3471_set_mode(0);
 
   PM5CTL0 &= ~LOCKLPM5;  // turn on I/O
-
   UCA0CTLW0 &= ~UCSWRST; // Remove software reset
 
-  // Enable the UART receive interrupt
+  // Receive interrupt enable
   UCA0IE |= UCRXIE;
-  __enable_interrupt();   // enable maskables
+  __enable_interrupt();
 
 }
 
-void uart_transmit(char data)
+void max3471_transmit(char data)
 {
   int ii = 0;
-  // Rx interrupt disable, transmit enable
+  //Transmit mode
   UCA0IE &= ~UCRXIE;
-  P1OUT |= RS485_TX_EN;
+  P1OUT |= TX_EN;
 
   // Wait for the transmit buffer to be ready
   while (!(UCA0IFG & UCTXIFG));
@@ -77,12 +72,12 @@ void uart_transmit(char data)
   UCA0TXBUF = data;
   for(ii = 0; ii < 1000; ii++);
 
-  //Rx interrupt enable, receive enable
-  P1OUT &= ~RS485_TX_EN;
+  //Recieve mode
+  P1OUT &= ~TX_EN;
   UCA0IE |= UCRXIE;
 }
 
-void uart_recieve(char *data)
+void max3471_recieve(char *data)
 {
   // Wait for a received character
   while (!(UCA0IFG & UCRXIFG));
@@ -99,7 +94,7 @@ __interrupt void UART_ISR(void)
     if(UCA0RXBUF > 0x00) //A0
     {
         data = UCA0RXBUF;
-        uart_transmit(data);
+        max3471_transmit(data);
 
     }
 }

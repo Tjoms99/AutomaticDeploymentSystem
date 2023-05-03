@@ -1,11 +1,11 @@
 
 #include <MSP430.h>
+#include <rs485/max3471.h>
 #include <stdint.h>
 
 //#include <pressure/MS5837_30BA.h>
 //#include <temperature/TSYS01.h>
 //#include <i2c/i2c.h>
-#include <uart/uart.h>
 
 #define TIMER_1S 62500
 
@@ -38,7 +38,7 @@ int main(void)
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
 
     timer_1_init();
-    uart_init();
+    max3471_init();
 
     int i;
     while(1)
