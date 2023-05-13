@@ -1,6 +1,7 @@
 
 #include <MSP430.h>
 #include <rs485/max3471.h>
+#include <rs232/icl3221.h>
 #include <stdint.h>
 
 //#include <pressure/MS5837_30BA.h>
@@ -39,7 +40,8 @@ int main(void)
 
     timer_1_init();
     max3471_init();
-
+    icl3221_init();
+    icl3221_power(1);
     int i;
     while(1)
     {
