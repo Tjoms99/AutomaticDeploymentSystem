@@ -14,19 +14,21 @@
 #define TIMER_1S 62500
 
 uint8_t TEMPFG = 1;
-/*
-void timer_1_init(){
-    TA0CCR0 = TIMER_1S; // set the compare register
-    TA0CTL |= TASSEL_2; // set timer to system clk
-    TA0CTL |= ID_2;     // prescalar 4
-    TA0CTL |= MC_1;     // up mode
 
-    TA0CCTL0 &= ~CCIFG; // clear interrupt
-    TA0CCTL0 |= CCIE;   // enable interrupt
-    TA0CCTL0 &= ~CAP;   // compare mode
+void timer_init(){
+
+    TB0CTL |= TBCLR;        // reset TB0
+    TB0CTL |= TBSSEL__ACLK; // set timer to system clk
+    TB0CTL |= MC__UP;       // up mode
+
+    TB0CCR0 = 32768;        // set the compare register
+
+    TB0CCTL0 |= CCIE;       // enable interrupt
     __enable_interrupt();
+    TB0CCTL0 &= ~CCIFG;     // clear interrupt
+
 }
-*/
+
 
 
 int main(void)
@@ -46,7 +48,7 @@ int main(void)
     //clock_init_8mhz();
     clock_init_16mhz();
 
-    //timer_1_init();
+    timer_init();
     power_init();
     max3471_init();
     max3471_set_mode(0);
@@ -57,28 +59,29 @@ int main(void)
     while(1)
     {
 
-       icl3221_turn_on();
-       power(0x00);
-       icl3221_transmit('a');
+      if(TEMPFG){
+          power(0x00);
+          icl3221_transmit('a');
+          TEMPFG = 0;
+      }
 
-      __delay_cycles(16000000*1);
 
-
+/*
        power(0xFF);
        icl3221_transmit('b');
        __delay_cycles(16000000*1);
 
-
+*/
 
     }
 }
 
 
-/*
-#pragma vector = TIMER0_A0_VECTOR
+
+#pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
     TEMPFG = 1;
-    TA0CCTL0 &= ~CCIFG;  // clear interrupt
+    TBCCTL0 &= ~CCIFG;  // clear interrupt
 }
-*/
+
