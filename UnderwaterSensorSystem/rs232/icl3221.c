@@ -11,45 +11,42 @@
 
 #define TX BIT3
 #define RX BIT2
-#define ENABLE BIT4
+#define POWER_ON BIT4
 
 //See datasheet Table 15-4
 void icl3221_set_mode(uint8_t mode)
 {
-
     switch(mode){
-    case 0://9600; TX error: -0.5 0.6; RX error: -0.9 1.2
-        UCA1BR0 = 104;
-        UCA1MCTLW = 0x0100;
+    case 0:// BW: 56 000 @ 16MHz
+        UCA1BRW = 285;
+        UCA1MCTLW = 0xBB00;
         break;
-    case 1:  //115200; TX error: -7.8 6.4; RX error: -9.7 16.1
-        //CAUSES JITTER
-        UCA1BR0 = 8;
+    case 1: //BW: 9600 @ 16MHz
+        UCA1BRW = 1666;
         UCA1MCTLW = 0xD600;
         break;
-
     }
+
 }
 
-void icl3221_power(uint8_t on){
-
-    //Turn off RS232
-    P4OUT &= ~ENABLE;
-
+void icl3221_turn_on(){
     //Turn on RS232
-    if(on){
-        P4OUT |= ENABLE;
-    }
+    P4OUT |= POWER_ON;
+}
+
+void icl3221_turn_off(){
+    //Turn off RS232
+    P4OUT &= ~POWER_ON;
 }
 
 void icl3221_init()
 {
 
-  //Configure transmit enable
-  P4SEL0 &= (~ENABLE); // Set P1.6 SEL for GPIO
-  P4SEL1 &= (~ENABLE); // Set P1.6 SEL for GPIO
-  P4DIR |= ENABLE;  // Set P1.6 as Output
-  P4OUT &= ~ENABLE; // Disable device
+  //Configure power_on
+  P4SEL0 &= (~POWER_ON);
+  P4SEL1 &= (~POWER_ON);
+  P4DIR |= POWER_ON;  // Set as output
+  P4OUT &= ~POWER_ON; // Disable device
 
   // Configure Tx and Rx
   P4SEL1 &= ~(TX | RX);
@@ -83,7 +80,6 @@ void icl3221_transmit(char data)
   for(ii = 0; ii < 1000; ii++);
 
   //Recieve mode
-  P1OUT &= ~ENABLE;
   UCA1IE |= UCRXIE;
 }
 

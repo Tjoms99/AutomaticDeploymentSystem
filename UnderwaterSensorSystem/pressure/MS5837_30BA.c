@@ -13,6 +13,7 @@ uint32_t i = 0;
 
 #define TIMER_32MS 2020 //20ms
 
+/*
 static void timer_init()
 {
     TA0CTL |= TASSEL_2;   // set timer to system clk
@@ -25,6 +26,7 @@ static void timer_init()
     TA0CCTL2 &= ~CAP;     // compare mode
     __enable_interrupt();
 }
+*/
 
 //Cyclic redundancy check
 static uint8_t crc4(uint16_t n_prom[])
@@ -133,6 +135,7 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
    *temperature = TEMP/100.0f;  //Celsius
 }
 
+/*
 static void wait_for_conversion()
 {
     TA0CCTL2 |= CCIE;           // enable interrupt
@@ -143,7 +146,7 @@ static void wait_for_conversion()
 
     while((TA0IV & 0X04) == 0);
 }
-
+*/
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
 {
 
@@ -176,6 +179,7 @@ float ms5847_30ba_get_depth(float pressure, float pressure_reference)
     return (pressure-pressure_reference)/(FRESHWATER_DENSITY*9.80665); // h = P/(R*g)
 }
 
+/*
 //#pragma vector = TIMER0_A1_VECTOR
 __interrupt void Timer_A_CCR2_ISR(void)
 {
@@ -188,3 +192,4 @@ __interrupt void Timer_A_CCR2_ISR(void)
         break;
     }
 }
+*/

@@ -31,7 +31,7 @@ void init_i2c()
         P4SEL1 &= ~BIT4;        //P1.2 = SDA
         P4SEL0 |= BIT4;
 
-        SYSCFG3 |= BIT4;
+        //SYSCFG3 |= BIT4;
         PM5CTL0 &= ~LOCKLPM5;  // turn on I/O
 
         UCB1CTLW0 &= ~UCSWRST;  //set in operational mode

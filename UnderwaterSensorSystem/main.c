@@ -2,6 +2,9 @@
 #include <MSP430.h>
 #include <rs485/max3471.h>
 #include <rs232/icl3221.h>
+#include <clock/clock.h>
+#include <power/power.h>
+
 #include <stdint.h>
 
 //#include <pressure/MS5837_30BA.h>
@@ -11,7 +14,7 @@
 #define TIMER_1S 62500
 
 uint8_t TEMPFG = 1;
-
+/*
 void timer_1_init(){
     TA0CCR0 = TIMER_1S; // set the compare register
     TA0CTL |= TASSEL_2; // set timer to system clk
@@ -23,6 +26,8 @@ void timer_1_init(){
     TA0CCTL0 &= ~CAP;   // compare mode
     __enable_interrupt();
 }
+*/
+
 
 int main(void)
 {
@@ -35,26 +40,45 @@ int main(void)
 
 
 
-
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
 
-    timer_1_init();
+    //clock_init_1mhz();
+    //clock_init_8mhz();
+    clock_init_16mhz();
+
+    //timer_1_init();
+    power_init();
     max3471_init();
+    max3471_set_mode(0);
+
     icl3221_init();
-    icl3221_power(1);
-    int i;
+    icl3221_set_mode(1);
+    icl3221_turn_on();
     while(1)
     {
-       char data = 'a';
-       for(i = 0; i < 10000; i++);
+
+       icl3221_turn_on();
+       power(0x00);
+       icl3221_transmit('a');
+
+      __delay_cycles(16000000*1);
+
+
+       power(0xFF);
+       icl3221_transmit('b');
+       __delay_cycles(16000000*1);
+
+
+
     }
 }
 
 
-
+/*
 #pragma vector = TIMER0_A0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
     TEMPFG = 1;
     TA0CCTL0 &= ~CCIFG;  // clear interrupt
 }
+*/

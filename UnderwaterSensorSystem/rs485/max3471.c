@@ -9,25 +9,22 @@
 #include <msp430.h>
 #include <rs485/max3471.h>
 
-#define TX BIT4
-#define RX BIT5
-#define TX_EN BIT6
+#define TX BIT7
+#define RX BIT6
+#define TX_EN BIT5
 
 //See datasheet Table 15-4
 void max3471_set_mode(uint8_t mode)
 {
 
     switch(mode){
-    case 0://9600; TX error: -0.5 0.6; RX error: -0.9 1.2
-        UCA0BR0 = 104;
-        UCA0MCTLW = 0x0100;
-        break;
-    case 1:  //115200; TX error: -7.8 6.4; RX error: -9.7 16.1
-        //CAUSES JITTER
-        UCA0BR0 = 8;
-        UCA0MCTLW = 0xD600;
-        break;
+    // BW: 56 000 @ 16MHz
+    case 0:
+        clock_init_16mhz();
 
+        UCA0BRW = 285;
+        UCA0MCTLW = 0xBB00;
+        break;
     }
 }
 

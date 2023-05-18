@@ -12,6 +12,7 @@
 
 #define TIMER_33MS 2063 //33ms
 
+/*
 static void timer_init()
 {
     TA0CTL |= TASSEL_2; // set timer to system clk
@@ -24,7 +25,7 @@ static void timer_init()
     TA0CCTL1 &= ~CAP;    // compare mode
     __enable_interrupt();
 }
-
+*/
 static void set_coefficients(uint8_t coefficient)
 {
     if(coefficient == K4) k4 = data_in;
@@ -64,6 +65,7 @@ void TSYS01_init()
     timer_init();
 }
 
+/*
 static void wait_for_conversion()
 {
     TA0CCTL1 |= CCIE;           // enable interrupt
@@ -74,7 +76,7 @@ static void wait_for_conversion()
 
     while((TA0IV & 0X02) == 0);
 }
-
+*/
 static void read_adc()
 {
 
@@ -106,6 +108,7 @@ void TSYS01_measure(float* temperature)
     TSYS01_calculate_temperature(temperature);
 }
 
+/*
 #pragma vector = TIMER0_A1_VECTOR
 __interrupt void Timer_A_CCR1_ISR(void)
 {
@@ -118,3 +121,4 @@ __interrupt void Timer_A_CCR1_ISR(void)
         break;
     }
 }
+*/
