@@ -8,20 +8,20 @@
 #include <stdint.h>
 
 //#include <pressure/MS5837_30BA.h>
-//#include <temperature/TSYS01.h>
-//#include <i2c/i2c.h>
+#include <temperature/TSYS01.h>
+#include <i2c/i2c.h>
 
-#define TIMER_1S 62500
+#define TIMER_1S 32768
 
 uint8_t TEMPFG = 1;
 
-void timer_init(){
+static void timer_init(){
 
     TB0CTL |= TBCLR;        // reset TB0
-    TB0CTL |= TBSSEL__ACLK; // set timer to system clk
+    TB0CTL |= TBSSEL__ACLK; // ACLK
     TB0CTL |= MC__UP;       // up mode
 
-    TB0CCR0 = 32768;        // set the compare register
+    TB0CCR0 = TIMER_1S;        // set the compare register
 
     TB0CCTL0 |= CCIE;       // enable interrupt
     __enable_interrupt();
@@ -48,7 +48,10 @@ int main(void)
     //clock_init_8mhz();
     clock_init_16mhz();
 
+    init_i2c();
+
     timer_init();
+
     power_init();
     max3471_init();
     max3471_set_mode(0);
@@ -56,14 +59,21 @@ int main(void)
     icl3221_init();
     icl3221_set_mode(1);
     icl3221_turn_on();
+
+
+    TSYS01_init();
+
+
     while(1)
     {
 
-      if(TEMPFG){
-          power(0x00);
-          icl3221_transmit('a');
+
+      //if(TEMPFG){
+          //power(0x00);
+          //icl3221_transmit('a');
+          TSYS01_measure(&TSYS01_temperature);
           TEMPFG = 0;
-      }
+      //}
 
 
 /*

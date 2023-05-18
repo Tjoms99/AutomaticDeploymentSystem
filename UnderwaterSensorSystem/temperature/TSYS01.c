@@ -10,7 +10,7 @@
 #include <temperature/TSYS01.h>
 #include "../i2c/i2c.h"
 
-#define TIMER_33MS 2063 //33ms
+#define TIMER_33MS 10813 //33ms
 
 /*
 static void timer_init()
@@ -26,6 +26,21 @@ static void timer_init()
     __enable_interrupt();
 }
 */
+
+static void timer_init_1(){
+
+    TB0CTL |= TBCLR;        // reset TB0
+    TB0CTL |= TBSSEL__ACLK; // ACLK
+    TB0CTL |= MC__UP;       // up mode
+
+    TB0CCR1 = TIMER_33MS;        // set the compare register
+    TB0CCTL1 &= ~CAP;
+
+    TB0CCTL1 |= CCIE;       // enable interrupt
+    __enable_interrupt();
+    TB0CCTL1 &= ~CCIFG;     // clear interrupt
+
+}
 static void set_coefficients(uint8_t coefficient)
 {
     if(coefficient == K4) k4 = data_in;
@@ -33,6 +48,45 @@ static void set_coefficients(uint8_t coefficient)
     if(coefficient == K2) k2 = data_in;
     if(coefficient == K1) k1 = data_in;
     if(coefficient == K0) k0 = data_in;
+}
+
+static void wait_for_conversion()
+{
+    TBCCTL1 |= CCIE;           // enable interrupt
+
+    //set register to trigger 33ms into the future
+    TB0CCR1 = TB0R + TIMER_33MS; // set compare register
+    if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR1 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
+
+    while((TB0IV & 0X02) == 0);
+   // __delay_cycles(3300000*1);
+
+}
+
+static void read_adc()
+{
+
+    i2c_write(TSYS01_START_CONVERSION, TSYS01_ADDRESS);   // start conversion
+    wait_for_conversion();
+    i2c_write(TSYS01_GET_ADC_VALUE,TSYS01_ADDRESS);   // read adc temp value
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
+
+}
+
+static void TSYS01_calculate_temperature(float *temperature)
+{
+    static float adc = 9378708/256;
+
+    read_adc();
+    adc = data_in;
+
+    float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
+    float k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
+    float k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
+    float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
+    float k0_t = -1 * (1.5f * k0 / 100.0f);
+
+    *temperature = k4_t + k3_t + k2_t + k1_t + k0_t;
 }
 
 void TSYS01_init()
@@ -62,57 +116,20 @@ void TSYS01_init()
     i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K0);
 
-    timer_init();
+    timer_init_1();
 }
 
-/*
-static void wait_for_conversion()
-{
-    TA0CCTL1 |= CCIE;           // enable interrupt
-
-    //set register to trigger 33ms into the future
-    TA0CCR1 = TA0R + TIMER_33MS; // set compare register
-    if(TA0R + TIMER_33MS > TA0CCR0) TA0CCR1 = TIMER_33MS - (TA0CCR0 - TA0R); // in case of overflow when setting register
-
-    while((TA0IV & 0X02) == 0);
-}
-*/
-static void read_adc()
-{
-
-    i2c_write(TSYS01_START_CONVERSION, TSYS01_ADDRESS);   // start conversion
-    wait_for_conversion();
-    i2c_write(TSYS01_GET_ADC_VALUE,TSYS01_ADDRESS);   // read adc temp value
-    i2c_read(BYTES_2, TSYS01_ADDRESS);
-
-}
-
-static void TSYS01_calculate_temperature(float *temperature)
-{
-    static float adc = 9378708/256;
-
-    read_adc();
-    adc = data_in;
-
-    float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
-    float k3_t =      (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
-    float k2_t = -1 * (2.0f * k2 / 100000000000.0f * adc * adc);
-    float k1_t =      (1.0f * k1 / 1000000.0f  * adc);
-    float k0_t = -1 * (1.5f * k0 / 100.0f);
-
-    *temperature = k4_t + k3_t + k2_t + k1_t + k0_t;
-}
 
 void TSYS01_measure(float* temperature)
 {
     TSYS01_calculate_temperature(temperature);
 }
 
-/*
-#pragma vector = TIMER0_A1_VECTOR
-__interrupt void Timer_A_CCR1_ISR(void)
+
+#pragma vector = TIMER0_B1_VECTOR
+__interrupt void TIMER_ISR(void)
 {
-    switch(TA0IV){
+    switch(TB0IV){
     case 0x02:
         //TA0CCTL1 &= ~CCIE;    // disable interrupt
         //TA0CCR1 = TA0R - 1;
@@ -121,4 +138,5 @@ __interrupt void Timer_A_CCR1_ISR(void)
         break;
     }
 }
-*/
+
+
