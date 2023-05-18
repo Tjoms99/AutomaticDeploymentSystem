@@ -12,22 +12,7 @@
 
 #define TIMER_33MS 10813 //33ms
 
-/*
-static void timer_init()
-{
-    TA0CTL |= TASSEL_2; // set timer to system clk
-    TA0CTL |= ID_2;     // prescalar 4
-    TA0CTL |= MC_1;     // up mode
-
-    TA0CCR1 = TIMER_33MS; // set compare register;
-    TA0CCTL1 &= ~CCIFG;  // clear interrupt
-    TA0CCTL1 |= CCIE;    // enable interrupt
-    TA0CCTL1 &= ~CAP;    // compare mode
-    __enable_interrupt();
-}
-*/
-
-static void timer_init_1(){
+static void timer_init(){
 
     TB0CTL |= TBCLR;        // reset TB0
     TB0CTL |= TBSSEL__ACLK; // ACLK
@@ -59,8 +44,6 @@ static void wait_for_conversion()
     if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR1 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
 
     while((TB0IV & 0X02) == 0);
-   // __delay_cycles(3300000*1);
-
 }
 
 static void read_adc()
@@ -116,7 +99,7 @@ void TSYS01_init()
     i2c_read(BYTES_2, TSYS01_ADDRESS);
     set_coefficients(K0);
 
-    timer_init_1();
+    timer_init();
 }
 
 
@@ -127,7 +110,7 @@ void TSYS01_measure(float* temperature)
 
 
 #pragma vector = TIMER0_B1_VECTOR
-__interrupt void TIMER_ISR(void)
+__interrupt void Timer_CCR1_ISR(void)
 {
     switch(TB0IV){
     case 0x02:

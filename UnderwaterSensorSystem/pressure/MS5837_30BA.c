@@ -9,30 +9,29 @@
 #include <pressure/MS5837_30BA.h>
 #include <i2c/i2c.h>
 
-uint32_t i = 0;
 
-#define TIMER_32MS 2020 //20ms
+#define TIMER_33MS 10813 //33ms
 
-/*
-static void timer_init()
-{
-    TA0CTL |= TASSEL_2;   // set timer to system clk
-    TA0CTL |= ID_2;       // prescalar 4
-    TA0CTL |= MC_1;       // up mode
+static void timer_init(){
 
-    TA0CCR2 = TIMER_32MS; // set compare register;
-    TA0CCTL2 &= ~CCIFG;   // clear interrupt
-    TA0CCTL2 |= CCIE;     // enable interrupt
-    TA0CCTL2 &= ~CAP;     // compare mode
+    TB0CTL |= TBCLR;        // reset TB0
+    TB0CTL |= TBSSEL__ACLK; // ACLK
+    TB0CTL |= MC__UP;       // up mode
+
+    TB0CCR1 = TIMER_33MS;        // set the compare register
+    TB0CCTL1 &= ~CAP;
+
+    TB0CCTL1 |= CCIE;       // enable interrupt
     __enable_interrupt();
-}
-*/
+    TB0CCTL1 &= ~CCIFG;     // clear interrupt
 
+}
 //Cyclic redundancy check
 static uint8_t crc4(uint16_t n_prom[])
 {
     uint16_t n_rem = 0;
     uint8_t n_bit = 0;
+    uint32_t i = 0;
 
     n_prom[0] = ((n_prom[0]) & 0x0FFF);
     n_prom[7] = 0;
@@ -60,6 +59,8 @@ static uint8_t crc4(uint16_t n_prom[])
 
 void ms5847_30ba_init()
 {
+    uint32_t i = 0;
+
     i2c_write(MS5837_30BA_RESET_SENSOR,MS5837_30BA_ADDRESS);            // reset sensor
     for(i = 0; i <10000; i++);
 
@@ -135,18 +136,18 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
    *temperature = TEMP/100.0f;  //Celsius
 }
 
-/*
+
 static void wait_for_conversion()
 {
-    TA0CCTL2 |= CCIE;           // enable interrupt
+    TB0CCTL2 |= CCIE;           // enable interrupt
 
-    //set register to trigger 32ms into the future
-    TA0CCR2 = TA0R + TIMER_32MS; // set compare register
-    if(TA0R + TIMER_32MS > TA0CCR0) TA0CCR2 = TIMER_32MS - (TA0CCR0 - TA0R); // in case of overflow when setting register
+    //set register to trigger 33ms into the future
+    TB0CCR2 = TB0R + TIMER_33MS; // set compare register
+    if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR2 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
 
-    while((TA0IV & 0X04) == 0);
+    while((TB0IV & 0X04) == 0);
 }
-*/
+
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
 {
 
@@ -179,11 +180,11 @@ float ms5847_30ba_get_depth(float pressure, float pressure_reference)
     return (pressure-pressure_reference)/(FRESHWATER_DENSITY*9.80665); // h = P/(R*g)
 }
 
-/*
-//#pragma vector = TIMER0_A1_VECTOR
-__interrupt void Timer_A_CCR2_ISR(void)
+
+#pragma vector1 = TIMER0_B1_VECTOR
+__interrupt void Timer_CCR2_ISR(void)
 {
-    switch(TA0IV){
+    switch(TB0IV){
     case 0x04:
         //TA0CCTL2 &= ~CCIE;    // disable interrupt
         //TA0CCR2 = TA0R - 1;
@@ -192,4 +193,4 @@ __interrupt void Timer_A_CCR2_ISR(void)
         break;
     }
 }
-*/
+

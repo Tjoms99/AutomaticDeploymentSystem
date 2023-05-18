@@ -22,16 +22,15 @@ void power(uint8_t set_power){
         //Turn on 12V
         P1OUT |= POWER_ENABLE;
 
-
-        max3471_transmit(off[0]);
-        max3471_transmit(off[1]);
-        max3471_transmit(off[2]);
+        max3471_transmit(on[0]);
+        max3471_transmit(on[1]);
     } else {
         //Turn off 12V
         P1OUT &= ~POWER_ENABLE;
 
-        max3471_transmit(on[0]);
-        max3471_transmit(on[1]);
+        max3471_transmit(off[0]);
+        max3471_transmit(off[1]);
+        max3471_transmit(off[2]);
     }
 }
 

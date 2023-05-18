@@ -68,12 +68,12 @@ int main(void)
     {
 
 
-      //if(TEMPFG){
-          //power(0x00);
-          //icl3221_transmit('a');
+      if(TEMPFG){
+          power(0xFF);
+          icl3221_transmit('a');
           TSYS01_measure(&TSYS01_temperature);
           TEMPFG = 0;
-      //}
+      }
 
 
 /*
