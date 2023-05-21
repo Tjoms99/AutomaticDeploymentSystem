@@ -1,27 +1,35 @@
 
 #include <MSP430.h>
+#include <rs485/max3471.h>
+#include <rs232/icl3221.h>
+#include <clock/clock.h>
+#include <power/power.h>
+
 #include <stdint.h>
 
 //#include <pressure/MS5837_30BA.h>
-//#include <temperature/TSYS01.h>
-//#include <i2c/i2c.h>
-#include <uart/uart.h>
+#include <temperature/TSYS01.h>
+#include <i2c/i2c.h>
 
-#define TIMER_1S 62500
+#define TIMER_1S 32768
 
 uint8_t TEMPFG = 1;
 
-void init_timer1(){
-    TA0CCR0 = TIMER_1S; // set the compare register
-    TA0CTL |= TASSEL_2; // set timer to system clk
-    TA0CTL |= ID_2;     // prescalar 4
-    TA0CTL |= MC_1;     // up mode
+static void timer_init(){
 
-    TA0CCTL0 &= ~CCIFG; // clear interrupt
-    TA0CCTL0 |= CCIE;   // enable interrupt
-    TA0CCTL0 &= ~CAP;   // compare mode
+    TB0CTL |= TBCLR;        // reset TB0
+    TB0CTL |= TBSSEL__ACLK; // ACLK
+    TB0CTL |= MC__UP;       // up mode
+
+    TB0CCR0 = TIMER_1S;        // set the compare register
+
+    TB0CCTL0 |= CCIE;       // enable interrupt
     __enable_interrupt();
+    TB0CCTL0 &= ~CCIFG;     // clear interrupt
+
 }
+
+
 
 int main(void)
 {
@@ -34,43 +42,60 @@ int main(void)
 
 
 
-
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
 
-    init_timer1();
-    //init_i2c();
-    //TSYS01_init();
-    //MS5837_30BA_init();
-    uart_init();
+    //clock_init_1mhz();
+    //clock_init_8mhz();
+    clock_init_16mhz();
 
-    //MS5837_30BA_measure(&pressure_reference, &MS5837_30BA_temperature);
-    int i;
+    init_i2c();
+
+    timer_init();
+
+    power_init();
+    max3471_init();
+    max3471_set_mode(0);
+
+    icl3221_init();
+    icl3221_set_mode(1);
+    icl3221_turn_on();
+
+
+    TSYS01_init();
+
+
     while(1)
     {
-       char data = 'a';
-       //uart_transmit(data);
-       for(i = 0; i < 10000; i++);
-       /*
-       if(TEMPFG == 1){
-           TSYS01_measure(&TSYS01_temperature);
-           MS5837_30BA_measure(&MS5837_30BA_pressure, &MS5837_30BA_temperature);
 
-           depth = get_depth(MS5837_30BA_pressure, pressure_reference)*100.0f; // m -> cm
-           TEMPFG = 0;
-           //Transmitt data
-           uart_transmit(data);
-           uart_recieve(&data);
 
-       }
-       */
+      if(TEMPFG){
+          power(0xFF);
+          icl3221_transmit('a');
+          TSYS01_measure(&TSYS01_temperature);
+          TEMPFG = 0;
+          __bis_SR_register(LPM3_bits | GIE);     // Enter LPM3
+          __no_operation();                       // For debug
+      }
+
+
+/*
+       power(0xFF);
+       icl3221_transmit('b');
+       __delay_cycles(16000000*1);
+
+*/
+
     }
 }
 
 
 
-#pragma vector = TIMER0_A0_VECTOR
+#pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
+    __bic_SR_register_on_exit(LPM3_bits);
+
     TEMPFG = 1;
-    TA0CCTL0 &= ~CCIFG;  // clear interrupt
+    TBCCTL0 &= ~CCIFG;  // clear interrupt
 }
+
