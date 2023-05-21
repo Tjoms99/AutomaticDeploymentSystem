@@ -20,8 +20,6 @@ void max3471_set_mode(uint8_t mode)
     switch(mode){
     // BW: 56 000 @ 16MHz
     case 0:
-        clock_init_16mhz();
-
         UCA0BRW = 285;
         UCA0MCTLW = 0xBB00;
         break;

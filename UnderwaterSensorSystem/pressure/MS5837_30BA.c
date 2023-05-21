@@ -137,6 +137,8 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
 }
 
 
+//Wait for 33 seconds
+//Set up timer compare register CCR1 and enter LPM
 static void wait_for_conversion()
 {
     TB0CCTL2 |= CCIE;           // enable interrupt
@@ -145,7 +147,7 @@ static void wait_for_conversion()
     TB0CCR2 = TB0R + TIMER_33MS; // set compare register
     if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR2 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
 
-    while((TB0IV & 0X04) == 0);
+    __bis_SR_register(LPM3_bits | GIE);
 }
 
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
@@ -186,8 +188,7 @@ __interrupt void Timer_CCR2_ISR(void)
 {
     switch(TB0IV){
     case 0x04:
-        //TA0CCTL2 &= ~CCIE;    // disable interrupt
-        //TA0CCR2 = TA0R - 1;
+        __bic_SR_register_on_exit(LPM3_bits);
         break;
     default:
         break;

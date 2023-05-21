@@ -73,6 +73,8 @@ int main(void)
           icl3221_transmit('a');
           TSYS01_measure(&TSYS01_temperature);
           TEMPFG = 0;
+          __bis_SR_register(LPM3_bits | GIE);     // Enter LPM3
+          __no_operation();                       // For debug
       }
 
 
@@ -91,6 +93,8 @@ int main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
+    __bic_SR_register_on_exit(LPM3_bits);
+
     TEMPFG = 1;
     TBCCTL0 &= ~CCIFG;  // clear interrupt
 }

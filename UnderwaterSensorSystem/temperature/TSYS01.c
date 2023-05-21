@@ -35,6 +35,8 @@ static void set_coefficients(uint8_t coefficient)
     if(coefficient == K0) k0 = data_in;
 }
 
+//Wait for 33 seconds
+//Set up timer compare register CCR1 and enter LPM
 static void wait_for_conversion()
 {
     TBCCTL1 |= CCIE;           // enable interrupt
@@ -42,8 +44,7 @@ static void wait_for_conversion()
     //set register to trigger 33ms into the future
     TB0CCR1 = TB0R + TIMER_33MS; // set compare register
     if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR1 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
-
-    while((TB0IV & 0X02) == 0);
+    __bis_SR_register(LPM3_bits | GIE);
 }
 
 static void read_adc()
@@ -114,8 +115,7 @@ __interrupt void Timer_CCR1_ISR(void)
 {
     switch(TB0IV){
     case 0x02:
-        //TA0CCTL1 &= ~CCIE;    // disable interrupt
-        //TA0CCR1 = TA0R - 1;
+        __bic_SR_register_on_exit(LPM3_bits);
         break;
     default:
         break;
