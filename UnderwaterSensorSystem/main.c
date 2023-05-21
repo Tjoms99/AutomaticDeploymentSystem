@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-//#include <pressure/MS5837_30BA.h>
+#include <pressure/MS5837_30BA.h>
 #include <temperature/TSYS01.h>
 #include <i2c/i2c.h>
 
@@ -70,7 +70,6 @@ int main(void)
 
       if(TEMPFG){
           power(0xFF);
-          icl3221_transmit('a');
           TSYS01_measure(&TSYS01_temperature);
           TEMPFG = 0;
           __bis_SR_register(LPM3_bits | GIE);     // Enter LPM3

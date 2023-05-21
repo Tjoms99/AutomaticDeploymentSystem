@@ -39,7 +39,7 @@ static void set_coefficients(uint8_t coefficient)
 //Set up timer compare register CCR1 and enter LPM
 static void wait_for_conversion()
 {
-    TBCCTL1 |= CCIE;           // enable interrupt
+    TBCCTL1 |= CCIE; // enable interrupt
 
     //set register to trigger 33ms into the future
     TB0CCR1 = TB0R + TIMER_33MS; // set compare register
