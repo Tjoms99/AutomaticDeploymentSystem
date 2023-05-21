@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <msp430.h>
 #include <rs485/max3471.h>
+#include <storage/memory.h>
+
 
 #define TX BIT7
 #define RX BIT6
@@ -16,12 +18,15 @@
 //See datasheet Table 15-4
 void max3471_set_mode(uint8_t mode)
 {
-
     switch(mode){
-    // BW: 56 000 @ 16MHz
-    case 0:
+    case 0: // BW: 56 000 @ 16MHz
         UCA0BRW = 285;
         UCA0MCTLW = 0xBB00;
+        break;
+
+    case 1: //BW: 9600 @ 16MHz
+        UCA0BRW = 1666;
+        UCA0MCTLW = 0xD600;
         break;
     }
 }
@@ -81,15 +86,3 @@ void max3471_recieve(char *data)
   *data = (char) UCA0RXBUF;
 }
 
-// Interrupt Service Routine for UART receive
-#pragma vector=USCI_A0_VECTOR //A0
-__interrupt void UART_ISR(void)
-{
-    char data = '0';
-    if(UCA0RXBUF > 0x00) //A0
-    {
-        data = UCA0RXBUF;
-        max3471_transmit(data);
-
-    }
-}

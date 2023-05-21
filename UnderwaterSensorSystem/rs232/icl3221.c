@@ -92,15 +92,3 @@ void icl3221_recieve(char *data)
   *data = (char) UCA1RXBUF;
 }
 
-// Interrupt Service Routine for UART receive
-#pragma vector=USCI_A1_VECTOR //A1
-__interrupt void RS232_ISR(void)
-{
-    char data = '0';
-    if(UCA1RXBUF > 0x00) //A1
-    {
-        data = UCA1RXBUF;
-        icl3221_transmit(data);
-
-    }
-}

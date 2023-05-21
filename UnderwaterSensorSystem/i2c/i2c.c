@@ -11,7 +11,8 @@
 
 #define SDA_PIN BIT2
 #define SCL_PIN BIT3
-void init_i2c()
+
+void i2c_init()
 {
         UCB0CTLW0 |= UCSWRST;   // SW RST
 
