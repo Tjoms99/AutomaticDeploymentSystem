@@ -32,13 +32,18 @@ volatile uint16_t SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
 
 static void check_system_loop_time()
 {
-    if (SYSTEM_TIMER_INTERRUPT_COUNTER == SYSTEM_LOOP_TIME_SECONDS)
+    if (++SYSTEM_TIMER_INTERRUPT_COUNTER >= SYSTEM_LOOP_TIME_SECONDS)
     {
         SYSTEM_FLAG |= SYSTEM_ON;
         SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
     }
 }
 
+static void set_system_loop_time(uint16_t seconds)
+{
+    SYSTEM_LOOP_TIME_SECONDS = seconds;
+    SYSTEM_FLAG &= ~CUSTOM_TIME;
+}
 static void timer_init()
 {
 
@@ -57,7 +62,7 @@ static void timer_init()
  * SYSTEM FLAGS
  *  0 - Power enable: 12V
  *  1 - RS232 enable
- *  2 - Enable custom time interval used in continuous mode
+ *  2 - Set custom time interval used in continuous mode. First enable flag then send time interval
  *  3 - Single mode: One pressure + temperature sample
  *  4 - Continuous mode: Continuously sample pressure and temperature
  *  5 - Print current temperature
@@ -102,7 +107,7 @@ void print_current_temperature()
     max3471_transmit(buffer[5]);
 }
 
-print_temperature_register()
+void print_temperature_register()
 {
     float temperature = 0.0;
     char buffer[6];
@@ -121,6 +126,8 @@ print_temperature_register()
         max3471_transmit(buffer[4]);
         max3471_transmit(buffer[5]);
     } while (!done_reading);
+
+    SYSTEM_FLAG ^= PRINT_ALL_REGISTERS;
 }
 
 // Sample pressure and temperature once
@@ -130,6 +137,8 @@ void single_mode()
 
     TSYS01_measure(&TSYS01_temperature);
     set_temperature_current_register(TSYS01_temperature);
+
+    SYSTEM_FLAG ^= SINGLE_MODE;
 }
 
 // Sample pressure and temperature once
@@ -166,53 +175,29 @@ int main(void)
 
     TSYS01_init();
 
+    // RS485 Rx does not work when LPMx > 1
+    // Reason: DC0 takes to long to start up / drifts
     while (1)
     {
-        check_system_loop_time();
 
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
-            if (SYSTEM_FLAG & POWER_ENABLE)
-            {
-                power(0xFF);
-            }
-            else
-            {
-                power(0x00);
-            }
-            if (SYSTEM_FLAG & CUSTOM_TIME)
-              {
 
-              }
+            SYSTEM_FLAG &POWER_ENABLE ? power(0xFF) : power(0x00);
 
-            if (SYSTEM_FLAG & SINGLE_MODE)
-            {
-                single_mode();
-                SYSTEM_FLAG ^= SINGLE_MODE;
-            }
-            if (SYSTEM_FLAG & CONTINUOUS_MODE)
-            {
-                continuous_mode();
-            }
+            SYSTEM_FLAG &SINGLE_MODE ? single_mode() : __no_operation;
 
-            if (SYSTEM_FLAG & BIT5)
-            {
-                print_current_temperature();
-            }
+            SYSTEM_FLAG &CONTINUOUS_MODE ? continuous_mode() : __no_operation;
 
-            if (SYSTEM_FLAG & BIT6)
-            {
-                print_temperature_register();
-                SYSTEM_FLAG ^= BIT6;
-            }
+            SYSTEM_FLAG &PRINT_CURRENT_REGISTER ? print_current_temperature() : __no_operation;
 
-            SYSTEM_FLAG &= ~BIT7;
+            SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
+
+            SYSTEM_FLAG &= ~SYSTEM_ON;
         }
 
-        // RS485 Rx does not work when LPMx > 1
-        // Reason: DC0 takes to long to start up / drifts
-        __bis_SR_register(LPM1_bits | GIE); // Enter low-power mode
-        __no_operation();
+        // Enter low-power mode
+        __bis_SR_register(LPM1_bits | GIE);
     }
 }
 
@@ -221,7 +206,7 @@ __interrupt void Timer_A_CCR0_ISR(void)
 {
     __bic_SR_register_on_exit(LPM1_bits);
 
-    SYSTEM_TIMER_INTERRUPT_COUNTER++;
+    check_system_loop_time();
     TBCCTL0 &= ~CCIFG; // clear interrupt
 }
 
@@ -232,7 +217,9 @@ __interrupt void RS485_ISR(void)
     __bic_SR_register_on_exit(LPM1_bits);
 
     rs485_rx_data = UCA0RXBUF;
-    update_system_flags(rs485_rx_data);
+
+    // Remove / 10 when not using ASCII chars over putty
+    SYSTEM_FLAG &CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
 }
 
 // Interrupt Service Routine for UART receive
