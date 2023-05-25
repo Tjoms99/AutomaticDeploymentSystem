@@ -9,13 +9,11 @@
 #define __ICL3221_H_
 #include <stdint.h>
 
-    void icl3221_init(void);
-    void icl3221_turn_on();
-    void icl3221_turn_off();
-    void icl3221_set_mode(uint8_t mode);
-    void icl3221_transmit(char data);
-    void icl3221_recieve(char *data);
-
-
+void icl3221_init(void);
+void icl3221_turn_on();
+void icl3221_turn_off();
+void icl3221_set_mode(uint8_t mode);
+void icl3221_transmit(char data);
+void icl3221_recieve(char *data);
 
 #endif /* __ICL3221_H_ */

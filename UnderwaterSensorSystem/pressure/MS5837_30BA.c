@@ -12,6 +12,23 @@
 
 #define TIMER_33MS 10813 //33ms
 
+#define MS5837_30BA_ADDRESS 0x76
+
+#define MS5837_30BA_RESET_SENSOR                0x1E
+#define MS5837_30BA_GET_ADC_VALUE               0x00
+#define MS5837_30BA_PROM_READ                   0xA0
+#define MS5837_30BA_START_CONVERTION_D1_4096    0x48
+#define MS5837_30BA_START_CONVERTION_D2_4096    0x58
+
+#define BYTES_2 0X02
+#define BYTES_3 0X03
+
+#define SEAWATER_DENSITY    1029  //kg/m^3
+#define FRESHWATER_DENSITY  1000 //kg/m^3
+
+static uint16_t coefficients[8];
+
+
 static void timer_init(){
 
     TB0CTL |= TBCLR;        // reset TB0
@@ -55,30 +72,6 @@ static uint8_t crc4(uint16_t n_prom[])
 
     return n_rem ^ 0x00;
 }
-
-
-void ms5847_30ba_init()
-{
-    uint32_t i = 0;
-
-    i2c_write(MS5837_30BA_RESET_SENSOR,MS5837_30BA_ADDRESS);            // reset sensor
-    for(i = 0; i <10000; i++);
-
-    for(i = 0; i < 7; i++)
-    {
-        i2c_write((MS5837_30BA_PROM_READ + i*2), MS5837_30BA_ADDRESS);  // request coefficients
-        i2c_read(BYTES_2, MS5837_30BA_ADDRESS);                         // read coefficients
-        coefficients[i] = data_in;                                      // set coefficients
-    }
-
-    // Verify that data is correct with CRC
-    uint8_t crcRead = coefficients[0] >> 12;
-    uint8_t crcCalculated = crc4(coefficients);
-    if ( crcCalculated != crcRead )  i = 69;
-
-    timer_init();
-}
-
 
 static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uint32_t D2_temp)
 {
@@ -141,13 +134,36 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
 //Set up timer compare register CCR1 and enter LPM
 static void wait_for_conversion()
 {
-    TB0CCTL2 |= CCIE;           // enable interrupt
+    TB0CCTL2 |= CCIE; // enable interrupt
 
     //set register to trigger 33ms into the future
     TB0CCR2 = TB0R + TIMER_33MS; // set compare register
     if(TB0R + TIMER_33MS > TB0CCR0) TB0CCR2 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
 
     __bis_SR_register(LPM3_bits | GIE);
+}
+
+
+void ms5847_30ba_init()
+{
+    uint32_t i = 0;
+
+    i2c_write(MS5837_30BA_RESET_SENSOR,MS5837_30BA_ADDRESS);            // reset sensor
+    for(i = 0; i <10000; i++);
+
+    for(i = 0; i < 7; i++)
+    {
+        i2c_write((MS5837_30BA_PROM_READ + i*2), MS5837_30BA_ADDRESS);  // request coefficients
+        i2c_read(BYTES_2, MS5837_30BA_ADDRESS);                         // read coefficients
+        coefficients[i] = data_in;                                      // set coefficients
+    }
+
+    // Verify that data is correct with CRC
+    uint8_t crcRead = coefficients[0] >> 12;
+    uint8_t crcCalculated = crc4(coefficients);
+    if ( crcCalculated != crcRead )  i = 69;
+
+    timer_init();
 }
 
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
@@ -183,7 +199,7 @@ float ms5847_30ba_get_depth(float pressure, float pressure_reference)
 }
 
 
-#pragma vector1 = TIMER0_B1_VECTOR
+//#pragma vector = TIMER0_B1_VECTOR
 __interrupt void Timer_CCR2_ISR(void)
 {
     switch(TB0IV){
