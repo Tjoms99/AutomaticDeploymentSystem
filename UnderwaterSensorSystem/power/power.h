@@ -5,5 +5,4 @@
 void power(uint8_t on);
 void power_init();
 
-
 #endif

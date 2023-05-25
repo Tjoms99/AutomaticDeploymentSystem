@@ -9,20 +9,19 @@
 #include "../rs485/max3471.h"
 #include "../rs232/icl3221.h"
 
-
 #define POWER_ENABLE BIT4
-    char* on = "on";
-    char* off = "off";
-    char new_line = 12;
+char *on = "on";
+char *off = "off";
+char new_line = 12;
 
-
-void power(uint8_t set_power){
+void power(uint8_t set_power)
+{
     max3471_transmit(new_line);
     icl3221_transmit(new_line);
 
-
-    if(set_power){
-        //Turn on 12V
+    if (set_power)
+    {
+        // Turn on 12V
         P1OUT |= POWER_ENABLE;
 
         max3471_transmit(on[0]);
@@ -30,9 +29,10 @@ void power(uint8_t set_power){
 
         icl3221_transmit(on[0]);
         icl3221_transmit(on[1]);
-
-    } else {
-        //Turn off 12V
+    }
+    else
+    {
+        // Turn off 12V
         P1OUT &= ~POWER_ENABLE;
 
         max3471_transmit(off[0]);
@@ -45,10 +45,11 @@ void power(uint8_t set_power){
     }
 }
 
-void power_init(){
-  //Configure transmit enable
-  P1SEL0 &= (~POWER_ENABLE); // Set P1.6 SEL for GPIO
-  P1SEL1 &= (~POWER_ENABLE); // Set P1.6 SEL for GPIO
-  P1DIR |= POWER_ENABLE;  // Set P1.6 as Output
-  P1OUT &= ~POWER_ENABLE; // Disable 12V
+void power_init()
+{
+    // Configure transmit enable
+    P1SEL0 &= (~POWER_ENABLE); // Set P1.6 SEL for GPIO
+    P1SEL1 &= (~POWER_ENABLE); // Set P1.6 SEL for GPIO
+    P1DIR |= POWER_ENABLE;     // Set P1.6 as Output
+    P1OUT &= ~POWER_ENABLE;    // Disable 12V
 }

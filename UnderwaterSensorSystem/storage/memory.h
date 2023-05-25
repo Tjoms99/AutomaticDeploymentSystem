@@ -16,8 +16,6 @@
 #define PRESSURE_CURRENT_REGISTER 0x000
 #define PRESSURE_NEXT_REGISTER_START 0x001
 
-
-
 #define LOOP_FLAG 0x8000
 
 void set_temperature_current_register(float temperature);
