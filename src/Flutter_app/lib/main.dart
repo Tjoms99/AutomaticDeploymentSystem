@@ -2,7 +2,7 @@ import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'pages/dashboard.dart';
+import 'pages/parent.dart';
 
 void main() {
   runApp(const MyApp());

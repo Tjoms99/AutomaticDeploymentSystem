@@ -1,62 +1,47 @@
-import 'package:automatic_deployment_system_app/components/dashboard_contents.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
-import 'package:automatic_deployment_system_app/components/sidemenu.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/data/graphs.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-class ParentPage extends StatefulWidget {
-  ParentPage({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<ParentPage> createState() => _ParentPageState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _ParentPageState extends State<ParentPage> {
-  ValueNotifier<int> currentPage = ValueNotifier(0);
-
-  @override
-  void initState() {
-    graphList.elementAt(SensorType.DEPTH.index).sensorData.initState();
-    graphList.elementAt(SensorType.TEMPERATURE.index).sensorData.initState();
-    graphList.elementAt(SensorType.PRESSURE.index).sensorData.initState();
-    graphList.elementAt(SensorType.BATTERY.index).sensorData.initState();
-
-    super.initState();
-  }
-
+class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-          bottom: false,
-          left: false,
-          right: false,
-          top: true,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: SideMenu(currentPage: currentPage),
-              ),
-              Expanded(
-                flex: 10,
-                child: ValueListenableBuilder(
-                  valueListenable: currentPage,
-                  builder: (context, value, child) {
-                    return value == 0 ? DashboardContent() : SizedBox();
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: SideMenu(currentPage: currentPage),
-              ),
-            ],
-          )),
+    return SizedBox(
+      width: double.infinity,
+      height: SizeConfig.screenHeight,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Header(label: 'Dashboard'),
+            SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+            Wrap(
+              runSpacing: 20.0,
+              spacing: 20.0,
+              alignment: WrapAlignment.start,
+              children: [
+                cardList.elementAt(SensorType.DEPTH.index),
+                cardList.elementAt(SensorType.TEMPERATURE.index),
+                cardList.elementAt(SensorType.PRESSURE.index),
+                cardList.elementAt(SensorType.BATTERY.index),
+              ],
+            ),
+            SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+            graphList.elementAt(SensorType.DEPTH.index),
+            graphList.elementAt(SensorType.TEMPERATURE.index),
+            graphList.elementAt(SensorType.PRESSURE.index),
+            graphList.elementAt(SensorType.BATTERY.index),
+          ],
+        ),
+      ),
     );
   }
 }
