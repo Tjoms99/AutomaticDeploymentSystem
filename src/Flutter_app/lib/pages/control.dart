@@ -16,7 +16,7 @@ class _ControlPageState extends State<ControlPage> {
   Widget build(BuildContext context) {
     return DefaultWidget(
       widgets: [
-        Header(label: 'Control'),
+        Header(label: 'Control', enableUndertext: true),
         SizedBox(height: SizeConfig.blockSizeVertical! * 4),
         const Wrap(
           runSpacing: 20.0,

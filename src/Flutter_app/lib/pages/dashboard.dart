@@ -15,7 +15,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return DefaultWidget(widgets: [
-      Header(label: 'Dashboard'),
+      Header(label: 'Dashboard', enableUndertext: true),
       SizedBox(height: SizeConfig.blockSizeVertical! * 4),
       Wrap(
         runSpacing: 20.0,

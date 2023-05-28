@@ -31,6 +31,39 @@ class PrimaryText extends StatelessWidget {
   }
 }
 
+class PrimaryTextfield extends StatelessWidget {
+  final double size;
+  final FontWeight fontWeight;
+  final Color color;
+  final double height;
+  final TextEditingController controller;
+  final enabled;
+
+  PrimaryTextfield({
+    super.key,
+    this.fontWeight = FontWeight.w400,
+    this.color = AppColors.primaryText,
+    this.size = 20,
+    this.height = 1.3,
+    required this.controller,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      style: TextStyle(
+          color: color,
+          height: height,
+          fontFamily: 'openSans',
+          fontSize: size,
+          fontWeight: fontWeight),
+    );
+  }
+}
+
 class SideMenuButton extends StatefulWidget {
   final IconButton child;
   final bool focused;

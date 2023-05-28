@@ -3,16 +3,16 @@ import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
-class SideMenu extends StatefulWidget {
+class SideMenuButtons extends StatefulWidget {
   ValueNotifier<int> currentPage;
 
-  SideMenu({super.key, required this.currentPage});
+  SideMenuButtons({super.key, required this.currentPage});
 
   @override
-  State<SideMenu> createState() => _SideMenuState();
+  State<SideMenuButtons> createState() => _SideMenuButtonsState();
 }
 
-class _SideMenuState extends State<SideMenu> {
+class _SideMenuButtonsState extends State<SideMenuButtons> {
   bool homeSelected = true;
   bool winchSelected = false;
   bool temperatureSelected = false;

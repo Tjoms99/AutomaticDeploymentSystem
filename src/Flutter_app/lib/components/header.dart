@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
   String label = "";
+  bool enableUndertext;
 
-  Header({super.key, required this.label});
+  Header({super.key, required this.label, required this.enableUndertext});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +18,13 @@ class Header extends StatelessWidget {
           size: 30.0,
           fontWeight: FontWeight.w700,
         ),
-        const PrimaryText(
-          text: 'Automatic Deployment System',
-          size: 16.0,
-          color: AppColors.primaryText,
-        ),
+        enableUndertext
+            ? const PrimaryText(
+                text: 'Automatic Deployment System',
+                size: 16.0,
+                color: AppColors.primaryText,
+              )
+            : SizedBox(),
       ],
     );
   }

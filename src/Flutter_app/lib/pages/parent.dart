@@ -1,7 +1,8 @@
+import 'package:automatic_deployment_system_app/components/sidemenu_info.dart';
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
-import 'package:automatic_deployment_system_app/components/sidemenu.dart';
+import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/data/graphs.dart';
 import 'package:flutter/material.dart';
@@ -32,32 +33,37 @@ class _ParentPageState extends State<ParentPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-          bottom: false,
-          left: false,
-          right: false,
-          top: true,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: SideMenu(currentPage: currentPage),
-              ),
-              Expanded(
-                flex: 10,
-                child: ValueListenableBuilder(
-                  valueListenable: currentPage,
-                  builder: (context, value, child) {
-                    return value == 0 ? const Dashboard() : const ControlPage();
-                  },
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: SafeArea(
+            bottom: false,
+            left: false,
+            right: false,
+            top: true,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SideMenuButtons(currentPage: currentPage),
                 ),
-              ),
-              Expanded(
-                flex: 4,
-                child: SideMenu(currentPage: currentPage),
-              ),
-            ],
-          )),
+                Expanded(
+                  flex: 10,
+                  child: ValueListenableBuilder(
+                    valueListenable: currentPage,
+                    builder: (context, value, child) {
+                      return value == 0
+                          ? const Dashboard()
+                          : const ControlPage();
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: SideMenuInfo(),
+                ),
+              ],
+            )),
+      ),
     );
   }
 }
