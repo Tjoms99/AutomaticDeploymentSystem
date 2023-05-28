@@ -1,15 +1,13 @@
 import 'package:automatic_deployment_system_app/components/sidemenu_info.dart';
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
-import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
-import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/data/graphs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ParentPage extends StatefulWidget {
-  ParentPage({super.key});
+  const ParentPage({super.key});
 
   @override
   State<ParentPage> createState() => _ParentPageState();
@@ -57,7 +55,7 @@ class _ParentPageState extends State<ParentPage> {
                     },
                   ),
                 ),
-                Expanded(
+                const Expanded(
                   flex: 4,
                   child: SideMenuInfo(),
                 ),

@@ -1,4 +1,3 @@
-import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +19,7 @@ class _DefaultWidgetState extends State<DefaultWidget> {
         padding: const EdgeInsets.symmetric(vertical: 30.0, horizontal: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: widget.widgets ?? [SizedBox()],
+          children: widget.widgets ?? [const SizedBox()],
         ),
       ),
     );

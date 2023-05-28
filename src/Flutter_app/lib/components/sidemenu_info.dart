@@ -6,24 +6,24 @@ import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuInfo extends StatefulWidget {
-  SideMenuInfo({super.key});
+  const SideMenuInfo({super.key});
 
   @override
   State<SideMenuInfo> createState() => _SideMenuInfoState();
 }
 
 class _SideMenuInfoState extends State<SideMenuInfo> {
-  TextEditingController _targetDepthController =
+  final TextEditingController _targetDepthController =
       TextEditingController(text: "-10 m");
-  TextEditingController _depthDifferenceController =
+  final TextEditingController _depthDifferenceController =
       TextEditingController(text: "0.23 m");
-  TextEditingController _samplingIntervalController =
+  final TextEditingController _samplingIntervalController =
       TextEditingController(text: "1 s");
-  TextEditingController _samplingStatusController =
+  final TextEditingController _samplingStatusController =
       TextEditingController(text: "Sampling");
-  TextEditingController _rs232StatusController =
+  final TextEditingController _rs232StatusController =
       TextEditingController(text: "OFF");
-  TextEditingController _12VStatusController =
+  final TextEditingController _12VStatusController =
       TextEditingController(text: "OFF");
 
   @override

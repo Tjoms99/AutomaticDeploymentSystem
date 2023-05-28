@@ -24,7 +24,7 @@ class Header extends StatelessWidget {
                 size: 16.0,
                 color: AppColors.primaryText,
               )
-            : SizedBox(),
+            : const SizedBox(),
       ],
     );
   }
