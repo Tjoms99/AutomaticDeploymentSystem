@@ -7,12 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorData extends ValueNotifier {
+  SensorDataCallback callback;
   ValueNotifier<int> currentTime = ValueNotifier(0);
   ValueNotifier<double> currentData = ValueNotifier(0.0);
+
   List<ChartData> sensorData = <ChartData>[];
-
-  SensorDataCallback callback;
-
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
 

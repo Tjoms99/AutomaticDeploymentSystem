@@ -20,12 +20,23 @@ class _SideMenuState extends State<SideMenu> {
   bool depthSelected = false;
   double size = 25;
 
-  void updatePage() {
+  void updatePage(int index) {
     homeSelected = false;
     winchSelected = false;
     temperatureSelected = false;
     pressureSelected = false;
     depthSelected = false;
+
+    index == 0
+        ? homeSelected = true
+        : index == 1
+            ? winchSelected = true
+            : index == 2
+                ? temperatureSelected = true
+                : index == 3
+                    ? pressureSelected = true
+                    : depthSelected = true;
+    setState(() {});
   }
 
   @override
@@ -49,15 +60,8 @@ class _SideMenuState extends State<SideMenu> {
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
-                homeSelected = true;
-                winchSelected = false;
-                temperatureSelected = false;
-                pressureSelected = false;
-                depthSelected = false;
-
                 widget.currentPage.value = 0;
-
-                setState(() {});
+                updatePage(widget.currentPage.value);
               },
             ),
           ),
@@ -74,15 +78,8 @@ class _SideMenuState extends State<SideMenu> {
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
-                homeSelected = false;
-                winchSelected = true;
-                temperatureSelected = false;
-                pressureSelected = false;
-                depthSelected = false;
-
                 widget.currentPage.value = 1;
-
-                setState(() {});
+                updatePage(widget.currentPage.value);
               },
             ),
           ),
@@ -99,13 +96,9 @@ class _SideMenuState extends State<SideMenu> {
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
-                homeSelected = false;
-                winchSelected = false;
-                temperatureSelected = true;
-                pressureSelected = false;
-                depthSelected = false;
+                widget.currentPage.value = 2;
 
-                setState(() {});
+                updatePage(widget.currentPage.value);
               },
             ),
           ),
@@ -122,13 +115,8 @@ class _SideMenuState extends State<SideMenu> {
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
-                homeSelected = false;
-                winchSelected = false;
-                temperatureSelected = false;
-                pressureSelected = true;
-                depthSelected = false;
-
-                setState(() {});
+                widget.currentPage.value = 3;
+                updatePage(widget.currentPage.value);
               },
             ),
           ),
@@ -145,13 +133,8 @@ class _SideMenuState extends State<SideMenu> {
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
-                homeSelected = false;
-                winchSelected = false;
-                temperatureSelected = false;
-                pressureSelected = false;
-                depthSelected = true;
-
-                setState(() {});
+                widget.currentPage.value = 4;
+                updatePage(widget.currentPage.value);
               },
             ),
           ),
