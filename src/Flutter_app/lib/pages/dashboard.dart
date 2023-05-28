@@ -1,17 +1,27 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
+import 'package:automatic_deployment_system_app/components/info_card.dart';
+import 'package:automatic_deployment_system_app/components/info_graph.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/data/graphs.dart';
+import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  SensorDataList sensorDataList;
+
+  Dashboard({super.key, required this.sensorDataList});
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultWidget(widgets: [
@@ -22,17 +32,17 @@ class _DashboardState extends State<Dashboard> {
         spacing: 20.0,
         alignment: WrapAlignment.start,
         children: [
-          cardList.elementAt(SensorType.DEPTH.index),
-          cardList.elementAt(SensorType.TEMPERATURE.index),
-          cardList.elementAt(SensorType.PRESSURE.index),
-          cardList.elementAt(SensorType.BATTERY.index),
+          widget.sensorDataList.getInfocard(SensorType.DEPTH.index),
+          widget.sensorDataList.getInfocard(SensorType.TEMPERATURE.index),
+          widget.sensorDataList.getInfocard(SensorType.PRESSURE.index),
+          widget.sensorDataList.getInfocard(SensorType.BATTERY.index),
         ],
       ),
       SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-      graphList.elementAt(SensorType.DEPTH.index),
-      graphList.elementAt(SensorType.TEMPERATURE.index),
-      graphList.elementAt(SensorType.PRESSURE.index),
-      graphList.elementAt(SensorType.BATTERY.index),
+      widget.sensorDataList.getInfograph(SensorType.DEPTH.index),
+      widget.sensorDataList.getInfograph(SensorType.TEMPERATURE.index),
+      widget.sensorDataList.getInfograph(SensorType.PRESSURE.index),
+      widget.sensorDataList.getInfograph(SensorType.BATTERY.index),
     ]);
   }
 }

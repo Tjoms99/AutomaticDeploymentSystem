@@ -1,4 +1,8 @@
+import 'package:automatic_deployment_system_app/components/info_card.dart';
+import 'package:automatic_deployment_system_app/components/info_graph.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_info.dart';
+import 'package:automatic_deployment_system_app/data/sensor_data.dart';
+import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
@@ -15,14 +19,11 @@ class ParentPage extends StatefulWidget {
 
 class _ParentPageState extends State<ParentPage> {
   ValueNotifier<int> currentPage = ValueNotifier(0);
+  SensorDataList sensorDataList = SensorDataList();
 
   @override
   void initState() {
-    graphList.elementAt(SensorType.DEPTH.index).sensorData.initState();
-    graphList.elementAt(SensorType.TEMPERATURE.index).sensorData.initState();
-    graphList.elementAt(SensorType.PRESSURE.index).sensorData.initState();
-    graphList.elementAt(SensorType.BATTERY.index).sensorData.initState();
-
+    sensorDataList.initState();
     super.initState();
   }
 
@@ -50,14 +51,14 @@ class _ParentPageState extends State<ParentPage> {
                     valueListenable: currentPage,
                     builder: (context, value, child) {
                       return value == 0
-                          ? const Dashboard()
+                          ? Dashboard(sensorDataList: sensorDataList)
                           : const ControlPage();
                     },
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   flex: 4,
-                  child: SideMenuInfo(),
+                  child: SideMenuInfo(sensorDataList: sensorDataList),
                 ),
               ],
             )),

@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:automatic_deployment_system_app/data/graphs.dart';
+import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorData extends ValueNotifier {
-  SensorDataCallback callback;
+  List<SensorDataCallback> callback = [];
   ValueNotifier<int> currentTime = ValueNotifier(0);
   ValueNotifier<double> currentData = ValueNotifier(0.0);
 
@@ -15,7 +16,11 @@ class SensorData extends ValueNotifier {
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
 
-  SensorData({required this.callback}) : super(null);
+  SensorData() : super(null);
+
+  void registerCallback(SensorDataCallback cb) {
+    callback.add(cb);
+  }
 
   void updateCurrentTime(int value) {
     currentTime.value = value;
@@ -45,7 +50,7 @@ class SensorData extends ValueNotifier {
 
   void initState() {
     sensorData = getChartData();
-    Timer.periodic(const Duration(seconds: 1), updateDataSource);
+    Timer.periodic(const Duration(seconds: 1), update);
 
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {
@@ -66,9 +71,11 @@ class SensorData extends ValueNotifier {
 
   //TODO: Needs to be a callback function that is passed to the widget
   //updateDepth, updateTemperature, update... ect.
-  void updateDataSource(Timer timer) {
-    //TODO: Replace with real data
-    callback();
+  void update(Timer timer) {
+    int callbackLength = callback.length;
+    for (var i = 0; i < callbackLength; i++) {
+      callback.elementAt(i)();
+    }
   }
 
   void updateGraphData() {

@@ -39,7 +39,7 @@ class PrimaryTextfield extends StatelessWidget {
   final TextEditingController controller;
   final enabled;
 
-  const PrimaryTextfield({
+  PrimaryTextfield({
     super.key,
     this.fontWeight = FontWeight.w400,
     this.color = AppColors.primaryText,
