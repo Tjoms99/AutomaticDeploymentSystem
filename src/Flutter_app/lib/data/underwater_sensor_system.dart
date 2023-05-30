@@ -26,10 +26,14 @@ class UnderwaterSensorSystem {
 
   //TIMER
   late Timer _systemTimer;
-  int currentTime = 0;
+  int _currentTime = 0;
 
   //SYSTEM FLAGS
-  int samplingInterval = 1;
+  int _samplingInterval = 1;
+  bool _isSampling = false;
+  bool _isOnRS232 = false;
+  bool _isOn12V = false;
+  bool _requestSample = true;
 
   //WIDGETS
   late List<Infocard> infoCard;
@@ -44,7 +48,7 @@ class UnderwaterSensorSystem {
     _battery = SensorData();
 
     _systemTimer =
-        Timer.periodic(Duration(seconds: samplingInterval), updateData);
+        Timer.periodic(Duration(seconds: _samplingInterval), updateData);
 
     _depth.initState();
     _temperature.initState();
@@ -106,6 +110,7 @@ class UnderwaterSensorSystem {
     ];
   }
 
+  //----------SENSORS---------------
   SensorData getDepthSensor() {
     return _depth;
   }
@@ -122,6 +127,39 @@ class UnderwaterSensorSystem {
     return _battery;
   }
 
+  //----------SYSTEM---------------
+  bool isSampling() {
+    return _isSampling;
+  }
+
+  bool isOnRS232() {
+    return _isOnRS232;
+  }
+
+  bool isOn12V() {
+    return _isOn12V;
+  }
+
+  bool isRequestingSample() {
+    return _requestSample;
+  }
+
+  void toggleSampling() {
+    _isSampling = !_isSampling;
+  }
+
+  void toggleRS232() {
+    _isOnRS232 = !_isOnRS232;
+  }
+
+  void toggle12V() {
+    _isOn12V = _isOn12V;
+  }
+
+  void toogleRequestSample() {
+    _requestSample = !_requestSample;
+  }
+
   Infocard getInfocard(int index) {
     return infoCard.elementAt(index);
   }
@@ -130,12 +168,18 @@ class UnderwaterSensorSystem {
     return infoGraph.elementAt(index);
   }
 
+  int getCurrentTime() {
+    return _currentTime;
+  }
+
   void registerCallback(UnderwaterSensorSystemCallback cb) {
     callbacks.add(cb);
   }
 
+  //----------UPDATE---------------
   void updateData(Timer timer) {
-    currentTime += samplingInterval;
+    if (!_requestSample) return;
+    _currentTime += _samplingInterval;
 
     updateDepthData();
     updateTemperatureData();
@@ -148,17 +192,17 @@ class UnderwaterSensorSystem {
   }
 
   void updateTimer(int seconds) {
-    samplingInterval = seconds;
+    _samplingInterval = seconds;
     _systemTimer.cancel();
     _systemTimer =
-        Timer.periodic(Duration(seconds: samplingInterval), updateData);
+        Timer.periodic(Duration(seconds: _samplingInterval), updateData);
   }
 
   void updateDepthData() {
     double newData = (math.Random().nextDouble() * (-5) - 10);
     _depth.updateCurrentData(newData);
 
-    _depth.sensorData.add(ChartData(currentTime, _depth.getCurrentData()));
+    _depth.sensorData.add(ChartData(_currentTime, _depth.getCurrentData()));
 
     try {
       _depth.updateGraphData();
@@ -170,7 +214,7 @@ class UnderwaterSensorSystem {
     _temperature.updateCurrentData(newData);
 
     _temperature.sensorData
-        .add(ChartData(currentTime, _temperature.getCurrentData()));
+        .add(ChartData(_currentTime, _temperature.getCurrentData()));
 
     try {
       _temperature.updateGraphData();
@@ -182,7 +226,7 @@ class UnderwaterSensorSystem {
     _pressure.updateCurrentData(newData);
 
     _pressure.sensorData
-        .add(ChartData(currentTime, _pressure.getCurrentData()));
+        .add(ChartData(_currentTime, _pressure.getCurrentData()));
 
     try {
       _pressure.updateGraphData();
@@ -193,7 +237,7 @@ class UnderwaterSensorSystem {
     double newData = (math.Random().nextDouble() * 10 + 80);
     _battery.updateCurrentData(newData);
 
-    _battery.sensorData.add(ChartData(currentTime, _battery.getCurrentData()));
+    _battery.sensorData.add(ChartData(_currentTime, _battery.getCurrentData()));
 
     try {
       _battery.updateGraphData();

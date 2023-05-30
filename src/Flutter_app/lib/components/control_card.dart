@@ -5,16 +5,18 @@ import 'package:flutter/material.dart';
 
 class Controlcard extends StatefulWidget {
   final String label;
-  final bool enabled;
   final String textEnable;
   final String textDisable;
+  final Function() callback;
+  final Function() getStatus;
 
   const Controlcard(
       {super.key,
       required this.label,
-      required this.enabled,
       required this.textEnable,
-      required this.textDisable});
+      required this.textDisable,
+      required this.callback,
+      required this.getStatus});
 
   @override
   State<Controlcard> createState() => _ControlcardState();
@@ -25,11 +27,13 @@ class _ControlcardState extends State<Controlcard> {
 
   @override
   void initState() {
+    enabled = widget.getStatus();
     super.initState();
   }
 
   void updateState() {
-    enabled = !enabled;
+    widget.callback();
+    enabled = widget.getStatus();
     setState(() {});
   }
 

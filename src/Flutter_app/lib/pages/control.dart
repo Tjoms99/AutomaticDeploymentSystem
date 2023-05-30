@@ -2,10 +2,12 @@ import 'package:automatic_deployment_system_app/components/control_card.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
+import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
 import 'package:flutter/material.dart';
 
 class ControlPage extends StatefulWidget {
-  const ControlPage({super.key});
+  final UnderwaterSensorSystem underwaterSensorSystem;
+  const ControlPage({required this.underwaterSensorSystem});
 
   @override
   State<ControlPage> createState() => _ControlPageState();
@@ -18,7 +20,7 @@ class _ControlPageState extends State<ControlPage> {
       widgets: [
         const Header(label: 'Control', enableUndertext: true),
         SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-        const Wrap(
+        Wrap(
           runSpacing: 20.0,
           spacing: 20.0,
           alignment: WrapAlignment.start,
@@ -28,8 +30,10 @@ class _ControlPageState extends State<ControlPage> {
               label: 'SYSTEM',
               textEnable: "ACTIVE",
               textDisable: "INACTIVE",
-              enabled: true,
+              callback: widget.underwaterSensorSystem.toogleRequestSample,
+              getStatus: widget.underwaterSensorSystem.isRequestingSample,
             ),
+            /*
             Controlcard(
               label: 'MODE STATUS',
               textEnable: "AUTOMATIC",
@@ -80,6 +84,7 @@ class _ControlPageState extends State<ControlPage> {
               textDisable: "OFF",
               enabled: true,
             ),
+            */
           ],
         ),
       ],

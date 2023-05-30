@@ -36,6 +36,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   void initState() {
     widget.underwaterSensorSytem.registerCallback(updateDepthDifference);
     widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
+    widget.underwaterSensorSytem.registerCallback(updateTimeLeft);
 
     super.initState();
   }
@@ -51,9 +52,9 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
   void updateTimeLeft() {
     try {
-      double timeLeft = double.parse(_timeLeftController.text) -
-          widget.underwaterSensorSytem.getDepthSensor().currentData.value;
-      _depthDifferenceController.text = "${timeLeft.toStringAsFixed(2)} s";
+      double timeLeft = double.parse(_targetTimeController.text) -
+          widget.underwaterSensorSytem.getCurrentTime();
+      _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
     } catch (e) {}
   }
 

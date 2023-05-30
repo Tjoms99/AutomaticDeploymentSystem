@@ -49,7 +49,8 @@ class _ParentPageState extends State<ParentPage> {
                       return value == 0
                           ? Dashboard(
                               underwaterSensorSystem: underwaterSensorSystem)
-                          : const ControlPage();
+                          : ControlPage(
+                              underwaterSensorSystem: underwaterSensorSystem);
                     },
                   ),
                 ),
