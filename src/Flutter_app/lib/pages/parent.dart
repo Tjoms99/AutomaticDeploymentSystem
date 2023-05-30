@@ -1,5 +1,5 @@
 import 'package:automatic_deployment_system_app/components/sidemenu_info.dart';
-import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
+import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
