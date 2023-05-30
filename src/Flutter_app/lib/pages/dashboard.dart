@@ -5,9 +5,9 @@ import 'package:automatic_deployment_system_app/data/underwater_sensor_system.da
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  UnderwaterSensorSystem underwaterSensorSystem;
+  final UnderwaterSensorSystem underwaterSensorSystem;
 
-  Dashboard({super.key, required this.underwaterSensorSystem});
+  const Dashboard({super.key, required this.underwaterSensorSystem});
 
   @override
   State<Dashboard> createState() => _DashboardState();

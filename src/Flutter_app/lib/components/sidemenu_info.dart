@@ -25,7 +25,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       TextEditingController(text: "20");
   final TextEditingController _samplingIntervalController =
       TextEditingController(text: "1");
-  final TextEditingController _samplingStatusController =
+  final TextEditingController _systemStatusController =
       TextEditingController(text: "Sampling");
   final TextEditingController _rs232StatusController =
       TextEditingController(text: "OFF");
@@ -37,6 +37,9 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     widget.underwaterSensorSytem.registerCallback(updateDepthDifference);
     widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
     widget.underwaterSensorSytem.registerCallback(updateTimeLeft);
+    widget.underwaterSensorSytem.registerCallback(updateSystem);
+    widget.underwaterSensorSytem.registerCallback(updateRS232);
+    widget.underwaterSensorSytem.registerCallback(update12V);
 
     super.initState();
   }
@@ -65,6 +68,24 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     } catch (e) {}
   }
 
+  void updateSystem() {
+    widget.underwaterSensorSytem.isOnSystem()
+        ? _systemStatusController.text = "ACTIVE"
+        : _systemStatusController.text = "INACTIVE";
+  }
+
+  void updateRS232() {
+    widget.underwaterSensorSytem.isOnRS232()
+        ? _rs232StatusController.text = "ON"
+        : _rs232StatusController.text = "OFF";
+  }
+
+  void update12V() {
+    widget.underwaterSensorSytem.isOn12V()
+        ? _12VStatusController.text = "ON"
+        : _12VStatusController.text = "OFF";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -72,6 +93,9 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       child: DefaultWidget(
         widgets: [
           const Header(label: "Info", enableUndertext: false),
+          SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+          const PrimaryText(text: "SYSTEM STATUS:"),
+          PrimaryTextfield(controller: _systemStatusController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET DEPTH:"),
           PrimaryTextfield(controller: _targetDepthController),
@@ -88,10 +112,6 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SAMPLING INTERVAL:"),
           PrimaryTextfield(controller: _samplingIntervalController),
-          SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "SAMPLING STATUS:"),
-          PrimaryTextfield(
-              controller: _samplingStatusController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "RS232 STATUS:"),
           PrimaryTextfield(controller: _rs232StatusController, enabled: false),

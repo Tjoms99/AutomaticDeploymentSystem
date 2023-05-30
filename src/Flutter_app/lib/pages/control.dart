@@ -25,13 +25,26 @@ class _ControlPageState extends State<ControlPage> {
           spacing: 20.0,
           alignment: WrapAlignment.start,
           children: [
-            //TODO: add callback function to update state?
             Controlcard(
               label: 'SYSTEM',
               textEnable: "ACTIVE",
               textDisable: "INACTIVE",
-              callback: widget.underwaterSensorSystem.toogleRequestSample,
-              getStatus: widget.underwaterSensorSystem.isRequestingSample,
+              callback: widget.underwaterSensorSystem.toggleSystem,
+              getStatus: widget.underwaterSensorSystem.isOnSystem,
+            ),
+            Controlcard(
+              label: 'RS232',
+              textEnable: "ON",
+              textDisable: "OFF",
+              callback: widget.underwaterSensorSystem.toggleRS232,
+              getStatus: widget.underwaterSensorSystem.isOnRS232,
+            ),
+            Controlcard(
+              label: '12V',
+              textEnable: "ON",
+              textDisable: "OFF",
+              callback: widget.underwaterSensorSystem.toggle12V,
+              getStatus: widget.underwaterSensorSystem.isOn12V,
             ),
             /*
             Controlcard(
@@ -58,18 +71,7 @@ class _ControlPageState extends State<ControlPage> {
               textDisable: "NOP",
               enabled: true,
             ),
-            Controlcard(
-              label: 'RS232',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: true,
-            ),
-            Controlcard(
-              label: '12V',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: true,
-            ),
+
 
             //Should only be triggers....
             Controlcard(

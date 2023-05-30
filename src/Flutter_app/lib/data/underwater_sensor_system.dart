@@ -26,14 +26,15 @@ class UnderwaterSensorSystem {
 
   //TIMER
   late Timer _systemTimer;
+  int systemUpdateIntervalMS = 100;
   int _currentTime = 0;
 
   //SYSTEM FLAGS
   int _samplingInterval = 1;
-  bool _isSampling = false;
+  bool _isOnSystem = false;
   bool _isOnRS232 = false;
   bool _isOn12V = false;
-  bool _requestSample = true;
+  bool _requestSample = false;
 
   //WIDGETS
   late List<Infocard> infoCard;
@@ -47,8 +48,8 @@ class UnderwaterSensorSystem {
     _pressure = SensorData();
     _battery = SensorData();
 
-    _systemTimer =
-        Timer.periodic(Duration(seconds: _samplingInterval), updateData);
+    _systemTimer = Timer.periodic(
+        Duration(milliseconds: systemUpdateIntervalMS), updateData);
 
     _depth.initState();
     _temperature.initState();
@@ -128,8 +129,8 @@ class UnderwaterSensorSystem {
   }
 
   //----------SYSTEM---------------
-  bool isSampling() {
-    return _isSampling;
+  bool isOnSystem() {
+    return _isOnSystem;
   }
 
   bool isOnRS232() {
@@ -144,8 +145,8 @@ class UnderwaterSensorSystem {
     return _requestSample;
   }
 
-  void toggleSampling() {
-    _isSampling = !_isSampling;
+  void toggleSystem() {
+    _isOnSystem = !_isOnSystem;
   }
 
   void toggleRS232() {
@@ -153,10 +154,10 @@ class UnderwaterSensorSystem {
   }
 
   void toggle12V() {
-    _isOn12V = _isOn12V;
+    _isOn12V = !_isOn12V;
   }
 
-  void toogleRequestSample() {
+  void toggleRequestSample() {
     _requestSample = !_requestSample;
   }
 
@@ -178,13 +179,20 @@ class UnderwaterSensorSystem {
 
   //----------UPDATE---------------
   void updateData(Timer timer) {
-    if (!_requestSample) return;
-    _currentTime += _samplingInterval;
+    //Ticks in seconds
+    int ticks = timer.tick % (1000 ~/ systemUpdateIntervalMS);
 
-    updateDepthData();
-    updateTemperatureData();
-    updatePressureData();
-    updateBatteryData();
+    if (ticks == 0 && _isOnSystem) {
+      _currentTime += _samplingInterval;
+
+      updateDepthData();
+      updateTemperatureData();
+      updatePressureData();
+      updateBatteryData();
+    }
+
+    //Restart widgets ......
+    if (!_isOnSystem) _currentTime = 0;
 
     for (var i = 0; i < callbacks.length; i++) {
       callbacks.elementAt(i)();
@@ -193,9 +201,9 @@ class UnderwaterSensorSystem {
 
   void updateTimer(int seconds) {
     _samplingInterval = seconds;
-    _systemTimer.cancel();
-    _systemTimer =
-        Timer.periodic(Duration(seconds: _samplingInterval), updateData);
+    // _systemTimer.cancel();
+    //  _systemTimer =
+    //    Timer.periodic(Duration(seconds: _samplingInterval), updateData);
   }
 
   void updateDepthData() {
