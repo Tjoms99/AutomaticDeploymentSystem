@@ -4,9 +4,9 @@ import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuButtons extends StatefulWidget {
-  ValueNotifier<int> currentPage;
+  final ValueNotifier<int> currentPage;
 
-  SideMenuButtons({super.key, required this.currentPage});
+  const SideMenuButtons({super.key, required this.currentPage});
 
   @override
   State<SideMenuButtons> createState() => _SideMenuButtonsState();

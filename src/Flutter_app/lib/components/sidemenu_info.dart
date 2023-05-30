@@ -1,16 +1,14 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/data/graphs.dart';
-import 'package:automatic_deployment_system_app/data/sensor_data.dart';
 import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuInfo extends StatefulWidget {
-  SensorDataList sensorDataList;
-  SideMenuInfo({super.key, required this.sensorDataList});
+  final UnderwaterSensorSystem underwaterSensorSytem;
+  const SideMenuInfo({super.key, required this.underwaterSensorSytem});
 
   @override
   State<SideMenuInfo> createState() => _SideMenuInfoState();
@@ -36,28 +34,16 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
   @override
   void initState() {
-    widget.sensorDataList
-        .getDepthSensor()
-        .registerCallback(updateDepthDifference);
-    widget.sensorDataList
-        .getDepthSensor()
-        .registerCallback(updateDepthSamplingInterval);
-    widget.sensorDataList
-        .getTemperatureSensor()
-        .registerCallback(updateTemperatureSamplingInterval);
-    widget.sensorDataList
-        .getPressureSensor()
-        .registerCallback(updatePressureSamplingInterval);
-    widget.sensorDataList
-        .getBatterySensor()
-        .registerCallback(updateBatterySamplingInterval);
+    widget.underwaterSensorSytem.registerCallback(updateDepthDifference);
+    widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
+
     super.initState();
   }
 
   void updateDepthDifference() {
     try {
       double depthDifference = double.parse(_targetDepthController.text) -
-          widget.sensorDataList.getDepthSensor().currentData.value;
+          widget.underwaterSensorSytem.getDepthSensor().currentData.value;
       _depthDifferenceController.text =
           "${depthDifference.toStringAsFixed(2)} m";
     } catch (e) {}
@@ -66,36 +52,15 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   void updateTimeLeft() {
     try {
       double timeLeft = double.parse(_timeLeftController.text) -
-          widget.sensorDataList.getDepthSensor().currentData.value;
+          widget.underwaterSensorSytem.getDepthSensor().currentData.value;
       _depthDifferenceController.text = "${timeLeft.toStringAsFixed(2)} s";
     } catch (e) {}
   }
 
-  void updateDepthSamplingInterval() {
+  void updateSamplingInterval() {
     try {
       int seconds = int.parse(_samplingIntervalController.text);
-      widget.sensorDataList.getDepthSensor().updateTimer(seconds);
-    } catch (e) {}
-  }
-
-  void updateTemperatureSamplingInterval() {
-    try {
-      int seconds = int.parse(_samplingIntervalController.text);
-      widget.sensorDataList.getTemperatureSensor().updateTimer(seconds);
-    } catch (e) {}
-  }
-
-  void updatePressureSamplingInterval() {
-    try {
-      int seconds = int.parse(_samplingIntervalController.text);
-      widget.sensorDataList.getPressureSensor().updateTimer(seconds);
-    } catch (e) {}
-  }
-
-  void updateBatterySamplingInterval() {
-    try {
-      int seconds = int.parse(_samplingIntervalController.text);
-      widget.sensorDataList.getBatterySensor().updateTimer(seconds);
+      widget.underwaterSensorSytem.updateTimer(seconds);
     } catch (e) {}
   }
 
@@ -105,7 +70,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       color: AppColors.secondaryBackground,
       child: DefaultWidget(
         widgets: [
-          Header(label: "Info", enableUndertext: false),
+          const Header(label: "Info", enableUndertext: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET DEPTH:"),
           PrimaryTextfield(controller: _targetDepthController),

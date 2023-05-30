@@ -3,10 +3,10 @@ import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
-  String label = "";
-  bool enableUndertext;
+  final String label;
+  final bool enableUndertext;
 
-  Header({super.key, required this.label, required this.enableUndertext});
+  const Header({super.key, required this.label, required this.enableUndertext});
 
   @override
   Widget build(BuildContext context) {

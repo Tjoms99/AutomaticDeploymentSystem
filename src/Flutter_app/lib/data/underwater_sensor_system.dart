@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:automatic_deployment_system_app/components/info_card.dart';
 import 'package:automatic_deployment_system_app/components/info_graph.dart';
 import 'package:automatic_deployment_system_app/data/sensor_data.dart';
@@ -11,18 +13,29 @@ enum SensorType {
   BATTERY,
 }
 
-typedef SensorDataCallback = void Function();
+typedef UnderwaterSensorSystemCallback = void Function();
 
-class SensorDataList {
+class UnderwaterSensorSystem {
+  List<UnderwaterSensorSystemCallback> callbacks = [];
+
+  //DATA
   late SensorData _depth;
   late SensorData _temperature;
   late SensorData _pressure;
   late SensorData _battery;
 
+  //TIMER
+  late Timer _systemTimer;
+  int currentTime = 0;
+
+  //SYSTEM FLAGS
+  int samplingInterval = 1;
+
+  //WIDGETS
   late List<Infocard> infoCard;
   late List<Infograph> infoGraph;
 
-  SensorDataList();
+  UnderwaterSensorSystem();
 
   void initState() {
     _depth = SensorData();
@@ -30,15 +43,13 @@ class SensorDataList {
     _pressure = SensorData();
     _battery = SensorData();
 
+    _systemTimer =
+        Timer.periodic(Duration(seconds: samplingInterval), updateData);
+
     _depth.initState();
     _temperature.initState();
     _pressure.initState();
     _battery.initState();
-
-    _depth.registerCallback(updateDepthData);
-    _temperature.registerCallback(updateTemperatureData);
-    _pressure.registerCallback(updatePressureData);
-    _battery.registerCallback(updateBatteryData);
 
     infoGraph = [
       Infograph(
@@ -119,16 +130,36 @@ class SensorDataList {
     return infoGraph.elementAt(index);
   }
 
+  void registerCallback(UnderwaterSensorSystemCallback cb) {
+    callbacks.add(cb);
+  }
+
+  void updateData(Timer timer) {
+    currentTime += samplingInterval;
+
+    updateDepthData();
+    updateTemperatureData();
+    updatePressureData();
+    updateBatteryData();
+
+    for (var i = 0; i < callbacks.length; i++) {
+      callbacks.elementAt(i)();
+    }
+  }
+
+  void updateTimer(int seconds) {
+    samplingInterval = seconds;
+    _systemTimer.cancel();
+    _systemTimer =
+        Timer.periodic(Duration(seconds: samplingInterval), updateData);
+  }
+
   void updateDepthData() {
     double newData = (math.Random().nextDouble() * (-5) - 10);
     _depth.updateCurrentData(newData);
 
-    int newTime = (_depth.getCurrentTime() + 1);
-    _depth.updateCurrentTime(newTime);
-    _depth.sensorData
-        .add(ChartData(_depth.getCurrentTime(), _depth.getCurrentData()));
+    _depth.sensorData.add(ChartData(currentTime, _depth.getCurrentData()));
 
-    //Update last
     try {
       _depth.updateGraphData();
     } catch (e) {}
@@ -138,11 +169,9 @@ class SensorDataList {
     double newData = (math.Random().nextDouble() * 5 + 6);
     _temperature.updateCurrentData(newData);
 
-    int newTime = (_temperature.getCurrentTime() + 1);
-    _temperature.updateCurrentTime(newTime);
-    _temperature.sensorData.add(ChartData(
-        _temperature.getCurrentTime(), _temperature.getCurrentData()));
-    //Update last
+    _temperature.sensorData
+        .add(ChartData(currentTime, _temperature.getCurrentData()));
+
     try {
       _temperature.updateGraphData();
     } catch (e) {}
@@ -152,11 +181,9 @@ class SensorDataList {
     double newData = (math.Random().nextDouble() * 2000 + 100000);
     _pressure.updateCurrentData(newData);
 
-    int newTime = (_pressure.getCurrentTime() + 1);
-    _pressure.updateCurrentTime(newTime);
     _pressure.sensorData
-        .add(ChartData(_pressure.getCurrentTime(), _pressure.getCurrentData()));
-    //Update last
+        .add(ChartData(currentTime, _pressure.getCurrentData()));
+
     try {
       _pressure.updateGraphData();
     } catch (e) {}
@@ -166,11 +193,8 @@ class SensorDataList {
     double newData = (math.Random().nextDouble() * 10 + 80);
     _battery.updateCurrentData(newData);
 
-    int newTime = (_battery.getCurrentTime() + 1);
-    _battery.updateCurrentTime(newTime);
-    _battery.sensorData
-        .add(ChartData(_battery.getCurrentTime(), _battery.getCurrentData()));
-    //Update last
+    _battery.sensorData.add(ChartData(currentTime, _battery.getCurrentData()));
+
     try {
       _battery.updateGraphData();
     } catch (e) {}

@@ -2,8 +2,8 @@ import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:flutter/material.dart';
 
 class DefaultWidget extends StatefulWidget {
-  List<Widget>? widgets;
-  DefaultWidget({super.key, required this.widgets});
+  final List<Widget>? widgets;
+  const DefaultWidget({super.key, required this.widgets});
 
   @override
   State<DefaultWidget> createState() => _DefaultWidgetState();

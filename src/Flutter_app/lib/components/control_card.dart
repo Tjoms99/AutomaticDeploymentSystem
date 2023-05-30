@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 
 class Controlcard extends StatefulWidget {
   final String label;
-  bool enabled;
-  String textEnable;
-  String textDisable;
+  final bool enabled;
+  final String textEnable;
+  final String textDisable;
 
-  Controlcard(
+  const Controlcard(
       {super.key,
       required this.label,
       required this.enabled,

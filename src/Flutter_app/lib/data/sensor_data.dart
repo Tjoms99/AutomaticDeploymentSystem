@@ -1,45 +1,21 @@
-import 'dart:async';
 
-import 'package:automatic_deployment_system_app/data/graphs.dart';
-import 'package:automatic_deployment_system_app/data/sensor_data_list.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorData extends ValueNotifier {
-  List<SensorDataCallback> callback = [];
-  ValueNotifier<int> currentTime = ValueNotifier(0);
   ValueNotifier<double> currentData = ValueNotifier(0.0);
 
   List<ChartData> sensorData = <ChartData>[];
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
 
-  late Timer _systemTimer;
   SensorData() : super(null);
-
-  void registerCallback(SensorDataCallback cb) {
-    callback.add(cb);
-  }
-
-  void updateCurrentTime(int value) {
-    currentTime.value = value;
-    notifyListeners();
-  }
 
   void updateCurrentData(double value) {
     currentData.value = value;
     notifyListeners();
-  }
-
-  void updateTimer(int seconds) {
-    _systemTimer.cancel();
-    _systemTimer = Timer.periodic(Duration(seconds: seconds), updateData);
-  }
-
-  int getCurrentTime() {
-    return currentTime.value;
   }
 
   double getCurrentData() {
@@ -56,7 +32,7 @@ class SensorData extends ValueNotifier {
 
   void initState() {
     sensorData = getChartData();
-    _systemTimer = Timer.periodic(const Duration(seconds: 1), updateData);
+
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {
         chartSeriesController = controller;
@@ -72,15 +48,6 @@ class SensorData extends ValueNotifier {
       yValueMapper: (ChartData data, _) =>
           double.parse(data.y.toStringAsFixed(2)),
     );
-  }
-
-  //TODO: Needs to be a callback function that is passed to the widget
-  //updateDepth, updateTemperature, update... ect.
-  void updateData(Timer timer) {
-    int callbackLength = callback.length;
-    for (var i = 0; i < callbackLength; i++) {
-      callback.elementAt(i)();
-    }
   }
 
   void updateGraphData() {
