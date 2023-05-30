@@ -16,6 +16,7 @@ class SensorData extends ValueNotifier {
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
 
+  late Timer _systemTimer;
   SensorData() : super(null);
 
   void registerCallback(SensorDataCallback cb) {
@@ -30,6 +31,11 @@ class SensorData extends ValueNotifier {
   void updateCurrentData(double value) {
     currentData.value = value;
     notifyListeners();
+  }
+
+  void updateTimer(int seconds) {
+    _systemTimer.cancel();
+    _systemTimer = Timer.periodic(Duration(seconds: seconds), updateData);
   }
 
   int getCurrentTime() {
@@ -50,8 +56,7 @@ class SensorData extends ValueNotifier {
 
   void initState() {
     sensorData = getChartData();
-    Timer.periodic(const Duration(seconds: 1), update);
-
+    _systemTimer = Timer.periodic(const Duration(seconds: 1), updateData);
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {
         chartSeriesController = controller;
@@ -71,7 +76,7 @@ class SensorData extends ValueNotifier {
 
   //TODO: Needs to be a callback function that is passed to the widget
   //updateDepth, updateTemperature, update... ect.
-  void update(Timer timer) {
+  void updateData(Timer timer) {
     int callbackLength = callback.length;
     for (var i = 0; i < callbackLength; i++) {
       callback.elementAt(i)();

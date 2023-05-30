@@ -99,6 +99,18 @@ class SensorDataList {
     return _depth;
   }
 
+  SensorData getTemperatureSensor() {
+    return _temperature;
+  }
+
+  SensorData getPressureSensor() {
+    return _pressure;
+  }
+
+  SensorData getBatterySensor() {
+    return _battery;
+  }
+
   Infocard getInfocard(int index) {
     return infoCard.elementAt(index);
   }

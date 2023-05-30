@@ -18,11 +18,15 @@ class SideMenuInfo extends StatefulWidget {
 
 class _SideMenuInfoState extends State<SideMenuInfo> {
   final TextEditingController _targetDepthController =
-      TextEditingController(text: "10");
+      TextEditingController(text: "-10");
   final TextEditingController _depthDifferenceController =
       TextEditingController(text: "0.23");
+  final TextEditingController _targetTimeController =
+      TextEditingController(text: "60");
+  final TextEditingController _timeLeftController =
+      TextEditingController(text: "20");
   final TextEditingController _samplingIntervalController =
-      TextEditingController(text: "1 s");
+      TextEditingController(text: "1");
   final TextEditingController _samplingStatusController =
       TextEditingController(text: "Sampling");
   final TextEditingController _rs232StatusController =
@@ -35,6 +39,18 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     widget.sensorDataList
         .getDepthSensor()
         .registerCallback(updateDepthDifference);
+    widget.sensorDataList
+        .getDepthSensor()
+        .registerCallback(updateDepthSamplingInterval);
+    widget.sensorDataList
+        .getTemperatureSensor()
+        .registerCallback(updateTemperatureSamplingInterval);
+    widget.sensorDataList
+        .getPressureSensor()
+        .registerCallback(updatePressureSamplingInterval);
+    widget.sensorDataList
+        .getBatterySensor()
+        .registerCallback(updateBatterySamplingInterval);
     super.initState();
   }
 
@@ -42,13 +58,49 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     try {
       double depthDifference = double.parse(_targetDepthController.text) -
           widget.sensorDataList.getDepthSensor().currentData.value;
-      _depthDifferenceController.text = depthDifference.toStringAsFixed(2);
+      _depthDifferenceController.text =
+          "${depthDifference.toStringAsFixed(2)} m";
+    } catch (e) {}
+  }
+
+  void updateTimeLeft() {
+    try {
+      double timeLeft = double.parse(_timeLeftController.text) -
+          widget.sensorDataList.getDepthSensor().currentData.value;
+      _depthDifferenceController.text = "${timeLeft.toStringAsFixed(2)} s";
+    } catch (e) {}
+  }
+
+  void updateDepthSamplingInterval() {
+    try {
+      int seconds = int.parse(_samplingIntervalController.text);
+      widget.sensorDataList.getDepthSensor().updateTimer(seconds);
+    } catch (e) {}
+  }
+
+  void updateTemperatureSamplingInterval() {
+    try {
+      int seconds = int.parse(_samplingIntervalController.text);
+      widget.sensorDataList.getTemperatureSensor().updateTimer(seconds);
+    } catch (e) {}
+  }
+
+  void updatePressureSamplingInterval() {
+    try {
+      int seconds = int.parse(_samplingIntervalController.text);
+      widget.sensorDataList.getPressureSensor().updateTimer(seconds);
+    } catch (e) {}
+  }
+
+  void updateBatterySamplingInterval() {
+    try {
+      int seconds = int.parse(_samplingIntervalController.text);
+      widget.sensorDataList.getBatterySensor().updateTimer(seconds);
     } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    updateDepthDifference();
     return Container(
       color: AppColors.secondaryBackground,
       child: DefaultWidget(
@@ -61,6 +113,12 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           const PrimaryText(text: "DEPTH DIFFERENCE:"),
           PrimaryTextfield(
               controller: _depthDifferenceController, enabled: false),
+          SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+          const PrimaryText(text: "TARGET TIME:"),
+          PrimaryTextfield(controller: _targetTimeController),
+          SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+          const PrimaryText(text: "TIME LEFT:"),
+          PrimaryTextfield(controller: _timeLeftController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SAMPLING INTERVAL:"),
           PrimaryTextfield(controller: _samplingIntervalController),
