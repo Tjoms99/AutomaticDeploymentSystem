@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
@@ -10,7 +12,7 @@ class Controlcard extends StatefulWidget {
   final Function() callback;
   final Function() getStatus;
 
-  const Controlcard(
+  Controlcard(
       {super.key,
       required this.label,
       required this.textEnable,
@@ -24,9 +26,11 @@ class Controlcard extends StatefulWidget {
 
 class _ControlcardState extends State<Controlcard> {
   bool enabled = false;
+  late Timer timer;
 
   @override
   void initState() {
+    timer = Timer.periodic(Duration(milliseconds: 100), updateEnabled);
     enabled = widget.getStatus();
     super.initState();
   }
@@ -35,6 +39,13 @@ class _ControlcardState extends State<Controlcard> {
     widget.callback();
     enabled = widget.getStatus();
     setState(() {});
+  }
+
+  void updateEnabled(Timer timer) {
+    enabled = widget.getStatus();
+    try {
+      setState(() {});
+    } catch (e) {}
   }
 
   @override

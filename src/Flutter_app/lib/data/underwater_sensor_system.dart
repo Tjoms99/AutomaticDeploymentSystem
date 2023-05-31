@@ -28,13 +28,14 @@ class UnderwaterSensorSystem {
   late Timer _systemTimer;
   int systemUpdateIntervalMS = 100;
   int _currentTime = 0;
+  int _timeLeft = 0;
 
   //SYSTEM FLAGS
   int _samplingInterval = 1;
-  bool _isOnSystem = false;
+  bool _isOnSystem = true;
   bool _isOnRS232 = false;
   bool _isOn12V = false;
-  bool _requestSample = false;
+  bool _isSampling = false;
 
   //WIDGETS
   late List<Infocard> infoCard;
@@ -141,8 +142,13 @@ class UnderwaterSensorSystem {
     return _isOn12V;
   }
 
-  bool isRequestingSample() {
-    return _requestSample;
+  bool isSampling() {
+    if (_timeLeft <= 0) {
+      _isSampling = false;
+      _currentTime = 0;
+    }
+
+    return _isSampling;
   }
 
   void toggleSystem() {
@@ -157,8 +163,16 @@ class UnderwaterSensorSystem {
     _isOn12V = !_isOn12V;
   }
 
-  void toggleRequestSample() {
-    _requestSample = !_requestSample;
+  void toggleSampling() {
+    _isSampling = !_isSampling;
+    if (_timeLeft <= 0) {
+      _isSampling = false;
+      _currentTime = 0;
+    }
+  }
+
+  void setTimeLeft(int seconds) {
+    _timeLeft = seconds;
   }
 
   Infocard getInfocard(int index) {
@@ -182,7 +196,7 @@ class UnderwaterSensorSystem {
     //Ticks in seconds
     int ticks = timer.tick % (1000 ~/ systemUpdateIntervalMS);
 
-    if (ticks == 0 && _isOnSystem) {
+    if (ticks == 0 && _isOnSystem && _isSampling) {
       _currentTime += _samplingInterval;
 
       updateDepthData();

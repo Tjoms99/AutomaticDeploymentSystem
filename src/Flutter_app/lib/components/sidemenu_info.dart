@@ -15,6 +15,10 @@ class SideMenuInfo extends StatefulWidget {
 }
 
 class _SideMenuInfoState extends State<SideMenuInfo> {
+  final TextEditingController _systemController =
+      TextEditingController(text: "Sampling");
+  final TextEditingController _statusController =
+      TextEditingController(text: "Sampling");
   final TextEditingController _targetDepthController =
       TextEditingController(text: "-10");
   final TextEditingController _depthDifferenceController =
@@ -25,8 +29,6 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       TextEditingController(text: "20");
   final TextEditingController _samplingIntervalController =
       TextEditingController(text: "1");
-  final TextEditingController _systemStatusController =
-      TextEditingController(text: "Sampling");
   final TextEditingController _rs232StatusController =
       TextEditingController(text: "OFF");
   final TextEditingController _12VStatusController =
@@ -38,6 +40,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
     widget.underwaterSensorSytem.registerCallback(updateTimeLeft);
     widget.underwaterSensorSytem.registerCallback(updateSystem);
+    widget.underwaterSensorSytem.registerCallback(updateStatus);
     widget.underwaterSensorSytem.registerCallback(updateRS232);
     widget.underwaterSensorSytem.registerCallback(update12V);
 
@@ -57,6 +60,9 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     try {
       double timeLeft = double.parse(_targetTimeController.text) -
           widget.underwaterSensorSytem.getCurrentTime();
+
+      widget.underwaterSensorSytem.setTimeLeft(timeLeft.toInt());
+
       _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
     } catch (e) {}
   }
@@ -70,8 +76,14 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
   void updateSystem() {
     widget.underwaterSensorSytem.isOnSystem()
-        ? _systemStatusController.text = "ACTIVE"
-        : _systemStatusController.text = "INACTIVE";
+        ? _systemController.text = "ACTIVE"
+        : _systemController.text = "INACTIVE";
+  }
+
+  void updateStatus() {
+    widget.underwaterSensorSytem.isSampling()
+        ? _statusController.text = "SAMPLING"
+        : _statusController.text = "IDLE";
   }
 
   void updateRS232() {
@@ -94,29 +106,32 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
         widgets: [
           const Header(label: "Info", enableUndertext: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "SYSTEM STATUS:"),
-          PrimaryTextfield(controller: _systemStatusController, enabled: false),
+          const PrimaryText(text: "SYSTEM"),
+          PrimaryTextfield(controller: _systemController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "TARGET DEPTH:"),
+          const PrimaryText(text: "STATUS"),
+          PrimaryTextfield(controller: _statusController, enabled: false),
+          SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+          const PrimaryText(text: "TARGET DEPTH"),
           PrimaryTextfield(controller: _targetDepthController),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "DEPTH DIFFERENCE:"),
+          const PrimaryText(text: "DEPTH DIFFERENCE"),
           PrimaryTextfield(
               controller: _depthDifferenceController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "TARGET TIME:"),
+          const PrimaryText(text: "TARGET TIME"),
           PrimaryTextfield(controller: _targetTimeController),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "TIME LEFT:"),
+          const PrimaryText(text: "TIME LEFT"),
           PrimaryTextfield(controller: _timeLeftController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "SAMPLING INTERVAL:"),
+          const PrimaryText(text: "SAMPLING INTERVAL"),
           PrimaryTextfield(controller: _samplingIntervalController),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "RS232 STATUS:"),
+          const PrimaryText(text: "RS232"),
           PrimaryTextfield(controller: _rs232StatusController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-          const PrimaryText(text: "12V STATUS:"),
+          const PrimaryText(text: "12V"),
           PrimaryTextfield(controller: _12VStatusController, enabled: false),
         ],
       ),

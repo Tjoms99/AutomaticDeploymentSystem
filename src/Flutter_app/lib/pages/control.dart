@@ -27,10 +27,17 @@ class _ControlPageState extends State<ControlPage> {
           children: [
             Controlcard(
               label: 'SYSTEM',
-              textEnable: "ACTIVE",
-              textDisable: "INACTIVE",
+              textEnable: "ON",
+              textDisable: "OFF",
               callback: widget.underwaterSensorSystem.toggleSystem,
               getStatus: widget.underwaterSensorSystem.isOnSystem,
+            ),
+            Controlcard(
+              label: 'SAMPLING',
+              textEnable: "ON",
+              textDisable: "OFF",
+              callback: widget.underwaterSensorSystem.toggleSampling,
+              getStatus: widget.underwaterSensorSystem.isSampling,
             ),
             Controlcard(
               label: 'RS232',
