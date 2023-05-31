@@ -24,7 +24,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   final TextEditingController _depthDifferenceController =
       TextEditingController(text: "0.23");
   final TextEditingController _targetTimeController =
-      TextEditingController(text: "60");
+      TextEditingController(text: "10");
   final TextEditingController _timeLeftController =
       TextEditingController(text: "20");
   final TextEditingController _samplingIntervalController =
@@ -75,25 +75,25 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   }
 
   void updateSystem() {
-    widget.underwaterSensorSytem.isOnSystem()
+    widget.underwaterSensorSytem.getIsOnSystem()
         ? _systemController.text = "ACTIVE"
         : _systemController.text = "INACTIVE";
   }
 
   void updateStatus() {
-    widget.underwaterSensorSytem.isSampling()
+    widget.underwaterSensorSytem.getIsSampling()
         ? _statusController.text = "SAMPLING"
         : _statusController.text = "IDLE";
   }
 
   void updateRS232() {
-    widget.underwaterSensorSytem.isOnRS232()
+    widget.underwaterSensorSytem.getIsOnRS232()
         ? _rs232StatusController.text = "ON"
         : _rs232StatusController.text = "OFF";
   }
 
   void update12V() {
-    widget.underwaterSensorSytem.isOn12V()
+    widget.underwaterSensorSytem.getIsOn12V()
         ? _12VStatusController.text = "ON"
         : _12VStatusController.text = "OFF";
   }

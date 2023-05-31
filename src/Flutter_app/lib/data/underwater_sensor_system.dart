@@ -15,7 +15,7 @@ enum SensorType {
 
 typedef UnderwaterSensorSystemCallback = void Function();
 
-class UnderwaterSensorSystem {
+class UnderwaterSensorSystem extends ValueNotifier {
   List<UnderwaterSensorSystemCallback> callbacks = [];
 
   //DATA
@@ -32,16 +32,16 @@ class UnderwaterSensorSystem {
 
   //SYSTEM FLAGS
   int _samplingInterval = 1;
-  bool _isOnSystem = true;
-  bool _isOnRS232 = false;
-  bool _isOn12V = false;
-  bool _isSampling = false;
+  ValueNotifier<bool> isOnSystem = ValueNotifier(true);
+  ValueNotifier<bool> isOnRS232 = ValueNotifier(false);
+  ValueNotifier<bool> isOn12V = ValueNotifier(false);
+  ValueNotifier<bool> isSampling = ValueNotifier(false);
 
   //WIDGETS
   late List<Infocard> infoCard;
   late List<Infograph> infoGraph;
 
-  UnderwaterSensorSystem();
+  UnderwaterSensorSystem() : super(null);
 
   void initState() {
     _depth = SensorData();
@@ -130,45 +130,49 @@ class UnderwaterSensorSystem {
   }
 
   //----------SYSTEM---------------
-  bool isOnSystem() {
-    return _isOnSystem;
+  bool getIsOnSystem() {
+    return isOnSystem.value;
   }
 
-  bool isOnRS232() {
-    return _isOnRS232;
+  bool getIsOnRS232() {
+    return isOnRS232.value;
   }
 
-  bool isOn12V() {
-    return _isOn12V;
+  bool getIsOn12V() {
+    return isOn12V.value;
   }
 
-  bool isSampling() {
+  bool getIsSampling() {
     if (_timeLeft <= 0) {
-      _isSampling = false;
+      isSampling.value = false;
       _currentTime = 0;
     }
 
-    return _isSampling;
+    return isSampling.value;
   }
 
   void toggleSystem() {
-    _isOnSystem = !_isOnSystem;
+    isOnSystem.value = !isOnSystem.value;
+    notifyListeners();
   }
 
   void toggleRS232() {
-    _isOnRS232 = !_isOnRS232;
+    isOnRS232.value = !isOnRS232.value;
+    notifyListeners();
   }
 
   void toggle12V() {
-    _isOn12V = !_isOn12V;
+    isOn12V.value = !isOn12V.value;
+    notifyListeners();
   }
 
   void toggleSampling() {
-    _isSampling = !_isSampling;
+    isSampling.value = !isSampling.value;
     if (_timeLeft <= 0) {
-      _isSampling = false;
+      isSampling.value = false;
       _currentTime = 0;
     }
+    notifyListeners();
   }
 
   void setTimeLeft(int seconds) {
@@ -196,7 +200,7 @@ class UnderwaterSensorSystem {
     //Ticks in seconds
     int ticks = timer.tick % (1000 ~/ systemUpdateIntervalMS);
 
-    if (ticks == 0 && _isOnSystem && _isSampling) {
+    if (ticks == 0 && isOnSystem.value && isSampling.value) {
       _currentTime += _samplingInterval;
 
       updateDepthData();
@@ -206,7 +210,7 @@ class UnderwaterSensorSystem {
     }
 
     //Restart widgets ......
-    if (!_isOnSystem) _currentTime = 0;
+    if (!isOnSystem.value) _currentTime = 0;
 
     for (var i = 0; i < callbacks.length; i++) {
       callbacks.elementAt(i)();
