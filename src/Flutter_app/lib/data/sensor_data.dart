@@ -42,29 +42,30 @@ class SensorData extends ValueNotifier {
       yValueMapper: (ChartData data, _) =>
           double.parse(data.y.toStringAsFixed(2)),
     );
-
-    chartSeriesController?.updateDataSource(removedDataIndexes: [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19
-    ]);
+    try {
+      chartSeriesController?.updateDataSource(removedDataIndexes: [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]);
+    } catch (e) {}
   }
 
   ChartSeries getDataSeries() {

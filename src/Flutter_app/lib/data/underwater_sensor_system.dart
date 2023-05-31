@@ -130,12 +130,10 @@ class UnderwaterSensorSystem extends ValueNotifier {
   }
 
   void resetCharts() {
-    try {
-      _depth.resetChartData();
-      _temperature.resetChartData();
-      _pressure.resetChartData();
-      _battery.resetChartData();
-    } catch (e) {}
+    _depth.resetChartData();
+    _temperature.resetChartData();
+    _pressure.resetChartData();
+    _battery.resetChartData();
   }
 
   //----------SYSTEM---------------
