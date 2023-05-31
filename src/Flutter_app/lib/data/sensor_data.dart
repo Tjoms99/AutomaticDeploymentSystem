@@ -1,4 +1,3 @@
-
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/foundation.dart';
 
@@ -26,13 +25,8 @@ class SensorData extends ValueNotifier {
     return sensorData;
   }
 
-  ChartSeries getDataSeries() {
-    return series!;
-  }
-
-  void initState() {
-    sensorData = getChartData();
-
+  void resetChartData() {
+    sensorData = <ChartData>[];
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {
         chartSeriesController = controller;
@@ -48,6 +42,38 @@ class SensorData extends ValueNotifier {
       yValueMapper: (ChartData data, _) =>
           double.parse(data.y.toStringAsFixed(2)),
     );
+
+    chartSeriesController?.updateDataSource(removedDataIndexes: [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]);
+  }
+
+  ChartSeries getDataSeries() {
+    return series!;
+  }
+
+  void initState() {
+    sensorData = getChartData();
+    resetChartData();
   }
 
   void updateGraphData() {

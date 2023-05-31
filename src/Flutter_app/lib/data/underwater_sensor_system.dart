@@ -129,6 +129,15 @@ class UnderwaterSensorSystem extends ValueNotifier {
     return _battery;
   }
 
+  void resetCharts() {
+    try {
+      _depth.resetChartData();
+      _temperature.resetChartData();
+      _pressure.resetChartData();
+      _battery.resetChartData();
+    } catch (e) {}
+  }
+
   //----------SYSTEM---------------
   bool getIsOnSystem() {
     return isOnSystem.value;
@@ -146,6 +155,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     if (_timeLeft <= 0) {
       isSampling.value = false;
       _currentTime = 0;
+      resetCharts();
     }
 
     return isSampling.value;
@@ -153,6 +163,8 @@ class UnderwaterSensorSystem extends ValueNotifier {
 
   void toggleSystem() {
     isOnSystem.value = !isOnSystem.value;
+    resetCharts();
+
     notifyListeners();
   }
 
@@ -198,9 +210,10 @@ class UnderwaterSensorSystem extends ValueNotifier {
   //----------UPDATE---------------
   void updateData(Timer timer) {
     //Ticks in seconds
-    int ticks = timer.tick % (1000 ~/ systemUpdateIntervalMS);
+    int ticks =
+        timer.tick % ((1000 * _samplingInterval) ~/ systemUpdateIntervalMS);
 
-    if (ticks == 0 && isOnSystem.value && isSampling.value) {
+    if (ticks == _samplingInterval && isOnSystem.value && isSampling.value) {
       _currentTime += _samplingInterval;
 
       updateDepthData();
@@ -219,9 +232,6 @@ class UnderwaterSensorSystem extends ValueNotifier {
 
   void updateTimer(int seconds) {
     _samplingInterval = seconds;
-    // _systemTimer.cancel();
-    //  _systemTimer =
-    //    Timer.periodic(Duration(seconds: _samplingInterval), updateData);
   }
 
   void updateDepthData() {
