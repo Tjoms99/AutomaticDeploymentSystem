@@ -5,7 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorData extends ValueNotifier {
   ValueNotifier<double> currentData = ValueNotifier(0.0);
-
+  List<double> sensorDataList = [];
   List<ChartData> sensorData = <ChartData>[];
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
@@ -14,11 +14,16 @@ class SensorData extends ValueNotifier {
 
   void updateCurrentData(double value) {
     currentData.value = value;
+    sensorDataList.add(value);
     notifyListeners();
   }
 
   double getCurrentData() {
     return currentData.value;
+  }
+
+  List<double> getSensorDataList() {
+    return sensorDataList;
   }
 
   List<ChartData> getChartData() {

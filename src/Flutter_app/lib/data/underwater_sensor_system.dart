@@ -153,7 +153,6 @@ class UnderwaterSensorSystem extends ValueNotifier {
     if (_timeLeft <= 0) {
       isSampling.value = false;
       _currentTime = 0;
-      resetCharts();
     }
 
     return isSampling.value;
@@ -178,10 +177,13 @@ class UnderwaterSensorSystem extends ValueNotifier {
 
   void toggleSampling() {
     isSampling.value = !isSampling.value;
+
     if (_timeLeft <= 0) {
       isSampling.value = false;
       _currentTime = 0;
     }
+
+    resetCharts();
     notifyListeners();
   }
 

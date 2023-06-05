@@ -3,6 +3,7 @@ import 'package:automatic_deployment_system_app/data/underwater_sensor_system.da
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
+import 'package:automatic_deployment_system_app/pages/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -49,8 +50,13 @@ class _ParentPageState extends State<ParentPage> {
                       return value == 0
                           ? Dashboard(
                               underwaterSensorSystem: underwaterSensorSystem)
-                          : ControlPage(
-                              underwaterSensorSystem: underwaterSensorSystem);
+                          : value == 1
+                              ? ControlPage(
+                                  underwaterSensorSystem:
+                                      underwaterSensorSystem)
+                              : DataPage(
+                                  underwaterSensorSystem:
+                                      underwaterSensorSystem);
                     },
                   ),
                 ),
