@@ -1,6 +1,7 @@
 import 'package:automatic_deployment_system_app/components/data_table.dart';
 import 'package:automatic_deployment_system_app/components/default_container.dart';
 import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
@@ -33,12 +34,34 @@ class _DataSampleTableExpandState extends State<DataSampleTableExpand> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  DefaultContainer(child: PrimaryText(text: time)),
+                  DefaultContainer(
+                    child: Text(
+                      time,
+                      style: TextStyle(
+                        color: AppColors.primaryBackground,
+                        height: 1.3,
+                        fontFamily: 'openSans',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                   DataSampleTable(
                       underwaterSensorSystem: widget.underwaterSensorSystem),
                 ],
               )
-            : DefaultContainer(child: PrimaryText(text: date)),
+            : DefaultContainer(
+                child: Text(
+                  date,
+                  style: TextStyle(
+                    color: AppColors.primaryBackground,
+                    height: 1.3,
+                    fontFamily: 'openSans',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
       ),
     );
   }

@@ -62,6 +62,7 @@ class _ControlcardState extends State<Controlcard> {
                   text: widget.label,
                   color: AppColors.secondaryBackground,
                   size: 20.0,
+                  fontWeight: FontWeight.w500,
                 ),
                 SizedBox(
                   height: SizeConfig.blockSizeVertical! * 1,
@@ -72,6 +73,7 @@ class _ControlcardState extends State<Controlcard> {
                       : widget.textDisable,
                   color: AppColors.primaryBackground,
                   size: 16.0,
+                  fontWeight: FontWeight.w500,
                 ),
               ],
             ),

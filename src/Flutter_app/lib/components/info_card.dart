@@ -59,6 +59,7 @@ class _InfocardState extends State<Infocard> {
                 text: widget.sensorData!.getCurrentData().toStringAsFixed(2),
                 color: AppColors.primaryBackground,
                 size: 18.0,
+                fontWeight: FontWeight.w600,
               );
             }),
           )
