@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class ControlPage extends StatefulWidget {
   final UnderwaterSensorSystem underwaterSensorSystem;
-  const ControlPage({required this.underwaterSensorSystem});
+  const ControlPage({super.key, required this.underwaterSensorSystem});
 
   @override
   State<ControlPage> createState() => _ControlPageState();

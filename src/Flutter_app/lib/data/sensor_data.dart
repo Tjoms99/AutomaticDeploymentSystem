@@ -31,6 +31,7 @@ class SensorData extends ValueNotifier {
   }
 
   void resetChartData() {
+    sensorDataList = [];
     sensorData = <ChartData>[];
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {

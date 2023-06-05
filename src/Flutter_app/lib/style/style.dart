@@ -37,7 +37,7 @@ class PrimaryTextfield extends StatelessWidget {
   final Color color;
   final double height;
   final TextEditingController controller;
-  final enabled;
+  final bool enabled;
 
   const PrimaryTextfield({
     super.key,

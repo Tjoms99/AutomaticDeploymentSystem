@@ -1,11 +1,10 @@
 import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expandable_table/flutter_expandable_table.dart';
 
 class DataSampleTable extends StatefulWidget {
-  UnderwaterSensorSystem underwaterSensorSystem;
-  DataSampleTable({super.key, required this.underwaterSensorSystem});
+  final UnderwaterSensorSystem underwaterSensorSystem;
+  const DataSampleTable({super.key, required this.underwaterSensorSystem});
 
   @override
   State<DataSampleTable> createState() => _DataSampleTableState();
@@ -82,34 +81,16 @@ class _DataSampleTableState extends State<DataSampleTable> {
           return DataTable(
             columns: _dataColumn,
             rows: _getDataRow(),
-            headingRowColor:
-                MaterialStateProperty.all<Color>(AppColors.primaryButton),
-            //dataRowColor: MaterialStateProperty.all<Color>(AppColors.primaryButton),
-            dataTextStyle: TextStyle(color: AppColors.primaryText),
+            headingTextStyle: const TextStyle(
+              color: AppColors.primaryButton,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'openSans',
+            ),
+            dataTextStyle: const TextStyle(color: AppColors.primaryText),
           );
         },
       ),
     );
   }
 }
-
-//--------------------------------------------------
-class DefaultCellCard extends StatelessWidget {
-  final Widget child;
-
-  const DefaultCellCard({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.primaryButton,
-      margin: const EdgeInsets.all(1),
-      child: child,
-    );
-  }
-}
-
-//-------------------------------------------------

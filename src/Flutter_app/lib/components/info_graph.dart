@@ -8,8 +8,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 class Infograph extends StatefulWidget {
   final String? label;
   final String? labelAxisy;
-  final double? AxisYMinimum;
-  final double? AxisYMaximum;
+  final double? axisYMinimum;
+  final double? axisYMaximum;
   final SensorData sensorData;
 
   const Infograph({
@@ -17,8 +17,8 @@ class Infograph extends StatefulWidget {
     this.label,
     this.labelAxisy,
     required this.sensorData,
-    required this.AxisYMinimum,
-    required this.AxisYMaximum,
+    required this.axisYMinimum,
+    required this.axisYMaximum,
   });
 
   @override
@@ -72,8 +72,8 @@ class _InfographState extends State<Infograph> {
                       text: widget.labelAxisy ?? "",
                       textStyle:
                           const TextStyle(color: AppColors.primaryBackground)),
-                  minimum: widget.AxisYMinimum ?? 0,
-                  maximum: widget.AxisYMaximum ?? 100,
+                  minimum: widget.axisYMinimum ?? 0,
+                  maximum: widget.axisYMaximum ?? 100,
                 ),
                 series: <ChartSeries>[
                   widget.sensorData.getDataSeries(),
