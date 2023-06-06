@@ -16,6 +16,7 @@ class _DataSampleTableState extends State<DataSampleTable> {
   late List<double> _pressure;
   late List<double> _temperature;
   late List<double> _battery;
+
   static const List<DataColumn> _dataColumn = [
     DataColumn(
       label: Text('TIME'),
@@ -52,12 +53,11 @@ class _DataSampleTableState extends State<DataSampleTable> {
 
   List<DataRow> _getDataRow() {
     _dataRow = [];
-
     for (var i = 0; i < _depth.length; i++) {
       _dataRow.add(
         DataRow(
           cells: [
-            DataCell(Text(i.toStringAsFixed(2))),
+            DataCell(Text('+${i} s')),
             DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_pressure.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_temperature.elementAt(i).toStringAsFixed(2))),

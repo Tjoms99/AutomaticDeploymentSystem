@@ -37,7 +37,7 @@ class _DataSampleTableExpandState extends State<DataSampleTableExpand> {
                   DefaultContainer(
                     child: Text(
                       time,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.primaryBackground,
                         height: 1.3,
                         fontFamily: 'openSans',
@@ -53,7 +53,7 @@ class _DataSampleTableExpandState extends State<DataSampleTableExpand> {
             : DefaultContainer(
                 child: Text(
                   date,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primaryBackground,
                     height: 1.3,
                     fontFamily: 'openSans',
