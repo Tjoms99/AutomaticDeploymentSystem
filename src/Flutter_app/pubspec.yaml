@@ -39,6 +39,7 @@ dependencies:
   syncfusion_flutter_charts: ^21.2.6
   carousel_slider: ^4.2.1
   flutter_expandable_table: ^2.0.0
+  data_table_2: ^2.5.2
 
 dev_dependencies:
   flutter_test:

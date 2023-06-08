@@ -1,4 +1,4 @@
-import 'package:automatic_deployment_system_app/components/data_table_list.dart';
+import 'package:automatic_deployment_system_app/components/data_table.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
@@ -17,13 +17,10 @@ class DataPage extends StatefulWidget {
 class _DataPageState extends State<DataPage> {
   @override
   Widget build(BuildContext context) {
-    return DefaultWidget(
-      widgets: [
-        const Header(label: 'Data', enableUndertext: true),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-        DataSampleTableList(
-            underwaterSensorSystem: widget.underwaterSensorSystem),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+      child: DataSampleTable(
+          underwaterSensorSystem: widget.underwaterSensorSystem),
     );
   }
 }

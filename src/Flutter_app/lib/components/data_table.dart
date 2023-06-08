@@ -1,5 +1,6 @@
 import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class DataSampleTable extends StatefulWidget {
@@ -11,27 +12,27 @@ class DataSampleTable extends StatefulWidget {
 }
 
 class _DataSampleTableState extends State<DataSampleTable> {
-  late List<DataRow> _dataRow;
+  late List<DataRow2> _dataRow;
   late List<double> _depth;
   late List<double> _pressure;
   late List<double> _temperature;
   late List<double> _battery;
 
-  static const List<DataColumn> _dataColumn = [
+  static const List<DataColumn> _dataColumns = [
     DataColumn(
       label: Text('TIME'),
     ),
     DataColumn(
-      label: Text('DEPTH'),
+      label: Text('DEPTH (m)'),
     ),
     DataColumn(
-      label: Text('PRESSURE'),
+      label: Text('PRESS (Pa)'),
     ),
     DataColumn(
-      label: Text('TEMPERATURE'),
+      label: Text('TEMP (°C)'),
     ),
     DataColumn(
-      label: Text('BATTERY'),
+      label: Text('BATT (%)'),
     ),
   ];
 
@@ -51,11 +52,11 @@ class _DataSampleTableState extends State<DataSampleTable> {
     super.initState();
   }
 
-  List<DataRow> _getDataRow() {
+  List<DataRow2> _getDataRow() {
     _dataRow = [];
     for (var i = 0; i < _depth.length; i++) {
       _dataRow.add(
-        DataRow(
+        DataRow2(
           cells: [
             DataCell(Text('+${i} s')),
             DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
@@ -72,25 +73,74 @@ class _DataSampleTableState extends State<DataSampleTable> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ValueListenableBuilder(
-        valueListenable:
-            widget.underwaterSensorSystem.getDepthSensor().currentData,
-        builder: (context, value, child) {
-          return DataTable(
-            columns: _dataColumn,
-            rows: _getDataRow(),
-            headingTextStyle: const TextStyle(
-              color: AppColors.primaryButton,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'openSans',
-            ),
-            dataTextStyle: const TextStyle(color: AppColors.primaryText),
-          );
-        },
-      ),
+    return ValueListenableBuilder(
+      valueListenable:
+          widget.underwaterSensorSystem.getDepthSensor().currentData,
+      builder: (context, value, child) {
+        return DataTable2(
+          minWidth: 500,
+          columnSpacing: 0,
+          horizontalMargin: 10,
+          dividerThickness: 4,
+          fixedLeftColumns: 1,
+          fixedTopRows: 1,
+          columns: _dataColumns,
+          rows: _getDataRow(),
+          headingTextStyle: const TextStyle(
+            color: AppColors.primaryButton,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'openSans',
+          ),
+          dataTextStyle: const TextStyle(color: AppColors.primaryText),
+        );
+      },
     );
   }
+}
+
+DataTable2 getDataTable() {
+  ScrollController controller = ScrollController();
+  List<DataRow2> data = const [
+    DataRow2(
+      cells: [
+        DataCell(Text('+ s')),
+        DataCell(Text('+ s')),
+      ],
+    ),
+    DataRow2(
+      cells: [
+        DataCell(Text('+ s')),
+        DataCell(Text('+ s')),
+      ],
+    ),
+  ];
+
+  return DataTable2(
+    dividerThickness: 4,
+    scrollController: controller,
+    columnSpacing: 0,
+    horizontalMargin: 12,
+    bottomMargin: 20,
+    border: TableBorder.all(width: 1.0, color: Colors.grey),
+    headingRowColor: MaterialStateProperty.resolveWith(
+        (states) => 1 > 0 ? Colors.grey[200] : Colors.transparent),
+    fixedColumnsColor: Colors.grey[300],
+    fixedCornerColor: Colors.grey[400],
+    minWidth: 1000,
+    fixedTopRows: 1,
+    fixedLeftColumns: 0,
+    columns: const [
+      DataColumn2(
+        label: Text('Desert'),
+        size: ColumnSize.S,
+      ),
+      DataColumn2(
+        label: Text('Calories'),
+        size: ColumnSize.S,
+        numeric: true,
+      ),
+    ],
+    rows: data,
+  );
 }
