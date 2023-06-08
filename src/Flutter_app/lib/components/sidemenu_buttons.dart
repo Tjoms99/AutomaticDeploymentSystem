@@ -15,27 +15,20 @@ class SideMenuButtons extends StatefulWidget {
 class _SideMenuButtonsState extends State<SideMenuButtons> {
   bool homeSelected = true;
   bool winchSelected = false;
-  bool temperatureSelected = false;
-  bool pressureSelected = false;
-  bool depthSelected = false;
+  bool dataSelected = false;
+
   double size = 25;
 
   void updatePage(int index) {
     homeSelected = false;
     winchSelected = false;
-    temperatureSelected = false;
-    pressureSelected = false;
-    depthSelected = false;
+    dataSelected = false;
 
     index == 0
         ? homeSelected = true
         : index == 1
             ? winchSelected = true
-            : index == 2
-                ? temperatureSelected = true
-                : index == 3
-                    ? pressureSelected = true
-                    : depthSelected = true;
+            : dataSelected = true;
     setState(() {});
   }
 
@@ -85,55 +78,19 @@ class _SideMenuButtonsState extends State<SideMenuButtons> {
           ),
           const SizedBox(height: 10),
           SideMenuButton(
-            focused: temperatureSelected,
+            focused: dataSelected,
             child: IconButton(
               iconSize: size,
               padding: const EdgeInsets.symmetric(vertical: 20),
               icon: Icon(
-                Icons.thermostat,
-                color: temperatureSelected
+                Icons.dataset,
+                color: dataSelected
                     ? AppColors.primaryButton
                     : AppColors.secondaryButton,
               ),
               onPressed: () {
                 widget.currentPage.value = 2;
 
-                updatePage(widget.currentPage.value);
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          SideMenuButton(
-            focused: pressureSelected,
-            child: IconButton(
-              iconSize: size,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              icon: Icon(
-                Icons.vertical_align_center,
-                color: pressureSelected
-                    ? AppColors.primaryButton
-                    : AppColors.secondaryButton,
-              ),
-              onPressed: () {
-                widget.currentPage.value = 3;
-                updatePage(widget.currentPage.value);
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          SideMenuButton(
-            focused: depthSelected,
-            child: IconButton(
-              iconSize: size,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              icon: Icon(
-                Icons.waves,
-                color: depthSelected
-                    ? AppColors.primaryButton
-                    : AppColors.secondaryButton,
-              ),
-              onPressed: () {
-                widget.currentPage.value = 4;
                 updatePage(widget.currentPage.value);
               },
             ),

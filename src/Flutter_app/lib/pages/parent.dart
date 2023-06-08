@@ -17,10 +17,16 @@ class ParentPage extends StatefulWidget {
 class _ParentPageState extends State<ParentPage> {
   ValueNotifier<int> currentPage = ValueNotifier(0);
   UnderwaterSensorSystem underwaterSensorSystem = UnderwaterSensorSystem();
+  late List<Widget> mainPages;
 
   @override
   void initState() {
     underwaterSensorSystem.initState();
+    mainPages = [
+      Dashboard(underwaterSensorSystem: underwaterSensorSystem),
+      ControlPage(underwaterSensorSystem: underwaterSensorSystem),
+      DataPage(underwaterSensorSystem: underwaterSensorSystem),
+    ];
     super.initState();
   }
 
@@ -47,16 +53,7 @@ class _ParentPageState extends State<ParentPage> {
                   child: ValueListenableBuilder(
                     valueListenable: currentPage,
                     builder: (context, value, child) {
-                      return value == 0
-                          ? Dashboard(
-                              underwaterSensorSystem: underwaterSensorSystem)
-                          : value == 1
-                              ? ControlPage(
-                                  underwaterSensorSystem:
-                                      underwaterSensorSystem)
-                              : DataPage(
-                                  underwaterSensorSystem:
-                                      underwaterSensorSystem);
+                      return mainPages[value];
                     },
                   ),
                 ),

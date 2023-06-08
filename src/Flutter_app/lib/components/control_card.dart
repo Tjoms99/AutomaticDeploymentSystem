@@ -48,7 +48,7 @@ class _ControlcardState extends State<Controlcard> {
                   : AppColors.secondaryButton,
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black87,
+                  color: Colors.black38,
                   blurRadius: 4,
                   spreadRadius: 0,
                   offset: Offset(4, 4), // Shadow position
