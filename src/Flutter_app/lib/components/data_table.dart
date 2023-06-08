@@ -48,7 +48,8 @@ class _DataSampleTableState extends State<DataSampleTable> {
       _dataRow.add(
         DataRow2(
           cells: [
-            DataCell(Text('+${i} s')),
+            DataCell(Text(
+                '+${i * widget.underwaterSensorSystem.getSamplingInterval()} s')),
             DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_pressure.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_temperature.elementAt(i).toStringAsFixed(2))),

@@ -25,8 +25,14 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   final TextEditingController _rs232StatusController = TextEditingController();
   final TextEditingController _12VStatusController = TextEditingController();
 
+  bool sampling = false;
+
   @override
   void initState() {
+    _targetDepthController.text = "10";
+    _targetTimeController.text = "100";
+    _samplingIntController.text = "1";
+
     widget.underwaterSensorSytem.registerCallback(updateDepthDifference);
     widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
     widget.underwaterSensorSytem.registerCallback(updateTimeLeft);
@@ -66,6 +72,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     widget.underwaterSensorSytem.setTimeLeft(timeLeft);
 
     _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
+    setSampling();
   }
 
   void updateSamplingInterval() {
@@ -102,8 +109,15 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
         : _12VStatusController.text = "OFF";
   }
 
+  void setSampling() {
+    sampling = widget.underwaterSensorSytem.getIsSampling();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    setSampling();
+
     return Container(
       color: AppColors.secondaryBackground,
       child: DefaultWidget(
@@ -117,19 +131,23 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           PrimaryTextfield(controller: _statusController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET DEPTH"),
-          PrimaryTextfield(controller: _targetDepthController),
+          PrimaryTextfield(
+              controller: _targetDepthController, enabled: !sampling),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "DEPTH DIFFERENCE"),
           PrimaryTextfield(controller: _depthDiffController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET TIME"),
-          PrimaryTextfield(controller: _targetTimeController),
+          PrimaryTextfield(
+              controller: _targetTimeController,
+              enabled: !widget.underwaterSensorSytem.getIsSampling()),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TIME LEFT"),
           PrimaryTextfield(controller: _timeLeftController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SAMPLING INTERVAL"),
-          PrimaryTextfield(controller: _samplingIntController),
+          PrimaryTextfield(
+              controller: _samplingIntController, enabled: !sampling),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "RS232"),
           PrimaryTextfield(controller: _rs232StatusController, enabled: false),

@@ -54,7 +54,7 @@ class _InfographState extends State<Infograph> {
                       text: "Time in seconds",
                       textStyle:
                           const TextStyle(color: AppColors.primaryBackground)),
-                  autoScrollingDelta: 20,
+                  //autoScrollingDelta: 300,
                 ),
                 primaryYAxis: NumericAxis(
                   title: AxisTitle(

@@ -35,7 +35,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
   ValueNotifier<bool> isOnSystem = ValueNotifier(true);
   ValueNotifier<bool> isOnRS232 = ValueNotifier(false);
   ValueNotifier<bool> isOn12V = ValueNotifier(false);
-  ValueNotifier<bool> isSampling = ValueNotifier(false);
+  ValueNotifier<bool> isSampling = ValueNotifier(true);
 
   //WIDGETS
   late List<Infocard> infoCard;
@@ -157,6 +157,10 @@ class UnderwaterSensorSystem extends ValueNotifier {
     }
 
     return isSampling.value;
+  }
+
+  int getSamplingInterval() {
+    return _samplingInterval;
   }
 
   //---------------------------GET TOGGLE------------------------------------

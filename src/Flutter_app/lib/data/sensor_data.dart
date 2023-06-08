@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorData extends ValueNotifier {
+  final sensorDataGraphLength = 120;
+
   ValueNotifier<double> currentData = ValueNotifier(0.0);
   List<double> sensorDataList = [];
   List<ChartData> sensorData = <ChartData>[];
@@ -11,6 +13,11 @@ class SensorData extends ValueNotifier {
   ChartSeriesController? chartSeriesController;
 
   SensorData() : super(null);
+
+  void initState() {
+    sensorData = getChartData();
+    resetChartData();
+  }
 
   void updateCurrentData(double value) {
     currentData.value = value;
@@ -30,9 +37,15 @@ class SensorData extends ValueNotifier {
     return sensorData;
   }
 
+  ChartSeries getDataSeries() {
+    return series!;
+  }
+
   void resetChartData() {
     sensorDataList = [];
     sensorData = <ChartData>[];
+
+    //Setup graph series
     series = SplineSeries<ChartData, int>(
       onRendererCreated: (ChartSeriesController controller) {
         chartSeriesController = controller;
@@ -48,44 +61,15 @@ class SensorData extends ValueNotifier {
       yValueMapper: (ChartData data, _) =>
           double.parse(data.y.toStringAsFixed(2)),
     );
+
+    //Remove all data
     try {
-      chartSeriesController?.updateDataSource(removedDataIndexes: [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19
-      ]);
+      chartSeriesController?.updateDataSource(removedDataIndexes: [0]);
     } catch (e) {}
   }
 
-  ChartSeries getDataSeries() {
-    return series!;
-  }
-
-  void initState() {
-    sensorData = getChartData();
-    resetChartData();
-  }
-
   void updateGraphData() {
-    //Displays max 20 elements
-    if (sensorData.length > 20) {
+    if (sensorData.length > sensorDataGraphLength) {
       sensorData.removeAt(0);
       chartSeriesController?.updateDataSource(
           addedDataIndex: sensorData.length - 1, removedDataIndex: 0);
