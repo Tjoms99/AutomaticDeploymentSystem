@@ -96,3 +96,35 @@ class _SideMenuButtonState extends State<SideMenuButton> {
     );
   }
 }
+
+class boxDecoration {
+  BoxDecoration getControlBoxDecoration(Function() getStatus) {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(20.0),
+      color: getStatus() ? AppColors.primaryButton : AppColors.secondaryButton,
+      boxShadow: const [
+        BoxShadow(
+          color: Colors.black38,
+          blurRadius: 4,
+          spreadRadius: 0,
+          offset: Offset(4, 4), // Shadow position
+        ),
+      ],
+    );
+  }
+
+  BoxDecoration getBoxDecoration() {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(20.0),
+      color: AppColors.primaryButton,
+      boxShadow: const [
+        BoxShadow(
+          color: Colors.black38,
+          blurRadius: 4,
+          spreadRadius: 0,
+          offset: Offset(4, 4), // Shadow position
+        ),
+      ],
+    );
+  }
+}

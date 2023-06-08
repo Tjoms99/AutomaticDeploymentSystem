@@ -222,7 +222,6 @@ class UnderwaterSensorSystem extends ValueNotifier {
       updateBatteryData();
     }
 
-    //Restart widgets ......
     if (!isOnSystem.value) _currentTime = 0;
 
     for (var i = 0; i < callbacks.length; i++) {

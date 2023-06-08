@@ -22,18 +22,7 @@ class _InfocardState extends State<Infocard> {
       constraints: const BoxConstraints(minWidth: 200.0),
       padding: const EdgeInsets.only(
           top: 20.0, left: 20.0, bottom: 20.0, right: 40.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: AppColors.primaryButton,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 4,
-            spreadRadius: 0,
-            offset: Offset(4, 4), // Shadow position
-          ),
-        ],
-      ),
+      decoration: boxDecoration().getBoxDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
