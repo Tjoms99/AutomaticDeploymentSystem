@@ -32,7 +32,9 @@ class _ParentPageState extends State<ParentPage> {
 
   @override
   Widget build(BuildContext context) {
+    //Set fullscreen for phones
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: GestureDetector(

@@ -19,21 +19,11 @@ class _DataSampleTableState extends State<DataSampleTable> {
   late List<double> _battery;
 
   static const List<DataColumn> _dataColumns = [
-    DataColumn(
-      label: Text('TIME'),
-    ),
-    DataColumn(
-      label: Text('DEPTH (m)'),
-    ),
-    DataColumn(
-      label: Text('PRESS (Pa)'),
-    ),
-    DataColumn(
-      label: Text('TEMP (°C)'),
-    ),
-    DataColumn(
-      label: Text('BATT (%)'),
-    ),
+    DataColumn(label: Text('TIME')),
+    DataColumn(label: Text('DEPTH (m)')),
+    DataColumn(label: Text('PRESS (Pa)')),
+    DataColumn(label: Text('TEMP (°C)')),
+    DataColumn(label: Text('BATT (%)')),
   ];
 
   @override
@@ -97,50 +87,4 @@ class _DataSampleTableState extends State<DataSampleTable> {
       },
     );
   }
-}
-
-DataTable2 getDataTable() {
-  ScrollController controller = ScrollController();
-  List<DataRow2> data = const [
-    DataRow2(
-      cells: [
-        DataCell(Text('+ s')),
-        DataCell(Text('+ s')),
-      ],
-    ),
-    DataRow2(
-      cells: [
-        DataCell(Text('+ s')),
-        DataCell(Text('+ s')),
-      ],
-    ),
-  ];
-
-  return DataTable2(
-    dividerThickness: 4,
-    scrollController: controller,
-    columnSpacing: 0,
-    horizontalMargin: 12,
-    bottomMargin: 20,
-    border: TableBorder.all(width: 1.0, color: Colors.grey),
-    headingRowColor: MaterialStateProperty.resolveWith(
-        (states) => 1 > 0 ? Colors.grey[200] : Colors.transparent),
-    fixedColumnsColor: Colors.grey[300],
-    fixedCornerColor: Colors.grey[400],
-    minWidth: 1000,
-    fixedTopRows: 1,
-    fixedLeftColumns: 0,
-    columns: const [
-      DataColumn2(
-        label: Text('Desert'),
-        size: ColumnSize.S,
-      ),
-      DataColumn2(
-        label: Text('Calories'),
-        size: ColumnSize.S,
-        numeric: true,
-      ),
-    ],
-    rows: data,
-  );
 }

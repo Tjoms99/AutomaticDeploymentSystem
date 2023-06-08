@@ -15,24 +15,15 @@ class SideMenuInfo extends StatefulWidget {
 }
 
 class _SideMenuInfoState extends State<SideMenuInfo> {
-  final TextEditingController _systemController =
-      TextEditingController(text: "Sampling");
-  final TextEditingController _statusController =
-      TextEditingController(text: "Sampling");
-  final TextEditingController _targetDepthController =
-      TextEditingController(text: "-10");
-  final TextEditingController _depthDifferenceController =
-      TextEditingController(text: "0.23");
-  final TextEditingController _targetTimeController =
-      TextEditingController(text: "10");
-  final TextEditingController _timeLeftController =
-      TextEditingController(text: "20");
-  final TextEditingController _samplingIntervalController =
-      TextEditingController(text: "1");
-  final TextEditingController _rs232StatusController =
-      TextEditingController(text: "OFF");
-  final TextEditingController _12VStatusController =
-      TextEditingController(text: "OFF");
+  final TextEditingController _systemController = TextEditingController();
+  final TextEditingController _statusController = TextEditingController();
+  final TextEditingController _targetDepthController = TextEditingController();
+  final TextEditingController _depthDiffController = TextEditingController();
+  final TextEditingController _targetTimeController = TextEditingController();
+  final TextEditingController _timeLeftController = TextEditingController();
+  final TextEditingController _samplingIntController = TextEditingController();
+  final TextEditingController _rs232StatusController = TextEditingController();
+  final TextEditingController _12VStatusController = TextEditingController();
 
   @override
   void initState() {
@@ -48,30 +39,43 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
   }
 
   void updateDepthDifference() {
+    double targetDepth = 0;
+    double currentDepth = 0;
+    double depthDifference = 0;
+
     try {
-      double depthDifference = double.parse(_targetDepthController.text) -
+      targetDepth = double.parse(_targetDepthController.text);
+      currentDepth =
           widget.underwaterSensorSytem.getDepthSensor().currentData.value;
-      _depthDifferenceController.text =
-          "${depthDifference.toStringAsFixed(2)} m";
     } catch (e) {}
+
+    depthDifference = targetDepth - currentDepth;
+    _depthDiffController.text = "${depthDifference.toStringAsFixed(2)} m";
   }
 
   void updateTimeLeft() {
+    int targetTime = 0;
+    int currentTime = 0;
+
     try {
-      double timeLeft = double.parse(_targetTimeController.text) -
-          widget.underwaterSensorSytem.getCurrentTime();
-
-      widget.underwaterSensorSytem.setTimeLeft(timeLeft.toInt());
-
-      _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
+      targetTime = int.parse(_targetTimeController.text);
+      currentTime = widget.underwaterSensorSytem.getCurrentTime();
     } catch (e) {}
+
+    int timeLeft = targetTime - currentTime;
+    widget.underwaterSensorSytem.setTimeLeft(timeLeft);
+
+    _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
   }
 
   void updateSamplingInterval() {
+    int seconds = 1;
+
     try {
-      int seconds = int.parse(_samplingIntervalController.text);
-      widget.underwaterSensorSytem.updateTimer(seconds);
+      seconds = int.parse(_samplingIntController.text);
     } catch (e) {}
+
+    widget.underwaterSensorSytem.updateTimer(seconds);
   }
 
   void updateSystem() {
@@ -116,8 +120,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           PrimaryTextfield(controller: _targetDepthController),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "DEPTH DIFFERENCE"),
-          PrimaryTextfield(
-              controller: _depthDifferenceController, enabled: false),
+          PrimaryTextfield(controller: _depthDiffController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET TIME"),
           PrimaryTextfield(controller: _targetTimeController),
@@ -126,7 +129,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           PrimaryTextfield(controller: _timeLeftController, enabled: false),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SAMPLING INTERVAL"),
-          PrimaryTextfield(controller: _samplingIntervalController),
+          PrimaryTextfield(controller: _samplingIntController),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "RS232"),
           PrimaryTextfield(controller: _rs232StatusController, enabled: false),
