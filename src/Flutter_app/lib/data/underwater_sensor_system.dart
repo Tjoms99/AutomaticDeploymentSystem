@@ -112,7 +112,15 @@ class UnderwaterSensorSystem extends ValueNotifier {
     ];
   }
 
-  //----------SENSORS---------------
+  //---------------------------RESET SENSORS---------------------------------
+  void resetCharts() {
+    _depth.resetChartData();
+    _temperature.resetChartData();
+    _pressure.resetChartData();
+    _battery.resetChartData();
+  }
+
+  //---------------------------GET SENSORS-----------------------------------
   SensorData getDepthSensor() {
     return _depth;
   }
@@ -129,14 +137,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     return _battery;
   }
 
-  void resetCharts() {
-    _depth.resetChartData();
-    _temperature.resetChartData();
-    _pressure.resetChartData();
-    _battery.resetChartData();
-  }
-
-  //----------SYSTEM---------------
+  //---------------------------GET STATE------------------------------------
   bool getIsOnSystem() {
     return isOnSystem.value;
   }
@@ -158,6 +159,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     return isSampling.value;
   }
 
+  //---------------------------GET TOGGLE------------------------------------
   void toggleSystem() {
     isOnSystem.value = !isOnSystem.value;
     resetCharts();
@@ -187,9 +189,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     notifyListeners();
   }
 
-  void setTimeLeft(int seconds) {
-    _timeLeft = seconds;
-  }
+  //---------------------------GET WIDGETS-----------------------------------
 
   Infocard getInfocard(int index) {
     return infoCard.elementAt(index);
@@ -199,15 +199,21 @@ class UnderwaterSensorSystem extends ValueNotifier {
     return infoGraph.elementAt(index);
   }
 
+  //---------------------------SYSTEM TIMER----------------------------------
   int getCurrentTime() {
     return _currentTime;
   }
 
+  void setTimeLeft(int seconds) {
+    _timeLeft = seconds;
+  }
+
+  //---------------------------CALLBACKS-----------------------------------
   void registerCallback(UnderwaterSensorSystemCallback cb) {
     callbacks.add(cb);
   }
 
-  //----------UPDATE---------------
+  //---------------------------UPDATE DATA-----------------------------------
   void updateData(Timer timer) {
     //Ticks in seconds
     int ticks =
@@ -229,10 +235,12 @@ class UnderwaterSensorSystem extends ValueNotifier {
     }
   }
 
+  //---------------------------UPDATE TIMER-----------------------------------
   void updateTimer(int seconds) {
     _samplingInterval = seconds;
   }
 
+  //---------------------------UPDATE DEPTH-----------------------------------
   void updateDepthData() {
     double newData = (math.Random().nextDouble() * (-5) - 10);
     _depth.updateCurrentData(newData);
@@ -244,6 +252,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     } catch (e) {}
   }
 
+  //---------------------------UPDATE TEMPERATURE-----------------------------
   void updateTemperatureData() {
     double newData = (math.Random().nextDouble() * 5 + 6);
     _temperature.updateCurrentData(newData);
@@ -256,6 +265,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     } catch (e) {}
   }
 
+  //---------------------------UPDATE PRESSURE--------------------------------
   void updatePressureData() {
     double newData = (math.Random().nextDouble() * 2000 + 100000);
     _pressure.updateCurrentData(newData);
@@ -268,6 +278,7 @@ class UnderwaterSensorSystem extends ValueNotifier {
     } catch (e) {}
   }
 
+  //---------------------------UPDATE BATTERY---------------------------------
   void updateBatteryData() {
     double newData = (math.Random().nextDouble() * 10 + 80);
     _battery.updateCurrentData(newData);
