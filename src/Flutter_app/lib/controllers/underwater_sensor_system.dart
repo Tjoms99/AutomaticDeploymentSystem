@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:automatic_deployment_system_app/components/info_card.dart';
 import 'package:automatic_deployment_system_app/components/info_graph.dart';
-import 'package:automatic_deployment_system_app/data/sensor_data.dart';
+import 'package:automatic_deployment_system_app/controllers/sensor_data.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -15,14 +15,14 @@ enum SensorType {
 
 typedef UnderwaterSensorSystemCallback = void Function();
 
-class UnderwaterSensorSystem extends ValueNotifier {
+class UnderwaterSensorSystemController extends ValueNotifier {
   List<UnderwaterSensorSystemCallback> callbacks = [];
 
   //DATA
-  late SensorData _depth;
-  late SensorData _temperature;
-  late SensorData _pressure;
-  late SensorData _battery;
+  late SensorDataController _depth;
+  late SensorDataController _temperature;
+  late SensorDataController _pressure;
+  late SensorDataController _battery;
 
   //TIMER
   late Timer _systemTimer;
@@ -41,13 +41,13 @@ class UnderwaterSensorSystem extends ValueNotifier {
   late List<Infocard> infoCard;
   late List<Infograph> infoGraph;
 
-  UnderwaterSensorSystem() : super(null);
+  UnderwaterSensorSystemController() : super(null);
 
   void initState() {
-    _depth = SensorData();
-    _temperature = SensorData();
-    _pressure = SensorData();
-    _battery = SensorData();
+    _depth = SensorDataController();
+    _temperature = SensorDataController();
+    _pressure = SensorDataController();
+    _battery = SensorDataController();
 
     _systemTimer = Timer.periodic(
         Duration(milliseconds: systemUpdateIntervalMS), updateData);
@@ -121,19 +121,19 @@ class UnderwaterSensorSystem extends ValueNotifier {
   }
 
   //---------------------------GET SENSORS-----------------------------------
-  SensorData getDepthSensor() {
+  SensorDataController getDepthSensor() {
     return _depth;
   }
 
-  SensorData getTemperatureSensor() {
+  SensorDataController getTemperatureSensor() {
     return _temperature;
   }
 
-  SensorData getPressureSensor() {
+  SensorDataController getPressureSensor() {
     return _pressure;
   }
 
-  SensorData getBatterySensor() {
+  SensorDataController getBatterySensor() {
     return _battery;
   }
 

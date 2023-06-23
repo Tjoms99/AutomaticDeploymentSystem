@@ -1,10 +1,10 @@
-import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class DataSampleTable extends StatefulWidget {
-  final UnderwaterSensorSystem underwaterSensorSystem;
+  final UnderwaterSensorSystemController underwaterSensorSystem;
   const DataSampleTable({super.key, required this.underwaterSensorSystem});
 
   @override

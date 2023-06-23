@@ -1,11 +1,11 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  final UnderwaterSensorSystem underwaterSensorSystem;
+  final UnderwaterSensorSystemController underwaterSensorSystem;
 
   const Dashboard({super.key, required this.underwaterSensorSystem});
 

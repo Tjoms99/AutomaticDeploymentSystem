@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class SensorData extends ValueNotifier {
+class SensorDataController extends ValueNotifier {
   final sensorDataGraphLength = 120;
 
   ValueNotifier<double> currentData = ValueNotifier(0.0);
@@ -12,7 +12,7 @@ class SensorData extends ValueNotifier {
   ChartSeries? series = const ChartSeries();
   ChartSeriesController? chartSeriesController;
 
-  SensorData() : super(null);
+  SensorDataController() : super(null);
 
   void initState() {
     sensorData = getChartData();

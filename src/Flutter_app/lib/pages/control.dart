@@ -2,12 +2,13 @@ import 'package:automatic_deployment_system_app/components/control_card.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/mqtt_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
 import 'package:flutter/material.dart';
 
 class ControlPage extends StatefulWidget {
-  final UnderwaterSensorSystem underwaterSensorSystem;
-  const ControlPage({super.key, required this.underwaterSensorSystem});
+  final MQTTController mqttController;
+  const ControlPage({super.key, required this.mqttController});
 
   @override
   State<ControlPage> createState() => _ControlPageState();
@@ -29,33 +30,37 @@ class _ControlPageState extends State<ControlPage> {
               label: 'SYSTEM',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.underwaterSensorSystem.isOnSystem,
-              callback: widget.underwaterSensorSystem.toggleSystem,
-              getStatus: widget.underwaterSensorSystem.getIsOnSystem,
+              enabled: widget.mqttController.underwaterSensorSystem.isOnSystem,
+              callback: widget.mqttController.toggleSystem,
+              getStatus:
+                  widget.mqttController.underwaterSensorSystem.getIsOnSystem,
             ),
             Controlcard(
               label: 'SAMPLING',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.underwaterSensorSystem.isSampling,
-              callback: widget.underwaterSensorSystem.toggleSampling,
-              getStatus: widget.underwaterSensorSystem.getIsSampling,
+              enabled: widget.mqttController.underwaterSensorSystem.isSampling,
+              callback: widget.mqttController.toggleSampling,
+              getStatus:
+                  widget.mqttController.underwaterSensorSystem.getIsSampling,
             ),
             Controlcard(
               label: 'RS232',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.underwaterSensorSystem.isOnRS232,
-              callback: widget.underwaterSensorSystem.toggleRS232,
-              getStatus: widget.underwaterSensorSystem.getIsOnRS232,
+              enabled: widget.mqttController.underwaterSensorSystem.isOnRS232,
+              callback: widget.mqttController.toggleRS232,
+              getStatus:
+                  widget.mqttController.underwaterSensorSystem.getIsOnRS232,
             ),
             Controlcard(
               label: '12V',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.underwaterSensorSystem.isOn12V,
-              callback: widget.underwaterSensorSystem.toggle12V,
-              getStatus: widget.underwaterSensorSystem.getIsOn12V,
+              enabled: widget.mqttController.underwaterSensorSystem.isOn12V,
+              callback: widget.mqttController.toggle12V,
+              getStatus:
+                  widget.mqttController.underwaterSensorSystem.getIsOn12V,
             ),
             /*
             Controlcard(

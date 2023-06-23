@@ -1,12 +1,11 @@
 import 'package:automatic_deployment_system_app/components/data_table.dart';
 import 'package:automatic_deployment_system_app/components/default_container.dart';
-import 'package:automatic_deployment_system_app/data/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
-import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class DataSampleTableExpand extends StatefulWidget {
-  final UnderwaterSensorSystem underwaterSensorSystem;
+  final UnderwaterSensorSystemController underwaterSensorSystem;
   const DataSampleTableExpand(
       {super.key, required this.underwaterSensorSystem});
 

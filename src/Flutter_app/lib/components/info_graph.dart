@@ -1,5 +1,5 @@
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/data/sensor_data.dart';
+import 'package:automatic_deployment_system_app/controllers/sensor_data.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class Infograph extends StatefulWidget {
   final String? labelAxisy;
   final double? axisYMinimum;
   final double? axisYMaximum;
-  final SensorData sensorData;
+  final SensorDataController sensorData;
 
   const Infograph({
     super.key,
