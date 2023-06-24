@@ -29,8 +29,21 @@ class SystemController extends ValueNotifier {
     underwaterSensorSystem.initState();
     mqtt.connect();
 
+    mqtt.registerCallback((data) {
+      underwaterSensorSystem.updateDepth(data);
+    });
+    mqtt.registerCallback((data) {
+      underwaterSensorSystem.updateTemperature(data);
+    });
+    mqtt.registerCallback((data) {
+      underwaterSensorSystem.updatePressure(data);
+    });
+    mqtt.registerCallback((data) {
+      underwaterSensorSystem.updateBattery(data);
+    });
+
     _systemTimer = Timer.periodic(
-        Duration(milliseconds: systemUpdateIntervalMS), updateData);
+        Duration(milliseconds: systemUpdateIntervalMS), updateFrontendData);
   }
 
   //---------------------------CALLBACKS-----------------------------------
@@ -95,20 +108,7 @@ class SystemController extends ValueNotifier {
   }
 
   //---------------------------UPDATE DATA-----------------------------------
-  void updateData(Timer timer) {
-    //Ticks in seconds
-    int ticks =
-        timer.tick % ((1000 * _samplingInterval) ~/ systemUpdateIntervalMS);
-
-    if (ticks == _samplingInterval && isOnSystem.value && isSampling.value) {
-      _currentTime += _samplingInterval;
-
-      underwaterSensorSystem.updateDepthData(_currentTime);
-      underwaterSensorSystem.updateTemperatureData(_currentTime);
-      underwaterSensorSystem.updatePressureData(_currentTime);
-      underwaterSensorSystem.updateBatteryData(_currentTime);
-    }
-
+  void updateFrontendData(Timer timer) {
     if (!isOnSystem.value) _currentTime = 0;
 
     for (var i = 0; i < callbacks.length; i++) {

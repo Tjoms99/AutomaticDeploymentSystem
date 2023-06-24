@@ -8,17 +8,64 @@ const String mqttBroker = "test.mosquitto.org";
 const String mqttClientName = "";
 const int mqttBrokerPort = 1883;
 
+typedef MQTTCallback = void Function(String data);
+
 class MQTTController with ChangeNotifier {
   // Value notifiers
-  final ValueNotifier<String> depth = ValueNotifier<String>('0');
-  final ValueNotifier<String> temperature = ValueNotifier<String>('0');
-  final ValueNotifier<String> pressure = ValueNotifier<String>('0');
+  String depth = '0';
+  String temperature = '0';
+  String pressure = '0';
+  String battery = '0';
 
   MQTTController();
   // Client to be initialized
   late MqttServerClient client;
 
+  //CALLBACKS
+  List<MQTTCallback> callbacks = [];
+
+  //---------------------------CALLBACKS-----------------------------------
+  void registerCallback(MQTTCallback cb) {
+    callbacks.add(cb);
+  }
+
   //---------------------------MQTT FUNCTIONS-----------------------------------
+
+  void subscribeToTopics() {
+    client.subscribe(Topics.depth, MqttQos.atLeastOnce);
+    client.subscribe(Topics.temperature, MqttQos.atLeastOnce);
+    client.subscribe(Topics.pressure, MqttQos.atLeastOnce);
+    client.subscribe(Topics.battery, MqttQos.atLeastOnce);
+  }
+
+  void updateData(String topic, String message) {
+    switch (topic) {
+      case Topics.depth:
+        depth = message;
+        callbacks.elementAt(SensorType.DEPTH.index)(depth);
+        break;
+
+      case Topics.temperature:
+        temperature = message;
+        callbacks.elementAt(SensorType.TEMPERATURE.index)(temperature);
+        break;
+
+      case Topics.pressure:
+        pressure = message;
+        callbacks.elementAt(SensorType.PRESSURE.index)(pressure);
+        break;
+
+      case Topics.battery:
+        battery = message;
+        callbacks.elementAt(SensorType.BATTERY.index)(battery);
+        break;
+
+      default:
+    }
+
+    for (var i = 0; i < callbacks.length; i++) {}
+  }
+
   Future<Object> connect() async {
     client =
         MqttServerClient.withPort(mqttBroker, mqttClientName, mqttBrokerPort);
@@ -49,6 +96,7 @@ class MQTTController with ChangeNotifier {
       client.disconnect();
     }
 
+    subscribeToTopics();
     // Check if connected, if not disconnect properly
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
       print('MQTT | Client connected');
@@ -58,12 +106,6 @@ class MQTTController with ChangeNotifier {
       client.disconnect();
       return -1;
     }
-
-    // Subscribe to topics
-    client.subscribe(Topics.depth, MqttQos.atLeastOnce);
-    client.subscribe(Topics.temperature, MqttQos.atLeastOnce);
-    client.subscribe(Topics.pressure, MqttQos.atLeastOnce);
-    client.subscribe(Topics.battery, MqttQos.atLeastOnce);
 
     // Listen for messages on subscribed topics
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? msg) {
@@ -79,20 +121,7 @@ class MQTTController with ChangeNotifier {
       // Get topic
       String topic = msg[0].topic;
 
-      // Filter topics and update corresponding ValueNotifier
-      switch (topic) {
-        case Topics.depth:
-          // USS.getDepthSensor().updateCurrentData(double.parse(stringMsg));
-          break;
-        case Topics.temperature:
-          //USS.getTemperatureSensor().updateCurrentData(double.parse(stringMsg));
-          break;
-        case Topics.pressure:
-          //USS.getPressureSensor().updateCurrentData(double.parse(stringMsg));
-          break;
-
-        default:
-      }
+      updateData(topic, stringMsg);
 
       // print('MQTT | Data received on topic: $topic');
       //  print('MQTT | Payload size = ${message.length}');

@@ -156,9 +156,11 @@ class USSController extends ValueNotifier {
   }
 
   //---------------------------UPDATE DEPTH-----------------------------------
-  void updateDepthData(int currentTime) {
-    double newData = (math.Random().nextDouble() * (-5) - 10);
-    _depth.updateCurrentData(newData);
+  void updateDepth(String data) {
+    _depth.updateCurrentData(double.parse(data));
+
+    int samplingInterval = 1;
+    int currentTime = samplingInterval * _depth.sensorData.length;
 
     _depth.sensorData.add(ChartData(currentTime, _depth.getCurrentData()));
 
@@ -168,9 +170,11 @@ class USSController extends ValueNotifier {
   }
 
   //---------------------------UPDATE TEMPERATURE-----------------------------
-  void updateTemperatureData(int currentTime) {
-    double newData = (math.Random().nextDouble() * 5 + 6);
-    _temperature.updateCurrentData(newData);
+  void updateTemperature(String data) {
+    _temperature.updateCurrentData(double.parse(data));
+
+    int samplingInterval = 1;
+    int currentTime = samplingInterval * _depth.sensorData.length;
 
     _temperature.sensorData
         .add(ChartData(currentTime, _temperature.getCurrentData()));
@@ -181,9 +185,11 @@ class USSController extends ValueNotifier {
   }
 
   //---------------------------UPDATE PRESSURE--------------------------------
-  void updatePressureData(int currentTime) {
-    double newData = (math.Random().nextDouble() * 2000 + 100000);
-    _pressure.updateCurrentData(newData);
+  void updatePressure(String data) {
+    _pressure.updateCurrentData(double.parse(data));
+
+    int samplingInterval = 1;
+    int currentTime = samplingInterval * _depth.sensorData.length;
 
     _pressure.sensorData
         .add(ChartData(currentTime, _pressure.getCurrentData()));
@@ -194,9 +200,11 @@ class USSController extends ValueNotifier {
   }
 
   //---------------------------UPDATE BATTERY---------------------------------
-  void updateBatteryData(int currentTime) {
-    double newData = (math.Random().nextDouble() * 10 + 80);
-    _battery.updateCurrentData(newData);
+  void updateBattery(String data) {
+    _battery.updateCurrentData(double.parse(data));
+
+    int samplingInterval = 1;
+    int currentTime = samplingInterval * _depth.sensorData.length;
 
     _battery.sensorData.add(ChartData(currentTime, _battery.getCurrentData()));
 

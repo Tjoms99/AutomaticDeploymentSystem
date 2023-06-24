@@ -50,18 +50,23 @@ class _DataSampleTableState extends State<DataSampleTable> {
   List<DataRow2> _getDataRow() {
     _dataRow = [];
     for (var i = 0; i < _depth.length; i++) {
-      _dataRow.add(
-        DataRow2(
-          cells: [
-            DataCell(Text(
-                '+${i * widget.systemController.getSamplingInterval()} s')),
-            DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
-            DataCell(Text(_pressure.elementAt(i).toStringAsFixed(2))),
-            DataCell(Text(_temperature.elementAt(i).toStringAsFixed(2))),
-            DataCell(Text(_battery.elementAt(i).toStringAsFixed(2))),
-          ],
-        ),
-      );
+      try {
+        _dataRow.add(
+          DataRow2(
+            cells: [
+              DataCell(Text(
+                  '+${i * widget.systemController.getSamplingInterval()} s')),
+              DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
+              DataCell(Text(_pressure.elementAt(i).toStringAsFixed(2))),
+              DataCell(Text(_temperature.elementAt(i).toStringAsFixed(2))),
+              DataCell(Text(_battery.elementAt(i).toStringAsFixed(2))),
+            ],
+          ),
+        );
+      } catch (e) {
+        print(
+            "Uneven number of elements in array, ingoring the other elements");
+      }
     }
 
     return _dataRow;
