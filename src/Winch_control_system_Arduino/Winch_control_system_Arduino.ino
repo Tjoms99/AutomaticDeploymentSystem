@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <math.h>
 
 // WiFi
 const char *ssid = "Tjoms";         // Enter your Wi-Fi name
@@ -10,47 +11,20 @@ const char *mqtt_broker = "test.mosquitto.org";
 
 const char *topic_system = "AutomaticDeploymentSystem/app/system";
 const char *topic_sampling = "AutomaticDeploymentSystem/app/sampling";
+const char *topic_depth = "AutomaticDeploymentSystem/USS/depth";
 const char *topic_temperature = "AutomaticDeploymentSystem/USS/temperature";
 const char *topic_pressure = "AutomaticDeploymentSystem/USS/pressure";
-const char *topic_depth = "AutomaticDeploymentSystem/USS/depth";
+const char *topic_battery = "AutomaticDeploymentSystem/USS/battery";
 
 const char *mqtt_username = "";
 const char *mqtt_password = "";
 const int mqtt_port = 1883;
 
-char isSampling[1] = {'f'};
+char isSampling[1] = { 'f' };
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void setup() {
-  // Set software serial baud to 115200;
-  Serial.begin(115200);
-  // Connecting to a WiFi network
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi..");
-  }
-  Serial.println("Connected to the Wi-Fi network");
-  //connecting to a mqtt broker
-  client.setServer(mqtt_broker, mqtt_port);
-  client.setCallback(callback);
-  while (!client.connected()) {
-    String client_id = "esp32-client-";
-    client_id += String(WiFi.macAddress());
-    Serial.printf("The client %s connects to the public MQTT broker\n", client_id.c_str());
-    if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
-      Serial.println("Public EMQX MQTT broker connected");
-    } else {
-      Serial.print("failed with state ");
-      Serial.print(client.state());
-      delay(2000);
-    }
-  }
-  //  subscribe
-  client.subscribe(topic_sampling);
-}
 
 void callback(char *topic, byte *payload, unsigned int length) {
   Serial.print("Message arrived in topic: ");
@@ -62,17 +36,43 @@ void callback(char *topic, byte *payload, unsigned int length) {
   isSampling[0] = (char)payload[0];
   Serial.println();
   Serial.println("-----------------------");
+}
 
+void publishData() {
+  client.publish(topic_depth, "-12");
+  client.publish(topic_temperature, "20");
+  client.publish(topic_pressure, "101000");
+  client.publish(topic_battery, "69");
+
+  delay(1000);
+}
+
+void setup() {
+  // Set software serial baud to 115200;
+  Serial.begin(115200);
+  // Connecting to a WiFi network
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+
+  //connecting to a mqtt broker
+  client.setServer(mqtt_broker, mqtt_port);
+  client.setCallback(callback);
+
+  String client_id = "esp32-client-";
+  client_id += String(WiFi.macAddress());
+  while (!client.connected()) {
+    client.connect(client_id.c_str(), mqtt_username, mqtt_password);
+    delay(2000);
+  }
+  //  subscribe
+  client.subscribe(topic_sampling);
 }
 
 void loop() {
-  static int temperature = 0;
-
   client.loop();
-  delay(1000);
   if (isSampling[0] == 't') {
-    client.publish(topic_temperature, "20");
-    client.publish(topic_pressure, "101000");
-    client.publish(topic_depth, "-12");
+    publishData();
   }
 }
