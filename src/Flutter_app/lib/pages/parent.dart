@@ -1,6 +1,7 @@
 import 'package:automatic_deployment_system_app/components/sidemenu_info.dart';
 import 'package:automatic_deployment_system_app/controllers/mqtt_controller.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/pages/control.dart';
 import 'package:automatic_deployment_system_app/pages/dashboard.dart';
 import 'package:automatic_deployment_system_app/components/sidemenu_buttons.dart';
@@ -16,26 +17,18 @@ class ParentPage extends StatefulWidget {
 }
 
 class _ParentPageState extends State<ParentPage> {
-  late ValueNotifier<int> currentPage;
-  late UnderwaterSensorSystemController underwaterSensorSystem;
-  late MQTTController mqttController;
+  SystemController systemController = SystemController();
 
   late List<Widget> mainPages;
 
   @override
   void initState() {
-    underwaterSensorSystem = UnderwaterSensorSystemController();
-    underwaterSensorSystem.initState();
-
-    mqttController = MQTTController(underwaterSensorSystem);
-    mqttController.connect();
-
-    currentPage = ValueNotifier(0);
+    systemController.initState();
 
     mainPages = [
-      Dashboard(underwaterSensorSystem: underwaterSensorSystem),
-      ControlPage(mqttController: mqttController),
-      DataPage(underwaterSensorSystem: underwaterSensorSystem),
+      Dashboard(USS: systemController.underwaterSensorSystem),
+      ControlPage(systemController: systemController),
+      DataPage(systemController: systemController),
     ];
 
     super.initState();
@@ -59,12 +52,13 @@ class _ParentPageState extends State<ParentPage> {
               children: [
                 Expanded(
                   flex: 1,
-                  child: SideMenuButtons(currentPage: currentPage),
+                  child: SideMenuButtons(
+                      currentPage: systemController.currentPage),
                 ),
                 Expanded(
                   flex: 10,
                   child: ValueListenableBuilder(
-                    valueListenable: currentPage,
+                    valueListenable: systemController.currentPage,
                     builder: (context, value, child) {
                       return mainPages[value];
                     },
@@ -72,8 +66,7 @@ class _ParentPageState extends State<ParentPage> {
                 ),
                 Expanded(
                   flex: 4,
-                  child: SideMenuInfo(
-                      underwaterSensorSytem: underwaterSensorSystem),
+                  child: SideMenuInfo(systemController: systemController),
                 ),
               ],
             )),

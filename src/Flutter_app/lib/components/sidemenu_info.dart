@@ -1,14 +1,15 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuInfo extends StatefulWidget {
-  final UnderwaterSensorSystemController underwaterSensorSytem;
-  const SideMenuInfo({super.key, required this.underwaterSensorSytem});
+  final SystemController systemController;
+  const SideMenuInfo({super.key, required this.systemController});
 
   @override
   State<SideMenuInfo> createState() => _SideMenuInfoState();
@@ -33,13 +34,13 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     _targetTimeController.text = "100";
     _samplingIntController.text = "1";
 
-    widget.underwaterSensorSytem.registerCallback(updateDepthDifference);
-    widget.underwaterSensorSytem.registerCallback(updateSamplingInterval);
-    widget.underwaterSensorSytem.registerCallback(updateTimeLeft);
-    widget.underwaterSensorSytem.registerCallback(updateSystem);
-    widget.underwaterSensorSytem.registerCallback(updateStatus);
-    widget.underwaterSensorSytem.registerCallback(updateRS232);
-    widget.underwaterSensorSytem.registerCallback(update12V);
+    widget.systemController.registerCallback(updateDepthDifference);
+    widget.systemController.registerCallback(updateSamplingInterval);
+    widget.systemController.registerCallback(updateTimeLeft);
+    widget.systemController.registerCallback(updateSystem);
+    widget.systemController.registerCallback(updateStatus);
+    widget.systemController.registerCallback(updateRS232);
+    widget.systemController.registerCallback(update12V);
 
     super.initState();
   }
@@ -51,8 +52,10 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
     try {
       targetDepth = double.parse(_targetDepthController.text);
-      currentDepth =
-          widget.underwaterSensorSytem.getDepthSensor().currentData.value;
+      currentDepth = widget.systemController.underwaterSensorSystem
+          .getDepthSensor()
+          .currentData
+          .value;
     } catch (e) {}
 
     depthDifference = targetDepth - currentDepth;
@@ -65,11 +68,11 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
     try {
       targetTime = int.parse(_targetTimeController.text);
-      currentTime = widget.underwaterSensorSytem.getCurrentTime();
+      currentTime = widget.systemController.getCurrentTime();
     } catch (e) {}
 
     int timeLeft = targetTime - currentTime;
-    widget.underwaterSensorSytem.setTimeLeft(timeLeft);
+    widget.systemController.setTimeLeft(timeLeft);
 
     _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
     setSampling();
@@ -82,35 +85,35 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       seconds = int.parse(_samplingIntController.text);
     } catch (e) {}
 
-    widget.underwaterSensorSytem.updateTimer(seconds);
+    widget.systemController.updateTimer(seconds);
   }
 
   void updateSystem() {
-    widget.underwaterSensorSytem.getIsOnSystem()
+    widget.systemController.getIsOnSystem()
         ? _systemController.text = "ACTIVE"
         : _systemController.text = "INACTIVE";
   }
 
   void updateStatus() {
-    widget.underwaterSensorSytem.getIsSampling()
+    widget.systemController.getIsSampling()
         ? _statusController.text = "SAMPLING"
         : _statusController.text = "IDLE";
   }
 
   void updateRS232() {
-    widget.underwaterSensorSytem.getIsOnRS232()
+    widget.systemController.underwaterSensorSystem.getIsOnRS232()
         ? _rs232StatusController.text = "ON"
         : _rs232StatusController.text = "OFF";
   }
 
   void update12V() {
-    widget.underwaterSensorSytem.getIsOn12V()
+    widget.systemController.underwaterSensorSystem.getIsOn12V()
         ? _12VStatusController.text = "ON"
         : _12VStatusController.text = "OFF";
   }
 
   void setSampling() {
-    sampling = widget.underwaterSensorSytem.getIsSampling();
+    sampling = widget.systemController.getIsSampling();
     setState(() {});
   }
 
@@ -140,7 +143,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           const PrimaryText(text: "TARGET TIME"),
           PrimaryTextfield(
               controller: _targetTimeController,
-              enabled: !widget.underwaterSensorSytem.getIsSampling()),
+              enabled: !widget.systemController.getIsSampling()),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TIME LEFT"),
           PrimaryTextfield(controller: _timeLeftController, enabled: false),

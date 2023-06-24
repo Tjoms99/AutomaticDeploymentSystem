@@ -1,13 +1,13 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  final UnderwaterSensorSystemController underwaterSensorSystem;
+  final USSController USS;
 
-  const Dashboard({super.key, required this.underwaterSensorSystem});
+  const Dashboard({super.key, required this.USS});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -29,18 +29,17 @@ class _DashboardState extends State<Dashboard> {
         spacing: 20.0,
         alignment: WrapAlignment.start,
         children: [
-          widget.underwaterSensorSystem.getInfocard(SensorType.DEPTH.index),
-          widget.underwaterSensorSystem
-              .getInfocard(SensorType.TEMPERATURE.index),
-          widget.underwaterSensorSystem.getInfocard(SensorType.PRESSURE.index),
-          widget.underwaterSensorSystem.getInfocard(SensorType.BATTERY.index),
+          widget.USS.getInfocard(SensorType.DEPTH.index),
+          widget.USS.getInfocard(SensorType.TEMPERATURE.index),
+          widget.USS.getInfocard(SensorType.PRESSURE.index),
+          widget.USS.getInfocard(SensorType.BATTERY.index),
         ],
       ),
       SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-      widget.underwaterSensorSystem.getInfograph(SensorType.DEPTH.index),
-      widget.underwaterSensorSystem.getInfograph(SensorType.TEMPERATURE.index),
-      widget.underwaterSensorSystem.getInfograph(SensorType.PRESSURE.index),
-      widget.underwaterSensorSystem.getInfograph(SensorType.BATTERY.index),
+      widget.USS.getInfograph(SensorType.DEPTH.index),
+      widget.USS.getInfograph(SensorType.TEMPERATURE.index),
+      widget.USS.getInfograph(SensorType.PRESSURE.index),
+      widget.USS.getInfograph(SensorType.BATTERY.index),
     ]);
   }
 }

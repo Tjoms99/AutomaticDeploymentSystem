@@ -1,4 +1,5 @@
-import "package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart";
+import "package:automatic_deployment_system_app/config/mqtt_topics.dart";
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import "package:flutter/material.dart";
 import "package:mqtt_client/mqtt_client.dart";
 import "package:mqtt_client/mqtt_server_client.dart";
@@ -7,29 +8,13 @@ const String mqttBroker = "test.mosquitto.org";
 const String mqttClientName = "";
 const int mqttBrokerPort = 1883;
 
-// MQTT Topics
-abstract class Topics {
-  // Controll
-  static const String system = "AutomaticDeploymentSystem/app/system";
-  static const String sampling = "AutomaticDeploymentSystem/app/sampling";
-  static const String rs232 = "AutomaticDeploymentSystem/app/rs232";
-  static const String volt = "AutomaticDeploymentSystem/app/12v";
-
-  // Data
-  static const String temperature = "AutomaticDeploymentSystem/USS/temperature";
-  static const String pressure = "AutomaticDeploymentSystem/USS/pressure";
-  static const String depth = "AutomaticDeploymentSystem/USS/depth";
-}
-
 class MQTTController with ChangeNotifier {
   // Value notifiers
   final ValueNotifier<String> depth = ValueNotifier<String>('0');
   final ValueNotifier<String> temperature = ValueNotifier<String>('0');
   final ValueNotifier<String> pressure = ValueNotifier<String>('0');
 
-  UnderwaterSensorSystemController underwaterSensorSystem;
-
-  MQTTController(this.underwaterSensorSystem);
+  MQTTController();
   // Client to be initialized
   late MqttServerClient client;
 
@@ -78,6 +63,7 @@ class MQTTController with ChangeNotifier {
     client.subscribe(Topics.depth, MqttQos.atLeastOnce);
     client.subscribe(Topics.temperature, MqttQos.atLeastOnce);
     client.subscribe(Topics.pressure, MqttQos.atLeastOnce);
+    client.subscribe(Topics.battery, MqttQos.atLeastOnce);
 
     // Listen for messages on subscribed topics
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? msg) {
@@ -96,27 +82,21 @@ class MQTTController with ChangeNotifier {
       // Filter topics and update corresponding ValueNotifier
       switch (topic) {
         case Topics.depth:
-          underwaterSensorSystem
-              .getDepthSensor()
-              .updateCurrentData(double.parse(stringMsg));
+          // USS.getDepthSensor().updateCurrentData(double.parse(stringMsg));
           break;
         case Topics.temperature:
-          underwaterSensorSystem
-              .getTemperatureSensor()
-              .updateCurrentData(double.parse(stringMsg));
+          //USS.getTemperatureSensor().updateCurrentData(double.parse(stringMsg));
           break;
         case Topics.pressure:
-          underwaterSensorSystem
-              .getPressureSensor()
-              .updateCurrentData(double.parse(stringMsg));
+          //USS.getPressureSensor().updateCurrentData(double.parse(stringMsg));
           break;
 
         default:
       }
 
-      print('MQTT | Data received on topic: $topic');
-      print('MQTT | Payload size = ${message.length}');
-      print('');
+      // print('MQTT | Data received on topic: $topic');
+      //  print('MQTT | Payload size = ${message.length}');
+      // print('');
     });
 
     return client;
@@ -128,6 +108,7 @@ class MQTTController with ChangeNotifier {
 
   void onDisconnected() {
     print('MQTT | Disconnected');
+    client.connect();
   }
 
   void onSubscribed(String topic) {
@@ -147,33 +128,36 @@ class MQTTController with ChangeNotifier {
   }
 
   void publishMessage(String topic, String message) {
+    if (client.connectionStatus!.state == MqttConnectionState.disconnected) {
+      print('MQTT | Client Disconnected');
+      return;
+    }
+
     final builder = MqttClientPayloadBuilder();
     builder.addString(message);
     client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
   }
 
   //---------------------------ADS FUNCTIONS-----------------------------------
-
+/*
   void toggleSystem() {
-    underwaterSensorSystem.toggleSystem();
-    publishMessage(
-        Topics.system, underwaterSensorSystem.getIsOnSystem().toString());
+    USS.toggleSystem();
+    publishMessage(Topics.system, USS.getIsOnSystem().toString());
   }
 
   void toggleSampling() {
-    underwaterSensorSystem.toggleSampling();
-    publishMessage(
-        Topics.sampling, underwaterSensorSystem.getIsSampling().toString());
+    USS.toggleSampling();
+    publishMessage(Topics.sampling, USS.getIsSampling().toString());
   }
 
   void toggleRS232() {
-    underwaterSensorSystem.toggleRS232();
-    publishMessage(
-        Topics.rs232, underwaterSensorSystem.getIsOnRS232().toString());
+    USS.toggleRS232();
+    publishMessage(Topics.rs232, USS.getIsOnRS232().toString());
   }
 
   void toggle12V() {
-    underwaterSensorSystem.toggle12V();
-    publishMessage(Topics.volt, underwaterSensorSystem.getIsOn12V().toString());
+    USS.toggle12V();
+    publishMessage(Topics.volt, USS.getIsOn12V().toString());
   }
+  */
 }

@@ -1,11 +1,12 @@
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class DataSampleTable extends StatefulWidget {
-  final UnderwaterSensorSystemController underwaterSensorSystem;
-  const DataSampleTable({super.key, required this.underwaterSensorSystem});
+  final SystemController systemController;
+  const DataSampleTable({super.key, required this.systemController});
 
   @override
   State<DataSampleTable> createState() => _DataSampleTableState();
@@ -28,14 +29,18 @@ class _DataSampleTableState extends State<DataSampleTable> {
 
   @override
   void initState() {
-    _depth = widget.underwaterSensorSystem.getDepthSensor().getSensorDataList();
-    _pressure =
-        widget.underwaterSensorSystem.getPressureSensor().getSensorDataList();
-    _temperature = widget.underwaterSensorSystem
+    _depth = widget.systemController.underwaterSensorSystem
+        .getDepthSensor()
+        .getSensorDataList();
+    _pressure = widget.systemController.underwaterSensorSystem
+        .getPressureSensor()
+        .getSensorDataList();
+    _temperature = widget.systemController.underwaterSensorSystem
         .getTemperatureSensor()
         .getSensorDataList();
-    _battery =
-        widget.underwaterSensorSystem.getBatterySensor().getSensorDataList();
+    _battery = widget.systemController.underwaterSensorSystem
+        .getBatterySensor()
+        .getSensorDataList();
 
     _dataRow = [];
 
@@ -49,7 +54,7 @@ class _DataSampleTableState extends State<DataSampleTable> {
         DataRow2(
           cells: [
             DataCell(Text(
-                '+${i * widget.underwaterSensorSystem.getSamplingInterval()} s')),
+                '+${i * widget.systemController.getSamplingInterval()} s')),
             DataCell(Text(_depth.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_pressure.elementAt(i).toStringAsFixed(2))),
             DataCell(Text(_temperature.elementAt(i).toStringAsFixed(2))),
@@ -65,8 +70,9 @@ class _DataSampleTableState extends State<DataSampleTable> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable:
-          widget.underwaterSensorSystem.getDepthSensor().currentData,
+      valueListenable: widget.systemController.underwaterSensorSystem
+          .getDepthSensor()
+          .currentData,
       builder: (context, value, child) {
         return DataTable2(
           minWidth: 500,

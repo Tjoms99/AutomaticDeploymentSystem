@@ -1,11 +1,12 @@
 import 'package:automatic_deployment_system_app/components/data_table.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:flutter/material.dart';
 
 class DataPage extends StatefulWidget {
-  final UnderwaterSensorSystemController underwaterSensorSystem;
+  final SystemController systemController;
 
-  const DataPage({super.key, required this.underwaterSensorSystem});
+  const DataPage({super.key, required this.systemController});
 
   @override
   State<DataPage> createState() => _DataPageState();
@@ -16,8 +17,7 @@ class _DataPageState extends State<DataPage> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
-      child: DataSampleTable(
-          underwaterSensorSystem: widget.underwaterSensorSystem),
+      child: DataSampleTable(systemController: widget.systemController),
     );
   }
 }

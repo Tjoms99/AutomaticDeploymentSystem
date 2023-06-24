@@ -1,13 +1,13 @@
 import 'package:automatic_deployment_system_app/components/data_table.dart';
 import 'package:automatic_deployment_system_app/components/default_container.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:flutter/material.dart';
 
 class DataSampleTableExpand extends StatefulWidget {
-  final UnderwaterSensorSystemController underwaterSensorSystem;
-  const DataSampleTableExpand(
-      {super.key, required this.underwaterSensorSystem});
+  final SystemController systemController;
+  const DataSampleTableExpand({super.key, required this.systemController});
 
   @override
   State<DataSampleTableExpand> createState() => _DataSampleTableExpandState();
@@ -45,8 +45,7 @@ class _DataSampleTableExpandState extends State<DataSampleTableExpand> {
                       ),
                     ),
                   ),
-                  DataSampleTable(
-                      underwaterSensorSystem: widget.underwaterSensorSystem),
+                  DataSampleTable(systemController: widget.systemController),
                 ],
               )
             : DefaultContainer(

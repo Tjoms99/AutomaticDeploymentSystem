@@ -3,12 +3,13 @@ import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/controllers/mqtt_controller.dart';
-import 'package:automatic_deployment_system_app/controllers/underwater_sensor_system.dart';
+import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
+import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:flutter/material.dart';
 
 class ControlPage extends StatefulWidget {
-  final MQTTController mqttController;
-  const ControlPage({super.key, required this.mqttController});
+  final SystemController systemController;
+  const ControlPage({super.key, required this.systemController});
 
   @override
   State<ControlPage> createState() => _ControlPageState();
@@ -30,39 +31,36 @@ class _ControlPageState extends State<ControlPage> {
               label: 'SYSTEM',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.underwaterSensorSystem.isOnSystem,
-              callback: widget.mqttController.toggleSystem,
-              getStatus:
-                  widget.mqttController.underwaterSensorSystem.getIsOnSystem,
+              enabled: widget.systemController.isOnSystem,
+              callback: widget.systemController.toggleSystem,
+              getStatus: widget.systemController.getIsOnSystem,
             ),
             Controlcard(
               label: 'SAMPLING',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.underwaterSensorSystem.isSampling,
-              callback: widget.mqttController.toggleSampling,
-              getStatus:
-                  widget.mqttController.underwaterSensorSystem.getIsSampling,
+              enabled: widget.systemController.isSampling,
+              callback: widget.systemController.toggleSampling,
+              getStatus: widget.systemController.getIsSampling,
             ),
+            /*
             Controlcard(
               label: 'RS232',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.underwaterSensorSystem.isOnRS232,
+              enabled: widget.mqttController.USS.isOnRS232,
               callback: widget.mqttController.toggleRS232,
-              getStatus:
-                  widget.mqttController.underwaterSensorSystem.getIsOnRS232,
+              getStatus: widget.mqttController.USS.getIsOnRS232,
             ),
             Controlcard(
               label: '12V',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.underwaterSensorSystem.isOn12V,
+              enabled: widget.mqttController.USS.isOn12V,
               callback: widget.mqttController.toggle12V,
-              getStatus:
-                  widget.mqttController.underwaterSensorSystem.getIsOn12V,
+              getStatus: widget.mqttController.USS.getIsOn12V,
             ),
-            /*
+            
             Controlcard(
               label: 'MODE STATUS',
               textEnable: "AUTOMATIC",
@@ -87,7 +85,6 @@ class _ControlPageState extends State<ControlPage> {
               textDisable: "NOP",
               enabled: true,
             ),
-
 
             //Should only be triggers....
             Controlcard(
