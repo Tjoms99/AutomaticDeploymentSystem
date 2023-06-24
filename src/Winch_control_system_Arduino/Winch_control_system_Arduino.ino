@@ -39,7 +39,8 @@ void callback(char *topic, byte *payload, unsigned int length) {
 }
 
 void publishData() {
-  client.publish(topic_depth, "-12");
+  static int depth = -50;
+  client.publish(topic_depth, (char*)String(depth++, DEC).c_str());
   client.publish(topic_temperature, "20");
   client.publish(topic_pressure, "101000");
   client.publish(topic_battery, "69");
