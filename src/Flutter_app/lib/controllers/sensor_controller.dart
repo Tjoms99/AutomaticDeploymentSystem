@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SensorDataController extends ValueNotifier {
-  final sensorDataGraphLength = 120;
+  final sensorDataGraphLength = 30 * 60 * 60;
 
   ValueNotifier<double> currentData = ValueNotifier(0.0);
   List<double> sensorDataList = [];

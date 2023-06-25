@@ -125,7 +125,32 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
       color: AppColors.secondaryBackground,
       child: DefaultWidget(
         widgets: [
-          const Header(label: "Info", enableUndertext: false),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Header(label: "Info", enableUndertext: false),
+              ValueListenableBuilder(
+                valueListenable: widget.systemController.mqtt.isConnected,
+                builder: (context, value, child) {
+                  return widget.systemController.mqtt.isConnected.value
+                      ? IconButton(
+                          onPressed: widget.systemController.mqtt.disconnect,
+                          icon: Icon(
+                            Icons.signal_wifi_statusbar_4_bar,
+                            color: Colors.green,
+                          ),
+                        )
+                      : IconButton(
+                          onPressed: widget.systemController.mqtt.connect,
+                          icon: Icon(
+                            Icons.signal_wifi_off,
+                            color: Colors.red,
+                          ),
+                        );
+                },
+              )
+            ],
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SYSTEM"),
           PrimaryTextfield(controller: _systemController, enabled: false),

@@ -10,14 +10,16 @@ const int mqttBrokerPort = 1883;
 
 typedef MQTTCallback = void Function(String data);
 
-class MQTTController with ChangeNotifier {
+class MQTTController extends ValueNotifier {
+  ValueNotifier<bool> isConnected = ValueNotifier(false);
+
   // Value notifiers
   String depth = '0';
   String temperature = '0';
   String pressure = '0';
   String battery = '0';
 
-  MQTTController();
+  MQTTController() : super(null);
   // Client to be initialized
   late MqttServerClient client;
 
@@ -131,13 +133,18 @@ class MQTTController with ChangeNotifier {
     return client;
   }
 
+  void disconnect() {
+    client.disconnect();
+  }
+
   void onConnected() {
     print('MQTT | Connected');
+    isConnected.value = true;
   }
 
   void onDisconnected() {
     print('MQTT | Disconnected');
-    client.connect();
+    isConnected.value = false;
   }
 
   void onSubscribed(String topic) {
@@ -164,7 +171,8 @@ class MQTTController with ChangeNotifier {
 
     final builder = MqttClientPayloadBuilder();
     builder.addString(message);
-    client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+    client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!,
+        retain: true);
   }
 
   //---------------------------ADS FUNCTIONS-----------------------------------
