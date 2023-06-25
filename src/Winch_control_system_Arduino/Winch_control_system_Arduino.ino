@@ -22,6 +22,7 @@ const int mqtt_port = 1883;
 
 char isSampling[1] = { 'f' };
 
+String client_id = "esp32-client-";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -40,10 +41,13 @@ void callback(char *topic, byte *payload, unsigned int length) {
 
 void publishData() {
   static int depth = -50;
-  client.publish(topic_depth, (char*)String(depth++, DEC).c_str());
-  client.publish(topic_temperature, "20");
-  client.publish(topic_pressure, "101000");
-  client.publish(topic_battery, "69");
+  if(depth > 0) {
+    depth = -50;
+  }
+  client.publish(topic_depth, (char *)String(depth++, DEC).c_str(), true);
+  client.publish(topic_temperature, "20", true);
+  client.publish(topic_pressure, "101000", true);
+  client.publish(topic_battery, "69", true);
 
   delay(1000);
 }
@@ -61,7 +65,7 @@ void setup() {
   client.setServer(mqtt_broker, mqtt_port);
   client.setCallback(callback);
 
-  String client_id = "esp32-client-";
+
   client_id += String(WiFi.macAddress());
   while (!client.connected()) {
     client.connect(client_id.c_str(), mqtt_username, mqtt_password);
@@ -73,6 +77,12 @@ void setup() {
 
 void loop() {
   client.loop();
+  //If connection failed, or connection lost, or connection timeout, retry the connection.
+  if (client.state() < 0) {
+    client.connect(client_id.c_str(), mqtt_username, mqtt_password);
+    delay(2000);
+  }
+
   if (isSampling[0] == 't') {
     publishData();
   }
