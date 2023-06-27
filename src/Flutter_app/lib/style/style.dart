@@ -38,6 +38,7 @@ class PrimaryTextfield extends StatelessWidget {
   final double height;
   final TextEditingController controller;
   final bool enabled;
+  final Function() onChangedFunction;
 
   const PrimaryTextfield({
     super.key,
@@ -47,12 +48,16 @@ class PrimaryTextfield extends StatelessWidget {
     this.height = 1.3,
     required this.controller,
     this.enabled = true,
+    required this.onChangedFunction,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      onChanged: (value) {
+        onChangedFunction();
+      },
       enabled: enabled,
       style: TextStyle(
           color: color,

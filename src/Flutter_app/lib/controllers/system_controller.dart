@@ -13,7 +13,7 @@ class SystemController extends ValueNotifier {
   SystemController() : super(null);
 
   //CALLBACKS
-  List<UnderwaterSensorSystemCallback> callbacks = [];
+  List<Function> callbacks = [];
   //NOTIFIER
   ValueNotifier<bool> isOnSystem = ValueNotifier(true);
   ValueNotifier<bool> isSampling = ValueNotifier(true);
@@ -47,7 +47,7 @@ class SystemController extends ValueNotifier {
   }
 
   //---------------------------CALLBACKS-----------------------------------
-  void registerCallback(UnderwaterSensorSystemCallback cb) {
+  void registerCallback(Function cb) {
     callbacks.add(cb);
   }
 
@@ -74,7 +74,9 @@ class SystemController extends ValueNotifier {
 
   void toggleSystem() {
     isOnSystem.value = !isOnSystem.value;
-    mqtt.publishMessage(Topics.system, isOnSystem.value.toString());
+    isOnSystem.value
+        ? mqtt.publishMessage(Topics.system, '1')
+        : mqtt.publishMessage(Topics.system, '0');
     underwaterSensorSystem.resetCharts();
 
     notifyListeners();
@@ -82,7 +84,9 @@ class SystemController extends ValueNotifier {
 
   void toggleSampling() {
     isSampling.value = !isSampling.value;
-    mqtt.publishMessage(Topics.sampling, isSampling.value.toString());
+    isSampling.value
+        ? mqtt.publishMessage(Topics.sampling, '1')
+        : mqtt.publishMessage(Topics.sampling, '0');
 
     if (_timeLeft <= 0) {
       isSampling.value = false;
@@ -91,6 +95,22 @@ class SystemController extends ValueNotifier {
 
     underwaterSensorSystem.resetCharts();
     notifyListeners();
+  }
+
+  void toggleRS232() {
+    underwaterSensorSystem.toggleRS232();
+
+    underwaterSensorSystem.getIsOnRS232()
+        ? mqtt.publishMessage(Topics.rs232, '1')
+        : mqtt.publishMessage(Topics.rs232, '0');
+  }
+
+  void toggle12V() {
+    underwaterSensorSystem.toggle12V();
+
+    underwaterSensorSystem.getIsOn12V()
+        ? mqtt.publishMessage(Topics.volt, '1')
+        : mqtt.publishMessage(Topics.volt, '0');
   }
 
   //---------------------------SYSTEM TIMER----------------------------------

@@ -13,8 +13,6 @@ enum SensorType {
   BATTERY,
 }
 
-typedef UnderwaterSensorSystemCallback = void Function();
-
 class USSController extends ValueNotifier {
   //DATA
   late SensorDataController _depth;

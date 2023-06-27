@@ -1,5 +1,6 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
+import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
@@ -35,7 +36,6 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     _samplingIntController.text = "1";
 
     widget.systemController.registerCallback(updateDepthDifference);
-    widget.systemController.registerCallback(updateSamplingInterval);
     widget.systemController.registerCallback(updateTimeLeft);
     widget.systemController.registerCallback(updateSystem);
     widget.systemController.registerCallback(updateStatus);
@@ -43,6 +43,16 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     widget.systemController.registerCallback(update12V);
 
     super.initState();
+  }
+
+  void updateTargetDepth() {
+    double targetDepth = 0;
+
+    try {
+      targetDepth = double.parse(_targetDepthController.text);
+      widget.systemController.mqtt
+          .publishMessage(Topics.targetDepth, targetDepth.toString());
+    } catch (e) {}
   }
 
   void updateDepthDifference() {
@@ -60,6 +70,16 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
     depthDifference = targetDepth - currentDepth;
     _depthDiffController.text = "${depthDifference.toStringAsFixed(2)} m";
+  }
+
+  void updateTargetTime() {
+    int targetTime = 0;
+
+    try {
+      targetTime = int.parse(_targetTimeController.text);
+      widget.systemController.mqtt
+          .publishMessage(Topics.targetTime, targetTime.toString());
+    } catch (e) {}
   }
 
   void updateTimeLeft() {
@@ -83,6 +103,8 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
     try {
       seconds = int.parse(_samplingIntController.text);
+      widget.systemController.mqtt
+          .publishMessage(Topics.samplingInterval, seconds.toString());
     } catch (e) {}
 
     widget.systemController.updateTimer(seconds);
@@ -153,35 +175,67 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SYSTEM"),
-          PrimaryTextfield(controller: _systemController, enabled: false),
+          PrimaryTextfield(
+            controller: _systemController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "STATUS"),
-          PrimaryTextfield(controller: _statusController, enabled: false),
+          PrimaryTextfield(
+            controller: _statusController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET DEPTH"),
           PrimaryTextfield(
-              controller: _targetDepthController, enabled: !sampling),
+            controller: _targetDepthController,
+            enabled: !sampling,
+            onChangedFunction: updateTargetDepth,
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "DEPTH DIFFERENCE"),
-          PrimaryTextfield(controller: _depthDiffController, enabled: false),
+          PrimaryTextfield(
+            controller: _depthDiffController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TARGET TIME"),
           PrimaryTextfield(
-              controller: _targetTimeController,
-              enabled: !widget.systemController.getIsSampling()),
+            controller: _targetTimeController,
+            enabled: !widget.systemController.getIsSampling(),
+            onChangedFunction: updateTargetTime,
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "TIME LEFT"),
-          PrimaryTextfield(controller: _timeLeftController, enabled: false),
+          PrimaryTextfield(
+            controller: _timeLeftController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "SAMPLING INTERVAL"),
           PrimaryTextfield(
-              controller: _samplingIntController, enabled: !sampling),
+            controller: _samplingIntController,
+            enabled: !sampling,
+            onChangedFunction: updateSamplingInterval,
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "RS232"),
-          PrimaryTextfield(controller: _rs232StatusController, enabled: false),
+          PrimaryTextfield(
+            controller: _rs232StatusController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
           const PrimaryText(text: "12V"),
-          PrimaryTextfield(controller: _12VStatusController, enabled: false),
+          PrimaryTextfield(
+            controller: _12VStatusController,
+            enabled: false,
+            onChangedFunction: () {},
+          ),
         ],
       ),
     );

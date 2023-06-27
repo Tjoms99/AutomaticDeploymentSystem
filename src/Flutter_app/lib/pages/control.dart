@@ -43,24 +43,25 @@ class _ControlPageState extends State<ControlPage> {
               callback: widget.systemController.toggleSampling,
               getStatus: widget.systemController.getIsSampling,
             ),
-            /*
             Controlcard(
               label: 'RS232',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.USS.isOnRS232,
-              callback: widget.mqttController.toggleRS232,
-              getStatus: widget.mqttController.USS.getIsOnRS232,
+              enabled: widget.systemController.underwaterSensorSystem.isOnRS232,
+              callback: widget.systemController.toggleRS232,
+              getStatus:
+                  widget.systemController.underwaterSensorSystem.getIsOnRS232,
             ),
             Controlcard(
               label: '12V',
               textEnable: "ON",
               textDisable: "OFF",
-              enabled: widget.mqttController.USS.isOn12V,
-              callback: widget.mqttController.toggle12V,
-              getStatus: widget.mqttController.USS.getIsOn12V,
+              enabled: widget.systemController.underwaterSensorSystem.isOn12V,
+              callback: widget.systemController.toggle12V,
+              getStatus:
+                  widget.systemController.underwaterSensorSystem.getIsOn12V,
             ),
-            
+            /*
             Controlcard(
               label: 'MODE STATUS',
               textEnable: "AUTOMATIC",
