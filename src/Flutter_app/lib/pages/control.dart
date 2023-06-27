@@ -2,8 +2,6 @@ import 'package:automatic_deployment_system_app/components/control_card.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/controllers/mqtt_controller.dart';
-import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:flutter/material.dart';
 

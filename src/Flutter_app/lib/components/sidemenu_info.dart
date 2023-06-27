@@ -2,7 +2,6 @@ import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
-import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
 import 'package:automatic_deployment_system_app/style/style.dart';
@@ -157,14 +156,14 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
                   return widget.systemController.mqtt.isConnected.value
                       ? IconButton(
                           onPressed: widget.systemController.mqtt.disconnect,
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.signal_wifi_statusbar_4_bar,
                             color: Colors.green,
                           ),
                         )
                       : IconButton(
                           onPressed: widget.systemController.mqtt.connect,
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.signal_wifi_off,
                             color: Colors.red,
                           ),

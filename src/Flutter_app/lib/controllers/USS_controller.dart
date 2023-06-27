@@ -1,10 +1,8 @@
-import 'dart:async';
 
 import 'package:automatic_deployment_system_app/components/info_card.dart';
 import 'package:automatic_deployment_system_app/components/info_graph.dart';
 import 'package:automatic_deployment_system_app/controllers/sensor_controller.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 enum SensorType {
   DEPTH,
