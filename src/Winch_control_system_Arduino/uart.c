@@ -18,24 +18,8 @@ const int RS485_TX_EN_PIN = D5;
 
 char *rx_data = "\nUDEF";
 
-static void uart_test(void *arg)
-{
-    char *buffer = "\n5\n";
-
-    while (1)
-    {
-        digitalWrite(RS485_TX_EN_PIN, HIGH);
-        uart_write_bytes(UART_NUM, (const char *)buffer, strlen(buffer));
-        vTaskDelay(1 * strlen(buffer) / portTICK_PERIOD_MS);
-        digitalWrite(RS485_TX_EN_PIN, LOW);
-
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
-    }
-}
-
 static void uart_rx(void *arg)
 {
-    // uint8_t data[128];
     uint8_t *data = (uint8_t *)malloc(RX_BUFFER_SIZE + 1);
     int length = 0;
 
@@ -47,24 +31,11 @@ static void uart_rx(void *arg)
         length = uart_read_bytes(UART_NUM, data, length, 100);
         if (length > 0)
         {
-
             rx_data = data;
-            // rx_data[0] = "Q";
-
-            // uart_write(rx_data);
-            uart_flush_input(UART_NUM);
+            // uart_flush_input(UART_NUM);
         }
 
-        else if (length < 0)
-        {
-            uart_write("\nERR");
-        }
-        else
-        {
-            uart_write("\nNOP");
-        }
-
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
@@ -77,8 +48,6 @@ void uart_begin(void)
 
     uart_driver_install(UART_NUM, RX_BUFFER_SIZE, 0, 10, NULL, 0);
 
-    uart_flush(UART_NUM);
-    // xTaskCreate(uart_test, "uart_test_task", 2048, NULL, 10, NULL);
     xTaskCreate(uart_rx, "uart_rx_task", 2048, NULL, 10, NULL);
 }
 
