@@ -87,3 +87,14 @@ void max3471_recieve(char *data)
   // Return the received character
   *data = (char)UCA0RXBUF;
 }
+
+void max3471_transmit_6_bytes(char *data)
+{
+  max3471_transmit(12);
+  max3471_transmit(data[0]);
+  max3471_transmit(data[1]);
+  max3471_transmit(data[2]);
+  max3471_transmit(data[3]);
+  max3471_transmit(data[4]);
+  max3471_transmit(data[5]);
+}

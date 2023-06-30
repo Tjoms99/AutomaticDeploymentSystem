@@ -1,6 +1,7 @@
 
 #include <MSP430.h>
 #include <rs485/max3471.h>
+#include <rs485/print.h>
 #include <rs232/icl3221.h>
 #include <clock/clock.h>
 #include <power/power.h>
@@ -11,7 +12,6 @@
 #include <temperature/TSYS01.h>
 #include <i2c/i2c.h>
 #include <storage/memory.h>
-#include <library/conversions.h>
 #define TIMER_1S 32768
 
 volatile uint8_t SYSTEM_FLAG = 0;
@@ -44,6 +44,7 @@ static void set_system_loop_time(uint16_t seconds)
     SYSTEM_LOOP_TIME_SECONDS = seconds;
     SYSTEM_FLAG &= ~CUSTOM_TIME;
 }
+
 static void timer_init()
 {
 
@@ -90,53 +91,13 @@ void update_system_flags(char data)
         SYSTEM_FLAG = 0; // Reset
 }
 
-void print_current_temperature()
-{
-    float temperature = 0.0;
-    char buffer[6];
-
-    get_temperature_current_register(&temperature);
-
-    float_to_char_array(temperature, buffer);
-    max3471_transmit(12);
-    max3471_transmit(buffer[0]);
-    max3471_transmit(buffer[1]);
-    max3471_transmit(buffer[2]);
-    max3471_transmit(buffer[3]);
-    max3471_transmit(buffer[4]);
-    max3471_transmit(buffer[5]);
-}
-
-void print_temperature_register()
-{
-    float temperature = 0.0;
-    char buffer[6];
-    uint8_t done_reading = 0x00;
-
-    do
-    {
-        get_temperature_next_register(&temperature, &done_reading);
-
-        float_to_char_array(temperature, buffer);
-        max3471_transmit(12);
-        max3471_transmit(buffer[0]);
-        max3471_transmit(buffer[1]);
-        max3471_transmit(buffer[2]);
-        max3471_transmit(buffer[3]);
-        max3471_transmit(buffer[4]);
-        max3471_transmit(buffer[5]);
-    } while (!done_reading);
-
-    SYSTEM_FLAG ^= PRINT_ALL_REGISTERS;
-}
-
 // Sample pressure and temperature once
 void single_mode()
 {
-    static float TSYS01_temperature = 0;
+    static float tsys01_temperature = 0;
 
-    TSYS01_measure(&TSYS01_temperature);
-    set_temperature_current_register(TSYS01_temperature);
+    tsys01_measure(&tsys01_temperature);
+    set_temperature_current_register(tsys01_temperature);
 
     SYSTEM_FLAG ^= SINGLE_MODE;
 }
@@ -144,21 +105,22 @@ void single_mode()
 // Sample pressure and temperature once
 void continuous_mode()
 {
-    static float TSYS01_temperature = 0;
+    static float tsys01_temperature = 0;
+    static float ms5847_30ba_temperature = 0;
+    static float ms5847_30ba_pressure = 0;
 
-    TSYS01_measure(&TSYS01_temperature);
-    set_temperature_current_register(TSYS01_temperature);
-    set_temperature_next_register(TSYS01_temperature);
+    tsys01_measure(&tsys01_temperature);
+    ms5847_30ba_measure(&ms5847_30ba_pressure, &ms5847_30ba_temperature);
+
+    set_temperature_current_register(tsys01_temperature);
+    set_temperature_next_register(tsys01_temperature);
+
+    set_pressure_current_register(ms5847_30ba_pressure);
+    set_pressure_next_register(ms5847_30ba_pressure);
 }
 
 int main(void)
 {
-    static float MS5837_30BA_pressure = 0;
-    static float MS5837_30BA_temperature = 0;
-
-    static float pressure_reference = 0;
-    volatile static float depth = 0;
-
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
 
     clock_init_16mhz();
@@ -173,7 +135,8 @@ int main(void)
     icl3221_set_mode(1);
     icl3221_turn_on();
 
-    TSYS01_init();
+    tsys01_init();
+    ms5847_30ba_init();
 
     // RS485 Rx does not work when LPMx > 1
     // Reason: DC0 takes to long to start up / drifts
@@ -189,7 +152,7 @@ int main(void)
 
             SYSTEM_FLAG &CONTINUOUS_MODE ? continuous_mode() : __no_operation;
 
-            SYSTEM_FLAG &PRINT_CURRENT_REGISTER ? print_current_temperature() : __no_operation;
+            SYSTEM_FLAG &PRINT_CURRENT_REGISTER ? print_current_values() : __no_operation;
 
             SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
 
@@ -204,7 +167,7 @@ int main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
-    __bic_SR_register_on_exit(LPM1_bits);
+    //__bic_SR_register_on_exit(LPM1_bits);
 
     check_system_loop_time();
     TBCCTL0 &= ~CCIFG; // clear interrupt
@@ -214,12 +177,12 @@ __interrupt void Timer_A_CCR0_ISR(void)
 #pragma vector = USCI_A0_VECTOR
 __interrupt void RS485_ISR(void)
 {
-    //__bic_SR_register_on_exit(LPM1_bits);
+    __bic_SR_register_on_exit(LPM1_bits);
 
     rs485_rx_data = UCA0RXBUF;
 
     // Remove / 10 when not using ASCII chars over putty
-    SYSTEM_FLAG & CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
+    SYSTEM_FLAG &CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
 }
 
 // Interrupt Service Routine for UART receive
