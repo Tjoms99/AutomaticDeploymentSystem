@@ -14,7 +14,7 @@
 #include <library/conversions.h>
 #define TIMER_1S 32768
 
-volatile uint8_t SYSTEM_FLAG = 1;
+volatile uint8_t SYSTEM_FLAG = 0;
 volatile uint8_t rs485_rx_data = 0;
 volatile uint8_t rs232_rx_data = 0;
 
@@ -28,7 +28,7 @@ volatile uint16_t SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
 #define SINGLE_MODE BIT3
 #define CUSTOM_TIME BIT2
 #define RS232_ENABLE BIT1
-#define POWER_ENABLE BIT0
+#define VOLT12_ENABLE BIT0
 
 static void check_system_loop_time()
 {
@@ -73,7 +73,7 @@ static void timer_init()
 void update_system_flags(char data)
 {
     if (data == '0')
-        SYSTEM_FLAG ^= POWER_ENABLE;
+        SYSTEM_FLAG ^= VOLT12_ENABLE;
     if (data == '1')
         SYSTEM_FLAG ^= RS232_ENABLE;
     if (data == '2')
@@ -183,7 +183,7 @@ int main(void)
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
 
-            SYSTEM_FLAG &POWER_ENABLE ? power(0xFF) : power(0x00);
+            SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
 
             SYSTEM_FLAG &SINGLE_MODE ? single_mode() : __no_operation;
 
@@ -214,12 +214,12 @@ __interrupt void Timer_A_CCR0_ISR(void)
 #pragma vector = USCI_A0_VECTOR
 __interrupt void RS485_ISR(void)
 {
-    __bic_SR_register_on_exit(LPM1_bits);
+    //__bic_SR_register_on_exit(LPM1_bits);
 
     rs485_rx_data = UCA0RXBUF;
 
     // Remove / 10 when not using ASCII chars over putty
-    SYSTEM_FLAG &CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
+    SYSTEM_FLAG & CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
 }
 
 // Interrupt Service Routine for UART receive
