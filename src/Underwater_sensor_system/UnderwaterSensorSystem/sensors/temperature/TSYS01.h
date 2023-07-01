@@ -42,7 +42,7 @@ void tsys01_wait_for_conversion(void);
 
 void tsys01_get_convertion(float *adc);
 
-void tsys01_calculate_temperature(float *temperature, float *tsys01_adc);
+void tsys01_calculate_temperature(float *temperature, float tsys01_adc);
 
 void tsys01_measure(float *temperature);
 

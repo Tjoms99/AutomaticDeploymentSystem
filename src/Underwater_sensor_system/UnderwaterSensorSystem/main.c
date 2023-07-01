@@ -9,10 +9,11 @@
 #include <stdint.h>
 
 #include <sensors/pressure/MS5837_30BA.h>
-#include <sensors/temperature/TSYS01.h>
+#include <sensors/sensors.h>
+
 #include <i2c/i2c.h>
 #include <storage/memory.h>
-#define TIMER_1S 32768
+#define TIMER_1S 0x7FFF /// 7FFF 1s
 
 volatile uint8_t SYSTEM_FLAG = 0;
 volatile uint8_t rs485_rx_data = 0;
@@ -106,11 +107,9 @@ void single_mode()
 void continuous_mode()
 {
     static float tsys01_temperature = 0;
-    static float ms5847_30ba_temperature = 0;
     static float ms5847_30ba_pressure = 0;
 
-    tsys01_measure(&tsys01_temperature);
-    ms5847_30ba_measure(&ms5847_30ba_pressure, &ms5847_30ba_temperature);
+    sensors_get_values(&tsys01_temperature, &ms5847_30ba_pressure);
 
     set_temperature_current_register(tsys01_temperature);
     set_temperature_next_register(tsys01_temperature);
@@ -135,8 +134,7 @@ int main(void)
     icl3221_set_mode(1);
     icl3221_turn_on();
 
-    tsys01_init();
-    ms5847_30ba_init();
+    sensors_init();
 
     // RS485 Rx does not work when LPMx > 1
     // Reason: DC0 takes to long to start up / drifts
@@ -167,7 +165,7 @@ int main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
-    //__bic_SR_register_on_exit(LPM1_bits);
+    __bic_SR_register_on_exit(LPM1_bits);
 
     check_system_loop_time();
     TBCCTL0 &= ~CCIFG; // clear interrupt

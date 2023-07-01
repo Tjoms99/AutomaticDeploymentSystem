@@ -65,9 +65,9 @@ void tsys01_get_convertion(float *adc_value)
     *adc_value = i2c_data_in;
 }
 
-void tsys01_calculate_temperature(float *temperature, float *adc_value)
+void tsys01_calculate_temperature(float *temperature, float adc_value)
 {
-    float adc = *adc_value; // Default value 9378708 / 256; (for CRC)
+    float adc = adc_value; // Default value 9378708 / 256; (for CRC)
 
     float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
     float k3_t = (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
@@ -116,7 +116,7 @@ void tsys01_measure(float *temperature)
     tsys01_start_convertion();
     tsys01_wait_for_conversion();
     tsys01_get_convertion(&tsys01_adc);
-    tsys01_calculate_temperature(temperature, &tsys01_adc);
+    tsys01_calculate_temperature(temperature, tsys01_adc);
 }
 
 #pragma vector = TIMER0_B1_VECTOR
