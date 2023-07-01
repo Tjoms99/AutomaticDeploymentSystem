@@ -6,7 +6,7 @@
  */
 
 #include <MSP430.h>
-#include <pressure/MS5837_30BA.h>
+#include <sensors/pressure/MS5837_30BA.h>
 #include <i2c/i2c.h>
 
 #define TIMER_33MS 10813 // 33ms
@@ -136,7 +136,7 @@ static void calculate(float *pressure, float *temperature, uint32_t D1_pres, uin
 
 // Wait for 33 seconds
 // Set up timer compare register CCR1 and enter LPM
-static void wait_for_conversion()
+static void tsys01_wait_for_conversion()
 {
     TB0CCTL2 |= CCIE; // enable interrupt
 
@@ -160,7 +160,7 @@ void ms5847_30ba_init()
     {
         i2c_write((MS5837_30BA_PROM_READ + i * 2), MS5837_30BA_ADDRESS); // request coefficients
         i2c_read(BYTES_2, MS5837_30BA_ADDRESS);                          // read coefficients
-        coefficients[i] = data_in;                                       // set coefficients
+        coefficients[i] = i2c_data_in;                                   // set coefficients
     }
 
     // Verify that data is correct with CRC
@@ -172,21 +172,41 @@ void ms5847_30ba_init()
     timer_init();
 }
 
+void ms5847_30ba_start_pressure_convertion()
+{
+    i2c_write(MS5837_30BA_START_CONVERTION_D1_4096, MS5837_30BA_ADDRESS); // start conversion of pressure
+}
+
+void ms5847_30ba_start_temperature_convertion()
+{
+    i2c_write(MS5837_30BA_START_CONVERTION_D2_4096, MS5837_30BA_ADDRESS); // start conversion of temperature
+}
+
+void ms5847_30ba_get_pressure_convertion(uint32_t *D1)
+{
+    i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS); // request ADC value
+    i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                    // read ADC value
+    *D1 = i2c_data_in;                                         // set ADC value (pressure)}
+}
+
+void ms5847_30ba_get_temperature_convertion(uint32_t *D2)
+{
+    i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS); // request ADC value
+    i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                    // read ADC value
+    *D2 = i2c_data_in;                                         // set ADC value (temperature)
+}
+
 void get_conversion_values(uint32_t *D1, uint32_t *D2)
 {
+    ms5847_30ba_start_pressure_convertion();
+    tsys01_wait_for_conversion();
+    ms5847_30ba_get_pressure_convertion(D1);
 
-    i2c_write(MS5837_30BA_START_CONVERTION_D1_4096, MS5837_30BA_ADDRESS); // start conversion of pressure
-    wait_for_conversion();
-    i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS); // request ADC value
-    i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                    // read ADC value
-    *D1 = data_in;                                             // set ADC value (pressure)
-
-    i2c_write(MS5837_30BA_START_CONVERTION_D2_4096, MS5837_30BA_ADDRESS); // start conversion of temperature
-    wait_for_conversion();
-    i2c_write(MS5837_30BA_GET_ADC_VALUE, MS5837_30BA_ADDRESS); // request ADC value
-    i2c_read(BYTES_3, MS5837_30BA_ADDRESS);                    // read ADC value
-    *D2 = data_in;                                             // set ADC value (temperature)
+    ms5847_30ba_start_temperature_convertion();
+    tsys01_wait_for_conversion();
+    ms5847_30ba_get_temperature_convertion(D2);
 }
+
 void ms5847_30ba_measure(float *pressure, float *temperature)
 {
     static uint32_t D1_pres, D2_temp;

@@ -8,8 +8,8 @@
 
 #include <stdint.h>
 
-#include <pressure/MS5837_30BA.h>
-#include <temperature/TSYS01.h>
+#include <sensors/pressure/MS5837_30BA.h>
+#include <sensors/temperature/TSYS01.h>
 #include <i2c/i2c.h>
 #include <storage/memory.h>
 #define TIMER_1S 32768

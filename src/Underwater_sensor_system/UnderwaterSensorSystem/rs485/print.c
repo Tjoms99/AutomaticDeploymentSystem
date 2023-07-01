@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-#include <temperature/TSYS01.h>
+#include <sensors/temperature/TSYS01.h>
 #include <library/conversions.h>
 
 #include <rs485/max3471.h>
