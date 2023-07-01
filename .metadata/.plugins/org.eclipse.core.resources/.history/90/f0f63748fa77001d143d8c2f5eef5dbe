@@ -1,0 +1,24 @@
+/*
+ * pressure.h
+ *
+ *  Created on: 7 Dec 2022
+ *      Author: marcu
+ */
+
+#ifndef PRESSURE_PRESSURE_H_
+#define PRESSURE_PRESSURE_H_
+
+    #define PRESSURE_ADDRESS 0x76
+
+    #define RESET_SENSOR 0x1E
+    #define GET_ADC_VALUE 0x00
+    #define PROM_READ 0xA0
+    #define START_CONVERTION_D1_8192 0x4A
+    #define START_CONVERTION_D2_8192 0x5A
+
+    #define BYTES_2 0X02
+
+    uint16_t constants[8];
+
+    void init_pressure(void);
+#endif /* PRESSURE_PRESSURE_H_ */
