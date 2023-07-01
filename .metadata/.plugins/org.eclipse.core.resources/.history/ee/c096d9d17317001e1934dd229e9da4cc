@@ -1,0 +1,29 @@
+
+#include <stdint.h>
+#include <../temperature/TSYS01.h>
+
+#include "print.h"
+
+void print_current_temperature()
+{
+    float temperature = 0.0;
+    char buffer[6];
+
+    get_temperature_current_register(&temperature);
+    max3471_transmit_6_bytes(temperature);
+}
+
+void print_temperature_register()
+{
+    float temperature = 0.0;
+    char buffer[6];
+    uint8_t done_reading = 0x00;
+
+    do
+    {
+        get_temperature_next_register(&temperature, &done_reading);
+
+        float_to_char_array(temperature, buffer);
+        max3471_transmit_6_bytes(temperature);
+    } while (!done_reading);
+}

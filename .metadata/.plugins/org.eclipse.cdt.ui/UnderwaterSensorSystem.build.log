@@ -1,0 +1,41 @@
+
+**** Build of configuration Debug for project UnderwaterSensorSystem ****
+
+"C:\\ti\\ccs1210\\ccs\\utils\\bin\\gmake" -k -j 16 all -O 
+ 
+Building file: "../temperature/TSYS01.c"
+Invoking: MSP430 Compiler
+"C:/ti/ccs1210/ccs/tools/compiler/ti-cgt-msp430_21.6.0.LTS/bin/cl430" -vmspx --use_hw_mpy=F5 --include_path="C:/ti/ccs1210/ccs/ccs_base/msp430/include" --include_path="C:/Users/marcu/OneDrive/Documents/ImportantDocuments/University/NTNU/Project/USS/UnderwaterSensorSystem" --include_path="C:/ti/ccs1210/ccs/tools/compiler/ti-cgt-msp430_21.6.0.LTS/include" --advice:power=all --advice:hw_config=all --define=__MSP430FR2355__ --define=_FRWP_ENABLE --define=_INFO_FRWP_ENABLE -g --printf_support=minimal --diag_warning=225 --diag_wrap=off --display_error_number --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --preproc_with_compile --preproc_dependency="temperature/TSYS01.d_raw" --obj_directory="temperature"  "../temperature/TSYS01.c"
+"../temperature/TSYS01.c", line 72: remark #1530-D: (ULP 5.1) Detected divide operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 73: remark #1530-D: (ULP 5.1) Detected divide operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 74: remark #1530-D: (ULP 5.1) Detected divide operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 75: remark #1530-D: (ULP 5.1) Detected divide operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 76: remark #1530-D: (ULP 5.1) Detected divide operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 86: remark #1544-D: (ULP 13.1) Detected loop counting up. Recommend loops count down as detecting zeros is easier
+"../temperature/TSYS01.c", line 86: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
+"../temperature/TSYS01.c", line 70 (col. 9): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 72 (col. 21): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 73 (col. 64): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 74 (col. 21): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 75 (col. 42): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 76 (col. 21): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../temperature/TSYS01.c", line 78 (col. 18): remark #1531-D: (ULP 5.2) Detected floating point operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+Finished building: "../temperature/TSYS01.c"
+ 
+Building target: "UnderwaterSensorSystem.out"
+Invoking: MSP430 Linker
+"C:/ti/ccs1210/ccs/tools/compiler/ti-cgt-msp430_21.6.0.LTS/bin/cl430" -vmspx --use_hw_mpy=F5 --advice:power=all --advice:hw_config=all --define=__MSP430FR2355__ --define=_FRWP_ENABLE --define=_INFO_FRWP_ENABLE -g --printf_support=minimal --diag_warning=225 --diag_wrap=off --display_error_number --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 -z -m"UnderwaterSensorSystem.map" --heap_size=160 --stack_size=160 --cinit_hold_wdt=on -i"C:/ti/ccs1210/ccs/ccs_base/msp430/include" -i"C:/ti/ccs1210/ccs/ccs_base/msp430/lib/FR2xx" -i"C:/ti/ccs1210/ccs/tools/compiler/ti-cgt-msp430_21.6.0.LTS/lib" -i"C:/ti/ccs1210/ccs/tools/compiler/ti-cgt-msp430_21.6.0.LTS/include" --priority --reread_libs --define=_FRWP_ENABLE --define=_INFO_FRWP_ENABLE --diag_wrap=off --display_error_number --warn_sections --xml_link_info="UnderwaterSensorSystem_linkInfo.xml" --use_hw_mpy=F5 --rom_model -o "UnderwaterSensorSystem.out" "./main.obj" "./clock/clock.obj" "./i2c/i2c.obj" "./library/conversions.obj" "./power/power.obj" "./pressure/MS5837_30BA.obj" "./rs232/icl3221.obj" "./rs485/max3471.obj" "./rs485/print.obj" "./storage/memory.obj" "./temperature/TSYS01.obj" "../lnk_msp430fr2355.cmd"  -lfrwp_init.a -llibc.a 
+<Linking>
+warning #10229-D: output section ".data" refers to load symbol "$C$SL1" and hence cannot be compressed; compression "lzss" is ignored
+remark #10372-D: (ULP 4.1) Detected uninitialized Port 2 in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port 3 in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port 5 in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port 6 in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port A in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port B in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10372-D: (ULP 4.1) Detected uninitialized Port C in this project. Recommend initializing all unused ports to eliminate wasted current consumption on unused pins.
+remark #10422-D: (ULP 6.2) Detected use of a device with available 32-bit hardware multiplier and not also using MSPMATHLIB library (libmath.a).  Recommend using MSPMATHLIB library (libmath.a) for improved performance.
+Finished building target: "UnderwaterSensorSystem.out"
+ 
+
+**** Build Finished ****

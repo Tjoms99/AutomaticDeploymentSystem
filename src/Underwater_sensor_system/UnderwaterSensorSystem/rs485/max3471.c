@@ -47,7 +47,7 @@ void max3471_init()
   // Configure UART settings
   UCA0CTLW0 |= UCSWRST;       // SW reset
   UCA0CTLW0 |= UCSSEL__SMCLK; // SMCLK = BRCLK (115200 BAUD)
-  max3471_set_mode(0);
+  max3471_set_mode(1);
 
   PM5CTL0 &= ~LOCKLPM5;  // turn on I/O
   UCA0CTLW0 &= ~UCSWRST; // Remove software reset
@@ -86,4 +86,15 @@ void max3471_recieve(char *data)
 
   // Return the received character
   *data = (char)UCA0RXBUF;
+}
+
+void max3471_transmit_6_bytes(char *data)
+{
+  max3471_transmit(12);
+  max3471_transmit(data[0]);
+  max3471_transmit(data[1]);
+  max3471_transmit(data[2]);
+  max3471_transmit(data[3]);
+  max3471_transmit(data[4]);
+  max3471_transmit(data[5]);
 }

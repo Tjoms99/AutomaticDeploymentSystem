@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;UnderwaterSensorSystem/storage/memroy.h&apos; to &apos;memory.h&apos;" description="Rename resource &apos;memroy.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="storage/memroy.h" name="memory.h" stamp="1684681631888" updateReferences="true"/>
+</session>

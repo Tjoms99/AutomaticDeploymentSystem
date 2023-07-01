@@ -9,12 +9,9 @@
 #define STORAGE_MEMORY_H_
 
 #include <stdint.h>
-#define MEMORY_SIZE 0x1FF
-#define TEMPERATURE_CURRENT_REGISTER 0x000
-#define TEMPERATURE_NEXT_REGISTER_START 0x001
-
-#define PRESSURE_CURRENT_REGISTER 0x000
-#define PRESSURE_NEXT_REGISTER_START 0x001
+#define MEMORY_SIZE 0x0FF
+#define CURRENT_REGISTER 0x000
+#define NEXT_REGISTER_START 0x001
 
 #define LOOP_FLAG 0x8000
 
@@ -25,5 +22,11 @@ void set_temperature_next_register(float temperature);
 void get_temperature_current_register(float *temperature);
 
 void get_temperature_next_register(float *temperature, uint8_t *done_reading);
+
+void set_pressure_current_register(float pressure);
+
+void set_pressure_next_register(float pressure);
+
+void get_pressure_current_register(float *pressure);
 
 #endif /* STORAGE_MEMORY_H_ */
