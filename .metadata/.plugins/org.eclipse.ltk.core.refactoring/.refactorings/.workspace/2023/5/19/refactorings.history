@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;UnderwaterSensorSystem/Debug/UnderwaterSensorSystem.out&apos;" deleteContents="false" description="Delete resource &apos;UnderwaterSensorSystem/Debug/UnderwaterSensorSystem.out&apos;" element1="/UnderwaterSensorSystem/Debug/UnderwaterSensorSystem.out" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1684066526377"/>
-</session>

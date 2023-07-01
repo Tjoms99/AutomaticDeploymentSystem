@@ -1,8 +1,0 @@
-LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
-LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
-LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
-activeLaunchTarget=null\:---
-configDescList=org.eclipse.launchbar.core.descriptorType.default\:UnderwaterSensorSystem
-eclipse.preferences.version=1
-org.eclipse.launchbar.core.descriptorType.default\:UnderwaterSensorSystem/activeLaunchMode=debug
-org.eclipse.launchbar.core.descriptorType.default\:UnderwaterSensorSystem/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
