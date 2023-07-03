@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <MSP430.h>
-#include <temperature/TSYS01.h>
+#include <sensors/temperature/TSYS01.h>
 #include <i2c/i2c.h>
 
 #define TIMER_33MS 10813 // 33ms
@@ -29,20 +29,20 @@ static void timer_init()
 static void set_coefficients(uint8_t coefficient)
 {
     if (coefficient == K4)
-        k4 = data_in;
+        k4 = i2c_data_in;
     if (coefficient == K3)
-        k3 = data_in;
+        k3 = i2c_data_in;
     if (coefficient == K2)
-        k2 = data_in;
+        k2 = i2c_data_in;
     if (coefficient == K1)
-        k1 = data_in;
+        k1 = i2c_data_in;
     if (coefficient == K0)
-        k0 = data_in;
+        k0 = i2c_data_in;
 }
 
 // Wait for 33 seconds
 // Set up timer compare register CCR1 and enter LPM
-static void wait_for_conversion()
+void tsys01_wait_for_conversion()
 {
     TBCCTL1 |= CCIE; // enable interrupt
 
@@ -53,21 +53,21 @@ static void wait_for_conversion()
     __bis_SR_register(LPM1_bits | GIE);
 }
 
-static void read_adc()
+void tsys01_start_convertion()
 {
-
     i2c_write(TSYS01_START_CONVERSION, TSYS01_ADDRESS); // start conversion
-    wait_for_conversion();
-    i2c_write(TSYS01_GET_ADC_VALUE, TSYS01_ADDRESS); // read adc temp value
-    i2c_read(BYTES_2, TSYS01_ADDRESS);
 }
 
-static void tsys01_calculate_temperature(float *temperature)
+void tsys01_get_convertion(float *adc_value)
 {
-    static float adc = 9378708 / 256;
+    i2c_write(TSYS01_GET_ADC_VALUE, TSYS01_ADDRESS); // read adc temp value
+    i2c_read(BYTES_2, TSYS01_ADDRESS);
+    *adc_value = i2c_data_in;
+}
 
-    read_adc();
-    adc = data_in;
+void tsys01_calculate_temperature(float *temperature, float adc_value)
+{
+    float adc = adc_value; // Default value 9378708 / 256; (for CRC)
 
     float k4_t = -1 * (2.0f * k4 / 1000000000000000000000.0f * adc * adc * adc * adc);
     float k3_t = (4.0f * k3 / 10000000000000000.0f * adc * adc * adc);
@@ -111,7 +111,12 @@ void tsys01_init()
 
 void tsys01_measure(float *temperature)
 {
-    tsys01_calculate_temperature(temperature);
+    float tsys01_adc = 0;
+
+    tsys01_start_convertion();
+    tsys01_wait_for_conversion();
+    tsys01_get_convertion(&tsys01_adc);
+    tsys01_calculate_temperature(temperature, tsys01_adc);
 }
 
 #pragma vector = TIMER0_B1_VECTOR

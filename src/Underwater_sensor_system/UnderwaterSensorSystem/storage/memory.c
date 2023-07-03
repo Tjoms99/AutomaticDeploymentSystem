@@ -116,3 +116,52 @@ void get_pressure_next_register(float *pressure, uint8_t *done_reading)
         *done_reading = 0xFF;
     }
 }
+
+// ------------------------------------------------------------------
+// DEPTH
+
+void set_depth_current_register(float depth)
+{
+    depth_register[CURRENT_REGISTER] = depth;
+}
+
+void set_depth_next_register(float depth)
+{
+
+    depth_register[(MEMORY_SIZE & read_pointer_depth++)] = depth;
+
+    if ((read_pointer_depth & MEMORY_SIZE) >= MEMORY_SIZE)
+    {
+        read_pointer_depth = NEXT_REGISTER_START;
+        read_pointer_depth |= LOOP_FLAG; // Has looped flag triggered at MSB
+    }
+}
+
+void get_depth_current_register(float *depth)
+{
+    *depth = depth_register[CURRENT_REGISTER];
+}
+
+// Will reset the pointer when reading an empty register
+void get_depth_next_register(float *depth, uint8_t *done_reading)
+{
+    *done_reading = 0x00;
+
+    // Circular register, check if write pointer has looped to read the correct order
+    if ((write_pointer_depth & LOOP_FLAG) && !(read_pointer_depth & LOOP_FLAG))
+        read_pointer_depth = write_pointer_depth + 1;
+
+    // Read register
+    *depth = depth_register[(MEMORY_SIZE & read_pointer_depth++)];
+
+    // Init read_pointer but keep LOOP_FLAG
+    if ((read_pointer_depth & MEMORY_SIZE) >= MEMORY_SIZE)
+        read_pointer_depth = NEXT_REGISTER_START | LOOP_FLAG;
+
+    // Reset read_pointer when finished reading registers
+    if (read_pointer_depth == write_pointer_depth)
+    {
+        read_pointer_depth = NEXT_REGISTER_START;
+        *done_reading = 0xFF;
+    }
+}

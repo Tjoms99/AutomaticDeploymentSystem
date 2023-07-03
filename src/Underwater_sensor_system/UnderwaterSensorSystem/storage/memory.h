@@ -29,4 +29,10 @@ void set_pressure_next_register(float pressure);
 
 void get_pressure_current_register(float *pressure);
 
+void set_depth_current_register(float depth);
+
+void set_depth_next_register(float depth);
+
+void get_depth_current_register(float *depth);
+
 #endif /* STORAGE_MEMORY_H_ */

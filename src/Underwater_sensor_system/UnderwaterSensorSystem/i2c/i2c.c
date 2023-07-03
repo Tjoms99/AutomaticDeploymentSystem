@@ -51,7 +51,7 @@ void i2c_write(uint8_t cmd, uint8_t address)
         // Transmit Data to slave with a WRITE message
         UCB0I2CSA = address; // set slave address
         UCB0TBCNT = 1;       // count = 1 byte
-        data_out = cmd;
+        i2c_data_out = cmd;
 
         UCB0CTLW0 |= UCTR;    // Put into Tx mode
         UCB0CTLW0 |= UCTXSTT; // manually start message (START)
@@ -86,13 +86,13 @@ __interrupt void EUSCI_B0_I2C_ISR(void)
         {
         case RXIF0: // read Rx buffer
 
-                data_in = data_in << 8 | UCB0RXBUF;
+                i2c_data_in = i2c_data_in << 8 | UCB0RXBUF;
                 break;
 
         case TXIF0: // set Tx buffer
-                UCB0TXBUF = data_out;
+                UCB0TXBUF = i2c_data_out;
 
-                data_in = 0;
+                i2c_data_in = 0;
                 break;
 
         default:

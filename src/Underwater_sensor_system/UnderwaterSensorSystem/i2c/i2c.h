@@ -8,8 +8,8 @@
 #ifndef I2C_H_
 #define I2C_H_
 
-volatile uint64_t data_in;
-volatile uint32_t data_out;
+volatile uint64_t i2c_data_in;
+volatile uint32_t i2c_data_out;
 
 void i2c_init();
 void i2c_write(uint8_t cmd, uint8_t address);

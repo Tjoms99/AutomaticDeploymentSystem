@@ -8,11 +8,12 @@
 
 #include <stdint.h>
 
-#include <pressure/MS5837_30BA.h>
-#include <temperature/TSYS01.h>
+#include <sensors/pressure/MS5837_30BA.h>
+#include <sensors/sensors.h>
+
 #include <i2c/i2c.h>
 #include <storage/memory.h>
-#define TIMER_1S 32768
+#define TIMER_1S 0x7FFF /// 7FFF 1s
 
 volatile uint8_t SYSTEM_FLAG = 0;
 volatile uint8_t rs485_rx_data = 0;
@@ -25,7 +26,7 @@ volatile uint16_t SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
 #define PRINT_ALL_REGISTERS BIT6
 #define PRINT_CURRENT_REGISTER BIT5
 #define CONTINUOUS_MODE BIT4
-#define SINGLE_MODE BIT3
+#define DEPTH_ZERO BIT3
 #define CUSTOM_TIME BIT2
 #define RS232_ENABLE BIT1
 #define VOLT12_ENABLE BIT0
@@ -80,7 +81,7 @@ void update_system_flags(char data)
     if (data == '2')
         SYSTEM_FLAG ^= CUSTOM_TIME;
     if (data == '3')
-        SYSTEM_FLAG ^= SINGLE_MODE;
+        SYSTEM_FLAG ^= DEPTH_ZERO;
     if (data == '4')
         SYSTEM_FLAG ^= CONTINUOUS_MODE;
     if (data == '5')
@@ -92,31 +93,31 @@ void update_system_flags(char data)
 }
 
 // Sample pressure and temperature once
-void single_mode()
+void set_pressure_at_zero_depth()
 {
-    static float tsys01_temperature = 0;
-
-    tsys01_measure(&tsys01_temperature);
-    set_temperature_current_register(tsys01_temperature);
-
-    SYSTEM_FLAG ^= SINGLE_MODE;
+    static float ms5847_30ba_pressure = 0;
+    get_pressure_current_register(&ms5847_30ba_pressure);
+    sensors_pressure_at_zero_depth(ms5847_30ba_pressure);
+    SYSTEM_FLAG ^= DEPTH_ZERO;
 }
 
 // Sample pressure and temperature once
 void continuous_mode()
 {
     static float tsys01_temperature = 0;
-    static float ms5847_30ba_temperature = 0;
     static float ms5847_30ba_pressure = 0;
+    static float ms5847_30ba_depth = 0;
 
-    tsys01_measure(&tsys01_temperature);
-    ms5847_30ba_measure(&ms5847_30ba_pressure, &ms5847_30ba_temperature);
+    sensors_get_values(&tsys01_temperature, &ms5847_30ba_pressure, &ms5847_30ba_depth);
 
     set_temperature_current_register(tsys01_temperature);
     set_temperature_next_register(tsys01_temperature);
 
     set_pressure_current_register(ms5847_30ba_pressure);
     set_pressure_next_register(ms5847_30ba_pressure);
+
+    set_depth_current_register(ms5847_30ba_depth);
+    set_depth_next_register(ms5847_30ba_depth);
 }
 
 int main(void)
@@ -135,8 +136,10 @@ int main(void)
     icl3221_set_mode(1);
     icl3221_turn_on();
 
-    tsys01_init();
-    ms5847_30ba_init();
+    sensors_init();
+    // Set sensor values
+    continuous_mode();
+    set_pressure_at_zero_depth();
 
     // RS485 Rx does not work when LPMx > 1
     // Reason: DC0 takes to long to start up / drifts
@@ -148,7 +151,7 @@ int main(void)
 
             SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
 
-            SYSTEM_FLAG &SINGLE_MODE ? single_mode() : __no_operation;
+            SYSTEM_FLAG &DEPTH_ZERO ? set_pressure_at_zero_depth() : __no_operation;
 
             SYSTEM_FLAG &CONTINUOUS_MODE ? continuous_mode() : __no_operation;
 
@@ -167,7 +170,7 @@ int main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
-    //__bic_SR_register_on_exit(LPM1_bits);
+    __bic_SR_register_on_exit(LPM1_bits);
 
     check_system_loop_time();
     TBCCTL0 &= ~CCIFG; // clear interrupt
