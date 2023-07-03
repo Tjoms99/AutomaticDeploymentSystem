@@ -99,7 +99,6 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
 
   void updateSamplingInterval() {
     int seconds = 1;
-
     try {
       seconds = int.parse(_samplingIntController.text);
       widget.systemController.mqtt

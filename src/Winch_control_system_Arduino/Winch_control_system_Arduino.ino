@@ -3,6 +3,8 @@
 extern "C" {
 #include "uart.h"
 }
+#include <stdio.h>
+#include <string.h>
 
 //--------------------------------------------------------------------
 // WiFi
@@ -45,16 +47,19 @@ const int mqtt_port = 1883;
 #define TARGET_TIME 0x05
 #define TARGET_DEPTH 0x06
 
-char mqttData[MQTT_SUBSCRIBTIONS_LENGTH][10];
+char mqtt_data[MQTT_SUBSCRIBTIONS_LENGTH][10];
 
 String client_id = "esp32-client-";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void mqtt_populate_data(int location, byte *payload, unsigned int length) {
-  for (int i = 0; i < length; i++) {
-    mqttData[location][i] = (char)payload[i];
-    Serial.print(mqttData[location][i]);
+  for (int i = 0; i < 10; i++) {
+    mqtt_data[location][i] = '\0';
+    if (i < length) {
+      mqtt_data[location][i] = (char)payload[i];
+    }
+    Serial.print(mqtt_data[location][i]);
   }
 }
 
@@ -73,6 +78,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
     mqtt_populate_data(VOLT12_ON, payload, length);
   } else if (strcmp(topic, topic_sampling_interval) == 0) {
     mqtt_populate_data(SAMPLING_INTERVAL, payload, length);
+    uart_write_sample_time(mqtt_data[SAMPLING_INTERVAL]);
   } else if (strcmp(topic, topic_target_depth) == 0) {
     mqtt_populate_data(TARGET_TIME, payload, length);
   } else if (strcmp(topic, topic_target_time) == 0) {
@@ -94,29 +100,65 @@ char *get_rx_buffer() {
 }
 
 void assign_data(char temperature[6], char pressure[6], char depth[6]) {
+  static const uint8_t data_per_attribute = 1 + 1 + 6;  // NEW LINE + TAG + DATA
+  static const uint8_t data_elements = 3;               // Temperature, pressure, depth
+
+  static const char temperature_tag = 't';
+  static const char pressure_tag = 'p';
+  static const char depth_tag = 'd';
 
   char *data = get_rx_buffer();
+  Serial.println(data);
 
-  for (int data_index = 0; data_index < 6; data_index++) {
-    temperature[data_index] = data[data_index + 1];
-    pressure[data_index] = data[data_index + 8];
-    depth[data_index] = data[data_index + 15];
+  for (int data_index = 0; data_index < (data_per_attribute * data_elements); data_index++) {
+    if (temperature_tag == data[data_index]) {
+      temperature[0] = data[data_index + 1];
+      temperature[1] = data[data_index + 2];
+      temperature[2] = data[data_index + 3];
+      temperature[3] = data[data_index + 4];
+      temperature[4] = data[data_index + 5];
+      temperature[5] = data[data_index + 6];
+      data_index += data_per_attribute;
+    }
+
+    if (pressure_tag == data[data_index]) {
+      pressure[0] = data[data_index + 1];
+      pressure[1] = data[data_index + 2];
+      pressure[2] = data[data_index + 3];
+      pressure[3] = data[data_index + 4];
+      pressure[4] = data[data_index + 5];
+      pressure[5] = data[data_index + 6];
+      data_index += data_per_attribute;
+    }
+
+    if (depth_tag == data[data_index]) {
+      depth[0] = data[data_index + 1];
+      depth[1] = data[data_index + 2];
+      depth[2] = data[data_index + 3];
+      depth[3] = data[data_index + 4];
+      depth[4] = data[data_index + 5];
+      depth[5] = data[data_index + 6];
+      data_index += data_per_attribute;
+    }
   }
+
+  Serial.println(temperature);
+  Serial.println(pressure);
+  Serial.println(depth);
 }
 void publish_data() {
-  static char temperature[6];
-  static char pressure[6];
-  static char depth[6];
+  static char temperature[6] = "0";
+  static char pressure[6] = "0";
+  static char depth[6] = "0";
 
   assign_data(temperature, pressure, depth);
-
 
   client.publish(topic_depth, depth, true);
   client.publish(topic_temperature, temperature, true);
   client.publish(topic_pressure, pressure, true);
   client.publish(topic_battery, "69", true);
 
-  delay(1000);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
 void setup() {
@@ -138,6 +180,7 @@ void setup() {
 
   client_id += String(WiFi.macAddress());
   while (!client.connected()) {
+    Serial.println("Connecting..");
     client.connect(client_id.c_str(), mqtt_username, mqtt_password);
     delay(2000);
   }
@@ -149,6 +192,9 @@ void setup() {
   client.subscribe(topic_12v);
   client.subscribe(topic_target_depth);
   client.subscribe(topic_target_time);
+
+  uart_write_reset();
+  uart_write_sample();
 }
 
 void loop() {
@@ -156,10 +202,10 @@ void loop() {
   // If connection failed, or connection lost, or connection timeout, retry the connection.
   if (client.state() < 0) {
     client.connect(client_id.c_str(), mqtt_username, mqtt_password);
-    delay(2000);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
   }
 
-  if (mqttData[SAMPLING_ON][0] == '1') {
+  if (mqtt_data[SAMPLING_ON][0] == '1') {
     publish_data();
   }
 }

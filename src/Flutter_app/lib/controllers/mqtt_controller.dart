@@ -67,7 +67,11 @@ class MQTTController extends ValueNotifier {
 
         default:
       }
-    } catch (e) {}
+    } catch (e) {
+      print("${e}");
+      print(
+          "Tried to write message ${message} to topic ${topic}. Message cannot be converted to double");
+    }
 
     for (var i = 0; i < callbacks.length; i++) {}
   }

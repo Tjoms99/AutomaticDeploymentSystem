@@ -16,8 +16,8 @@ char new_line = 12;
 
 void power(uint8_t set_power)
 {
-    max3471_transmit(new_line);
-    icl3221_transmit(new_line);
+    // max3471_transmit(new_line);
+    // icl3221_transmit(new_line);
 
     if (set_power)
     {
@@ -36,15 +36,15 @@ void power(uint8_t set_power)
     {
         // Turn off 12V
         P1OUT &= ~VOLT12_ENABLE;
-/*
-        max3471_transmit(off[0]);
-        max3471_transmit(off[1]);
-        max3471_transmit(off[2]);
+        /*
+                max3471_transmit(off[0]);
+                max3471_transmit(off[1]);
+                max3471_transmit(off[2]);
 
-        icl3221_transmit(off[0]);
-        icl3221_transmit(off[1]);
-        icl3221_transmit(off[2]);
-        */
+                icl3221_transmit(off[0]);
+                icl3221_transmit(off[1]);
+                icl3221_transmit(off[2]);
+                */
     }
 }
 

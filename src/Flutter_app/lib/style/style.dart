@@ -55,7 +55,7 @@ class PrimaryTextfield extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      onChanged: (value) {
+      onSubmitted: (value) {
         onChangedFunction();
       },
       enabled: enabled,

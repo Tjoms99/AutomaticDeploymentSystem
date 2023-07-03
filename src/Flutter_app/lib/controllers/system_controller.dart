@@ -19,7 +19,7 @@ class SystemController extends ValueNotifier {
   ValueNotifier<bool> isSampling = ValueNotifier(true);
   //TIMER
   int _samplingInterval = 1;
-  late Timer _systemTimer;
+  late Timer systemTimer;
   int systemUpdateIntervalMS = 100;
   int _currentTime = 0;
   int _timeLeft = 0;
@@ -42,7 +42,7 @@ class SystemController extends ValueNotifier {
       underwaterSensorSystem.updateBattery(data);
     });
 
-    _systemTimer = Timer.periodic(
+    systemTimer = Timer.periodic(
         Duration(milliseconds: systemUpdateIntervalMS), updateFrontendData);
   }
 

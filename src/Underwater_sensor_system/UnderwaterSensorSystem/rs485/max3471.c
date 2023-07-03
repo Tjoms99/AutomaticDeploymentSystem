@@ -88,9 +88,10 @@ void max3471_recieve(char *data)
   *data = (char)UCA0RXBUF;
 }
 
-void max3471_transmit_6_bytes(char *data)
+void max3471_transmit_6_bytes(char *data, char tag)
 {
   max3471_transmit(12);
+  max3471_transmit(tag);
   max3471_transmit(data[0]);
   max3471_transmit(data[1]);
   max3471_transmit(data[2]);

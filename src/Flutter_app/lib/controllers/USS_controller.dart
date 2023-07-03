@@ -1,4 +1,3 @@
-
 import 'package:automatic_deployment_system_app/components/info_card.dart';
 import 'package:automatic_deployment_system_app/components/info_graph.dart';
 import 'package:automatic_deployment_system_app/controllers/sensor_controller.dart';
@@ -182,7 +181,7 @@ class USSController extends ValueNotifier {
 
   //---------------------------UPDATE PRESSURE--------------------------------
   void updatePressure(String data) {
-    _pressure.updateCurrentData(double.parse(data));
+    _pressure.updateCurrentData(double.parse(data) / 100); // From Pa to mBar
 
     int samplingInterval = 1;
     int currentTime = samplingInterval * _depth.sensorData.length;

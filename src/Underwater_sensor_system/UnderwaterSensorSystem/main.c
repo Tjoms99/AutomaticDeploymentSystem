@@ -40,10 +40,34 @@ static void check_system_loop_time()
     }
 }
 
-static void set_system_loop_time(uint16_t seconds)
+static void set_system_loop_time(char seconds_c)
 {
-    SYSTEM_LOOP_TIME_SECONDS = seconds;
-    SYSTEM_FLAG &= ~CUSTOM_TIME;
+    static uint8_t number_of_chars_to_recieve = 3;
+    static uint16_t seconds = 0;
+
+    if(number_of_chars_to_recieve == 3){
+       uint16_t seconds_100 = (uint16_t) seconds_c - 48; //ASCII '0' character
+       seconds = seconds_100 * 100;
+    }
+
+    if(number_of_chars_to_recieve == 2){
+        uint16_t seconds_10 = (uint16_t) seconds_c - 48; //ASCII '0' character
+        seconds += seconds_10 * 10;
+       }
+
+    if(number_of_chars_to_recieve == 1){
+        uint16_t seconds_1 = (uint16_t) seconds_c - 48; //ASCII '0' character
+        seconds += seconds_1;
+     }
+
+    number_of_chars_to_recieve--;
+
+    if(number_of_chars_to_recieve == 0){
+        SYSTEM_LOOP_TIME_SECONDS = seconds;
+        SYSTEM_FLAG &= ~CUSTOM_TIME;
+        number_of_chars_to_recieve = 3;
+     }
+
 }
 
 static void timer_init()
@@ -60,6 +84,11 @@ static void timer_init()
     TB0CCTL0 &= ~CCIFG; // clear interrupt
 }
 
+void reset() {
+    SYSTEM_FLAG = 0;
+    SYSTEM_LOOP_TIME_SECONDS = 1;
+    SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
+}
 /**
  * SYSTEM FLAGS
  *  0 - Power enable: 12V
@@ -89,7 +118,7 @@ void update_system_flags(char data)
     if (data == '6')
         SYSTEM_FLAG ^= PRINT_ALL_REGISTERS;
     if (data == '7')
-        SYSTEM_FLAG = 0; // Reset
+        reset();
 }
 
 // Sample pressure and temperature once
@@ -185,7 +214,7 @@ __interrupt void RS485_ISR(void)
     rs485_rx_data = UCA0RXBUF;
 
     // Remove / 10 when not using ASCII chars over putty
-    SYSTEM_FLAG &CUSTOM_TIME ? set_system_loop_time(rs485_rx_data / 10) : update_system_flags(rs485_rx_data);
+    SYSTEM_FLAG &CUSTOM_TIME ? set_system_loop_time(rs485_rx_data) : update_system_flags(rs485_rx_data);
 }
 
 // Interrupt Service Routine for UART receive
