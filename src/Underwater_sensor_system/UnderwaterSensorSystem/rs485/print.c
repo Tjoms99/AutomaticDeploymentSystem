@@ -20,11 +20,24 @@ void print_current_temperature()
 void print_current_pressure()
 {
     float pressure = 0.0;
+    int32_t pressure_Pa;
     char buffer[6];
 
     get_pressure_current_register(&pressure);
-    // pressure += 0.1;
-    float_to_char_array(pressure, buffer);
+    pressure_Pa = (int)pressure;
+    pressure_Pa *= 10;
+    itoa(pressure_Pa, buffer, 10);
+
+    max3471_transmit_6_bytes(buffer);
+}
+
+void print_current_depth()
+{
+    float depth = 0.0;
+    char buffer[6];
+
+    get_depth_current_register(&depth);
+    float_to_char_array(depth, buffer);
 
     max3471_transmit_6_bytes(buffer);
 }
@@ -33,6 +46,7 @@ void print_current_values()
 {
     print_current_temperature();
     print_current_pressure();
+    print_current_depth();
 }
 
 void print_temperature_register()

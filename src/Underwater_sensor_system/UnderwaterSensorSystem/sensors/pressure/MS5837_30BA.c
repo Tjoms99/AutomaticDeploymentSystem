@@ -212,7 +212,7 @@ void ms5847_30ba_measure(float *pressure, float *temperature)
 // Pressure reference should be taken just above the water level
 void ms5847_30ba_get_depth(float *depth, float pressure, float pressure_reference)
 {
-    *depth = (pressure - pressure_reference) / (FRESHWATER_DENSITY * 9.80665); // h = P/(R*g)
+    *depth = (pressure - pressure_reference) * 10.0f / (FRESHWATER_DENSITY * 9.80665); // h = P/(R*g)
 }
 
 // #pragma vector = TIMER0_B1_VECTOR
