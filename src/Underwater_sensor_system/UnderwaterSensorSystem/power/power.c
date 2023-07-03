@@ -24,18 +24,19 @@ void power(uint8_t set_power)
         // Turn on 12V
         P1OUT |= VOLT12_ENABLE;
 
-
+        /*
         max3471_transmit(on[0]);
         max3471_transmit(on[1]);
 
         icl3221_transmit(on[0]);
         icl3221_transmit(on[1]);
+        */
     }
     else
     {
         // Turn off 12V
         P1OUT &= ~VOLT12_ENABLE;
-
+/*
         max3471_transmit(off[0]);
         max3471_transmit(off[1]);
         max3471_transmit(off[2]);
@@ -43,6 +44,7 @@ void power(uint8_t set_power)
         icl3221_transmit(off[0]);
         icl3221_transmit(off[1]);
         icl3221_transmit(off[2]);
+        */
     }
 }
 

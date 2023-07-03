@@ -34,6 +34,8 @@ class MQTTController extends ValueNotifier {
   //---------------------------MQTT FUNCTIONS-----------------------------------
 
   void subscribeToTopics() {
+    if (client.connectionStatus!.state != MqttConnectionState.connected) return;
+
     client.subscribe(Topics.depth, MqttQos.atLeastOnce);
     client.subscribe(Topics.temperature, MqttQos.atLeastOnce);
     client.subscribe(Topics.pressure, MqttQos.atLeastOnce);
@@ -41,29 +43,31 @@ class MQTTController extends ValueNotifier {
   }
 
   void updateData(String topic, String message) {
-    switch (topic) {
-      case Topics.depth:
-        depth = message;
-        callbacks.elementAt(SensorType.DEPTH.index)(depth);
-        break;
+    try {
+      switch (topic) {
+        case Topics.depth:
+          depth = message;
+          callbacks.elementAt(SensorType.DEPTH.index)(depth);
+          break;
 
-      case Topics.temperature:
-        temperature = message;
-        callbacks.elementAt(SensorType.TEMPERATURE.index)(temperature);
-        break;
+        case Topics.temperature:
+          temperature = message;
+          callbacks.elementAt(SensorType.TEMPERATURE.index)(temperature);
+          break;
 
-      case Topics.pressure:
-        pressure = message;
-        callbacks.elementAt(SensorType.PRESSURE.index)(pressure);
-        break;
+        case Topics.pressure:
+          pressure = message;
+          callbacks.elementAt(SensorType.PRESSURE.index)(pressure);
+          break;
 
-      case Topics.battery:
-        battery = message;
-        callbacks.elementAt(SensorType.BATTERY.index)(battery);
-        break;
+        case Topics.battery:
+          battery = message;
+          callbacks.elementAt(SensorType.BATTERY.index)(battery);
+          break;
 
-      default:
-    }
+        default:
+      }
+    } catch (e) {}
 
     for (var i = 0; i < callbacks.length; i++) {}
   }

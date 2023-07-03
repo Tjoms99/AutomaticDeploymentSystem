@@ -93,25 +93,27 @@ char *get_rx_buffer() {
   return buffer;
 }
 
-void publish_data() {
-  static int depth = -50;
-  if (depth > 0) {
-    depth = -50;
-  }
+void assign_data(char temperature[6], char pressure[6], char depth[6]) {
+
   char *data = get_rx_buffer();
-  char temperature[5];
-  temperature[0] = data[1];
-  temperature[1] = data[2];
-  temperature[2] = data[3];
-  temperature[3] = data[4];
-  temperature[4] = data[5];
-  temperature[5] = data[6];
+
+  for (int data_index = 0; data_index < 6; data_index++) {
+    temperature[data_index] = data[data_index + 1];
+    pressure[data_index] = data[data_index + 8];
+    depth[data_index] = data[data_index + 15];
+  }
+}
+void publish_data() {
+  static char temperature[6];
+  static char pressure[6];
+  static char depth[6];
+
+  assign_data(temperature, pressure, depth);
 
 
-
-  client.publish(topic_depth, (char *)String(depth++, DEC).c_str(), true);
+  client.publish(topic_depth, depth, true);
   client.publish(topic_temperature, temperature, true);
-  client.publish(topic_pressure, "101000", true);
+  client.publish(topic_pressure, pressure, true);
   client.publish(topic_battery, "69", true);
 
   delay(1000);
