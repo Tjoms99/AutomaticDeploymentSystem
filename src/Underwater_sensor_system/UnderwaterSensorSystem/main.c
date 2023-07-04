@@ -45,29 +45,32 @@ static void set_system_loop_time(char seconds_c)
     static uint8_t number_of_chars_to_recieve = 3;
     static uint16_t seconds = 0;
 
-    if(number_of_chars_to_recieve == 3){
-       uint16_t seconds_100 = (uint16_t) seconds_c - 48; //ASCII '0' character
-       seconds = seconds_100 * 100;
+    if (number_of_chars_to_recieve == 3)
+    {
+        uint16_t seconds_100 = (uint16_t)seconds_c - 48; // ASCII '0' character
+        seconds = seconds_100 * 100;
     }
 
-    if(number_of_chars_to_recieve == 2){
-        uint16_t seconds_10 = (uint16_t) seconds_c - 48; //ASCII '0' character
+    if (number_of_chars_to_recieve == 2)
+    {
+        uint16_t seconds_10 = (uint16_t)seconds_c - 48; // ASCII '0' character
         seconds += seconds_10 * 10;
-       }
+    }
 
-    if(number_of_chars_to_recieve == 1){
-        uint16_t seconds_1 = (uint16_t) seconds_c - 48; //ASCII '0' character
+    if (number_of_chars_to_recieve == 1)
+    {
+        uint16_t seconds_1 = (uint16_t)seconds_c - 48; // ASCII '0' character
         seconds += seconds_1;
-     }
+    }
 
     number_of_chars_to_recieve--;
 
-    if(number_of_chars_to_recieve == 0){
+    if (number_of_chars_to_recieve == 0)
+    {
         SYSTEM_LOOP_TIME_SECONDS = seconds;
         SYSTEM_FLAG &= ~CUSTOM_TIME;
         number_of_chars_to_recieve = 3;
-     }
-
+    }
 }
 
 static void timer_init()
@@ -84,7 +87,8 @@ static void timer_init()
     TB0CCTL0 &= ~CCIFG; // clear interrupt
 }
 
-void reset() {
+void reset()
+{
     SYSTEM_FLAG = 0;
     SYSTEM_LOOP_TIME_SECONDS = 1;
     SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
@@ -147,6 +151,8 @@ void continuous_mode()
 
     set_depth_current_register(ms5847_30ba_depth);
     set_depth_next_register(ms5847_30ba_depth);
+
+    print_current_values();
 }
 
 int main(void)
@@ -177,6 +183,7 @@ int main(void)
 
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
+            UCA0IE &= ~UCRXIE; // disable RX UART INT
 
             SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
 
@@ -184,11 +191,12 @@ int main(void)
 
             SYSTEM_FLAG &CONTINUOUS_MODE ? continuous_mode() : __no_operation;
 
-            SYSTEM_FLAG &PRINT_CURRENT_REGISTER ? print_current_values() : __no_operation;
-
             SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
 
             SYSTEM_FLAG &= ~SYSTEM_ON;
+
+            UCA0IE |= UCRXIE; // enable RX UART INT
+
         }
 
         // Enter low-power mode

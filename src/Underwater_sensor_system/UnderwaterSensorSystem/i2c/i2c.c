@@ -58,6 +58,7 @@ void i2c_write(uint8_t cmd, uint8_t address)
 
         while ((UCB0IFG & UCSTPIFG) == 0)
                 ;
+
         UCB0IFG &= ~UCSTPIFG; // clear the stop flag
 }
 
@@ -72,6 +73,7 @@ void i2c_read(uint8_t bytes_to_read, uint8_t address)
 
         while ((UCB0IFG & UCSTPIFG) == 0)
                 ;
+
         UCB0IFG &= ~UCSTPIFG; // clear the stop flag
 }
 

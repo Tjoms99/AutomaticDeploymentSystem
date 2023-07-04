@@ -189,7 +189,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           const PrimaryText(text: "TARGET DEPTH"),
           PrimaryTextfield(
             controller: _targetDepthController,
-            enabled: !sampling,
+            enabled: true, //!sampling
             onChangedFunction: updateTargetDepth,
           ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
@@ -203,7 +203,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           const PrimaryText(text: "TARGET TIME"),
           PrimaryTextfield(
             controller: _targetTimeController,
-            enabled: !widget.systemController.getIsSampling(),
+            enabled: true, //!sampling
             onChangedFunction: updateTargetTime,
           ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
@@ -217,7 +217,7 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
           const PrimaryText(text: "SAMPLING INTERVAL"),
           PrimaryTextfield(
             controller: _samplingIntController,
-            enabled: !sampling,
+            enabled: true, //!sampling
             onChangedFunction: updateSamplingInterval,
           ),
           SizedBox(height: SizeConfig.blockSizeVertical! * 4),
