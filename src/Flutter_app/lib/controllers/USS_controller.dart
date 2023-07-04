@@ -57,8 +57,8 @@ class USSController extends ValueNotifier {
         label: "Pressure graph",
         labelAxisy: "Pressure in Pa",
         sensorData: _pressure,
-        axisYMaximum: 105000,
-        axisYMinimum: 90000,
+        axisYMaximum: 3100,
+        axisYMinimum: 900,
       ),
       Infograph(
         label: "Battery graph",

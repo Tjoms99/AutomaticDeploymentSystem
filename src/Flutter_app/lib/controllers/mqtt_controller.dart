@@ -182,27 +182,4 @@ class MQTTController extends ValueNotifier {
     client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!,
         retain: true);
   }
-
-  //---------------------------ADS FUNCTIONS-----------------------------------
-/*
-  void toggleSystem() {
-    USS.toggleSystem();
-    publishMessage(Topics.system, USS.getIsOnSystem().toString());
-  }
-
-  void toggleSampling() {
-    USS.toggleSampling();
-    publishMessage(Topics.sampling, USS.getIsSampling().toString());
-  }
-
-  void toggleRS232() {
-    USS.toggleRS232();
-    publishMessage(Topics.rs232, USS.getIsOnRS232().toString());
-  }
-
-  void toggle12V() {
-    USS.toggle12V();
-    publishMessage(Topics.volt, USS.getIsOn12V().toString());
-  }
-  */
 }

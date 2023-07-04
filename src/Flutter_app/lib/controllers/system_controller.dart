@@ -59,10 +59,8 @@ class SystemController extends ValueNotifier {
 
   bool getIsSampling() {
     if (_timeLeft <= 0) {
-      isSampling.value = false;
-      _currentTime = 0;
+      toggleSampling();
     }
-
     return isSampling.value;
   }
 
@@ -84,14 +82,15 @@ class SystemController extends ValueNotifier {
 
   void toggleSampling() {
     isSampling.value = !isSampling.value;
-    isSampling.value
-        ? mqtt.publishMessage(Topics.sampling, '1')
-        : mqtt.publishMessage(Topics.sampling, '0');
 
     if (_timeLeft <= 0) {
       isSampling.value = false;
       _currentTime = 0;
     }
+
+    isSampling.value
+        ? mqtt.publishMessage(Topics.sampling, '1')
+        : mqtt.publishMessage(Topics.sampling, '0');
 
     underwaterSensorSystem.resetCharts();
     notifyListeners();

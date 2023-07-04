@@ -85,10 +85,12 @@ void callback(char *topic, byte *payload, unsigned int length)
   else if (strcmp(topic, topic_rs232) == 0)
   {
     mqtt_populate_data(RS232_ON, payload, length);
+    uart_write_rs232();
   }
   else if (strcmp(topic, topic_12v) == 0)
   {
     mqtt_populate_data(VOLT12_ON, payload, length);
+    uart_write_12v();
   }
   else if (strcmp(topic, topic_sampling_interval) == 0)
   {
@@ -98,6 +100,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   else if (strcmp(topic, topic_target_depth) == 0)
   {
     mqtt_populate_data(TARGET_TIME, payload, length);
+    uart_write_init_depth();
   }
   else if (strcmp(topic, topic_target_time) == 0)
   {
@@ -127,7 +130,7 @@ void mqtt_task(void *arg)
       client.connect(client_id.c_str(), mqtt_username, mqtt_password);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
   }
 }
 
@@ -141,7 +144,7 @@ void setup()
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 
   uart_begin();
