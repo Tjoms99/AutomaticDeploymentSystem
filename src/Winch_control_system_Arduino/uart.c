@@ -20,6 +20,7 @@ static char *rx_data = "\nUDEF";
 static char temperature[6];
 static char pressure[6];
 static char depth[6];
+static volatile bool uart_is_busy = true;
 
 static uart_callback_data_ready callbacks_data[10];
 static uint8_t callback_data_n = 0;
@@ -29,12 +30,22 @@ static void uart_assign_data(char *data)
   static const uint8_t data_per_attribute = 1 + 1 + 6; // NEW LINE + TAG + DATA
   static const uint8_t data_elements = 3;              // Temperature, pressure, depth
 
+  static const char busy_tag = 'r';
+  static const char ready_tag = 'r';
   static const char temperature_tag = 't';
   static const char pressure_tag = 'p';
   static const char depth_tag = 'd';
 
   for (int data_index = 0; data_index < (data_per_attribute * data_elements); data_index++)
   {
+    if (busy_tag == data[data_index])
+    {
+      uart_is_busy = true;
+    }
+    if (ready_tag == data[data_index])
+    {
+      uart_is_busy = false;
+    }
     if (temperature_tag == data[data_index])
     {
       temperature[0] = data[data_index + 1];
@@ -81,23 +92,24 @@ static void uart_rx(void *arg)
   {
     uart_get_buffered_data_len(UART_NUM, (size_t *)&length);
     length = uart_read_bytes(UART_NUM, data, length, 100);
-    if (length > 0)
-    {
-      vTaskDelay(10 / portTICK_PERIOD_MS);
-      rx_data = data;
-      uart_flush_input(UART_NUM);
-      uart_assign_data(rx_data);
+    uart_assign_data(data);
 
+    if (length > 10) // uart actually has data and not 'b' and 'r' chars
+    {
+      uart_flush_input(UART_NUM);
       for (uint8_t callback = 0; callback < callback_data_n; callback++)
       {
         callbacks_data[callback](temperature, pressure, depth);
       }
     }
 
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    vTaskDelay(15 / portTICK_PERIOD_MS);
   }
 }
 
+bool uart_get_is_busy(){
+  return uart_is_busy;
+}
 void uart_begin(void)
 {
   // Configure UART parameters
@@ -112,6 +124,11 @@ void uart_begin(void)
 
 void uart_write_char(char *buffer)
 {
+
+ while (uart_get_is_busy()) {
+     vTaskDelay(5 / portTICK_PERIOD_MS);
+ }
+
   digitalWrite(RS485_TX_EN_PIN, HIGH);
   uart_write_bytes(UART_NUM, (const char *)buffer, strlen(buffer));
   vTaskDelay(1 / portTICK_PERIOD_MS);
@@ -121,66 +138,60 @@ void uart_write_char(char *buffer)
 void uart_write_reset()
 {
   uart_write_char("7");
-  vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 
 void uart_write_sample()
 {
   uart_write_char("4");
-  vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 
 void uart_write_init_depth()
 {
   uart_write_char("3");
-  vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 
 void uart_write_sample_time(char *sampling_interval)
 {
 
-  char buffer[3];
+  char buffer[4];
   char *time = buffer;
 
-  time[0] = sampling_interval[2];
-  time[1] = sampling_interval[1];
-  time[2] = sampling_interval[0];
+  time[0] = '0';
+  time[1] = '0';
+  time[2] = '0';
+  time[3] = '\0';
 
-  if (time[2] == '\0')
+  if (sampling_interval[1] == '\0')
   {
-    time[2] = 48;
+    time[0] = '0';
+    time[1] = '0';
+    time[2] = sampling_interval[0];
   }
-  if (time[1] == '\0')
+  else if (sampling_interval[2] == '\0')
   {
-    time[1] = 48;
+    time[0] = '0';
+    time[1] = sampling_interval[0];
+    time[2] = sampling_interval[1];
   }
-  if (time[0] == '\0')
+  else
   {
-    time[0] = 48;
+    time[0] = sampling_interval[0];
+    time[1] = sampling_interval[1];
+    time[2] = sampling_interval[2];
   }
 
   uart_write_char("2");
-  vTaskDelay(1 / portTICK_PERIOD_MS);
-
   uart_write_char(time);
-  vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 
 void uart_write_rs232()
 {
-  vTaskDelay(1 / portTICK_PERIOD_MS);
   uart_write_char("1");
 }
 
 void uart_write_12v()
 {
-  vTaskDelay(1 / portTICK_PERIOD_MS);
   uart_write_char("0");
-}
-
-void uart_read(char **buffer)
-{
-  *buffer = rx_data;
 }
 
 void uart_register_callback_data_ready(uart_callback_data_ready cb)

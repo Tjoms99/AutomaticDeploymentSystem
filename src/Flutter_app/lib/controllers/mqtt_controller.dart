@@ -172,7 +172,7 @@ class MQTTController extends ValueNotifier {
   }
 
   void publishMessage(String topic, String message) {
-    if (client.connectionStatus!.state == MqttConnectionState.disconnected) {
+    if (!(client.connectionStatus!.state == MqttConnectionState.connected)) {
       print('MQTT | Client Disconnected');
       return;
     }

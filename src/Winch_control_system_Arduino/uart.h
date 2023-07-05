@@ -5,7 +5,6 @@ typedef void (*uart_callback_uss_ready)();
 typedef void (*uart_callback_data_ready)(char temperature[6], char pressure[6], char depth[6]);
 void uart_begin(void);
 void uart_write_char(char *buffer);
-void uart_read(char **buffer);
 void uart_write_reset(void);
 void uart_write_sample(void);
 void uart_write_init_depth(void);

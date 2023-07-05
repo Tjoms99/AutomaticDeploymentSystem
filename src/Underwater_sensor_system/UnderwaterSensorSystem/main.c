@@ -50,14 +50,12 @@ static void set_system_loop_time(char seconds_c)
         uint16_t seconds_100 = (uint16_t)seconds_c - 48; // ASCII '0' character
         seconds = seconds_100 * 100;
     }
-
-    if (number_of_chars_to_recieve == 2)
+    else if (number_of_chars_to_recieve == 2)
     {
         uint16_t seconds_10 = (uint16_t)seconds_c - 48; // ASCII '0' character
         seconds += seconds_10 * 10;
     }
-
-    if (number_of_chars_to_recieve == 1)
+    else if (number_of_chars_to_recieve == 1)
     {
         uint16_t seconds_1 = (uint16_t)seconds_c - 48; // ASCII '0' character
         seconds += seconds_1;
@@ -183,6 +181,7 @@ int main(void)
 
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
+            max3471_transmit('b');
             UCA0IE &= ~UCRXIE; // disable RX UART INT
 
             SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
@@ -196,7 +195,7 @@ int main(void)
             SYSTEM_FLAG &= ~SYSTEM_ON;
 
             UCA0IE |= UCRXIE; // enable RX UART INT
-
+            max3471_transmit('r');
         }
 
         // Enter low-power mode
