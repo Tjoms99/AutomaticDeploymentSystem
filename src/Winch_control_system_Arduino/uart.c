@@ -103,11 +103,12 @@ static void uart_rx(void *arg)
       }
     }
 
-    vTaskDelay(15 / portTICK_PERIOD_MS);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 
-bool uart_get_is_busy(){
+bool uart_get_is_busy()
+{
   return uart_is_busy;
 }
 void uart_begin(void)
@@ -125,9 +126,12 @@ void uart_begin(void)
 void uart_write_char(char *buffer)
 {
 
- while (uart_get_is_busy()) {
-     vTaskDelay(5 / portTICK_PERIOD_MS);
- }
+  // while (uart_get_is_busy()) {
+  if (uart_get_is_busy())
+  {
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
+  //}
 
   digitalWrite(RS485_TX_EN_PIN, HIGH);
   uart_write_bytes(UART_NUM, (const char *)buffer, strlen(buffer));
