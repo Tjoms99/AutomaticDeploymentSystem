@@ -1,7 +1,7 @@
 extern "C" {
 #include "uart.h"
 }
-//#include <WiFi.h>
+#include <WiFi.h>
 //#include <stdio.h>
 //#include <string.h>
 
@@ -20,16 +20,15 @@ void setup() {
   // For the USB, just use Serial as normal:
   Serial.begin(115200);
 
- // uart_begin();
-  //WiFi.begin(ssid, password);
+  uart_begin();
+  WiFi.begin(ssid, password);
   ble_begin();
-  //mqtt_begin();
+  mqtt_begin();
 
-  //uart_register_callback_data_ready(publish_data);
-  //uart_write_reset();
+  uart_register_callback_data_ready(publish_data);
+  uart_write_reset();
 }
 
 void loop() {
   //vTaskDelay(1000 / portTICK_PERIOD_MS);
-  //ble_loop();
 }
