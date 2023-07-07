@@ -1,5 +1,10 @@
 #include "NimBLEDevice.h"
 
+// See the following for generating UUIDs:
+// https://www.uuidgenerator.net/
+
+NimBLEServer *pServer;
+
 // DATA SERVICE
 #define SERVICE_UUID_DATA "561721cd-dbb7-462d-a651-8f542da25b61"
 #define CHARACTERISTIC_UUID_DEPTH "0655982c-02f8-49bb-961d-4cb9984399b1"
@@ -18,6 +23,7 @@ NimBLECharacteristic *pCharacteristic_temperature;
 #define CHARACTERISTIC_UUID_RS232_ON "8d1a814d-2889-4ce2-a228-ec44a9053bb8"
 #define CHARACTERISTIC_UUID_12V_ON "2932a5b9-faee-4d50-b6da-b82b5b9739ad"
 #define CHARACTERISTIC_UUID_SAMPLING_TIME "c45c93cb-aec4-4590-8b65-9ee695aa8e40"
+
 NimBLEService *pService_control;
 NimBLECharacteristic *pCharacteristic_system_on;
 NimBLECharacteristic *pCharacteristic_sampling_on;
@@ -25,12 +31,87 @@ NimBLECharacteristic *pCharacteristic_rs232_on;
 NimBLECharacteristic *pCharacteristic_12v_on;
 NimBLECharacteristic *pCharacteristic_sampling_time;
 
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+std::string value = "0";
+
+/** Handler class for characteristic actions */
+class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
+{
+    void onRead(NimBLECharacteristic *pCharacteristic)
+    {
+        Serial.print(pCharacteristic->getUUID().toString().c_str());
+        Serial.print(": onRead(), value: ");
+        Serial.println(pCharacteristic->getValue().c_str());
+    };
+
+    void onWrite(NimBLECharacteristic *pCharacteristic)
+    {
+        Serial.print(pCharacteristic->getUUID().toString().c_str());
+        Serial.print(": onWrite(), value: ");
+        Serial.println(pCharacteristic->getValue().c_str());
+    };
+    /** Called before notification or indication is sent,
+     *  the value can be changed here before sending if desired.
+     */
+    void onNotify(NimBLECharacteristic *pCharacteristic)
+    {
+        Serial.println("Sending notification to clients");
+    };
+
+    /** The status returned in status is defined in NimBLECharacteristic.h.
+     *  The value returned in code is the NimBLE host return code.
+     */
+    void onStatus(NimBLECharacteristic *pCharacteristic, Status status, int code)
+    {
+        String str = ("Notification/Indication status code: ");
+        str += status;
+        str += ", return code: ";
+        str += code;
+        str += ", ";
+        str += NimBLEUtils::returnCodeToString(code);
+        Serial.println(str);
+    };
+
+    void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue)
+    {
+        String str = "Client ID: ";
+        str += desc->conn_handle;
+        str += " Address: ";
+        str += std::string(NimBLEAddress(desc->peer_ota_addr)).c_str();
+        if (subValue == 0)
+        {
+            str += " Unsubscribed to ";
+        }
+        else if (subValue == 1)
+        {
+            str += " Subscribed to notfications for ";
+        }
+        else if (subValue == 2)
+        {
+            str += " Subscribed to indications for ";
+        }
+        else if (subValue == 3)
+        {
+            str += " Subscribed to notifications and indications for ";
+        }
+        str += std::string(pCharacteristic->getUUID()).c_str();
+
+        Serial.println(str);
+    };
+};
+
+static CharacteristicCallbacks chrCallbacks;
+
 void ble_begin(void)
 {
+
     NimBLEDevice::init("Winch Control System");
     NimBLEDevice::setPower(ESP_PWR_LVL_P9); // Default +3db, now +9db
 
-    NimBLEServer *pServer = NimBLEDevice::createServer();
+    pServer = NimBLEDevice::createServer();
+    NimBLEDescriptor *pDescriptor = nullptr;
+
     //-------------------------------------------------------------------------------------------------
     // DATA
     pService_data = pServer->createService(SERVICE_UUID_DATA);
@@ -50,14 +131,16 @@ void ble_begin(void)
     pCharacteristic_sampling_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_ON);
     pCharacteristic_rs232_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_RS232_ON);
     pCharacteristic_12v_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_12V_ON);
-    pCharacteristic_sampling_time = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_TIME);
+    pCharacteristic_sampling_time = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_TIME, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+
+    pCharacteristic_sampling_time->setCallbacks(&chrCallbacks);
 
     pService_control->start();
     pCharacteristic_system_on->setValue("1");
     pCharacteristic_sampling_on->setValue("1");
     pCharacteristic_rs232_on->setValue("0");
     pCharacteristic_12v_on->setValue("0");
-    pCharacteristic_sampling_time->setValue("001");
+    pCharacteristic_sampling_time->setValue(value);
 
     //-------------------------------------------------------------------------------------------------
     // ADVERTISING
@@ -66,4 +149,33 @@ void ble_begin(void)
     pAdvertising->addServiceUUID(SERVICE_UUID_CONTROL);
 
     pAdvertising->start();
+}
+
+void ble_notify_sampling_time(byte *sampling_time, uint8_t length)
+{
+    pCharacteristic_sampling_time->setValue(sampling_time, length);
+    pCharacteristic_sampling_time->notify();
+}
+void ble_loop()
+{
+    // notify changed value
+    // if (deviceConnected)
+    // {
+
+    //  value++;
+    //  }
+    //  disconnecting
+    /*  if (!deviceConnected && oldDeviceConnected)
+      {
+          delay(500);                  // give the bluetooth stack the chance to get things ready
+          pServer->startAdvertising(); // restart advertising
+          Serial.println("start advertising");
+          oldDeviceConnected = deviceConnected;
+      }
+      // connecting
+      if (deviceConnected && !oldDeviceConnected)
+      {
+          // do stuff here on connecting
+          oldDeviceConnected = deviceConnected;
+      } */
 }

@@ -1,18 +1,20 @@
-extern "C" {
+extern "C"
+{
 #include "uart.h"
 }
 #include <WiFi.h>
-//#include <stdio.h>
-//#include <string.h>
+// #include <stdio.h>
+// #include <string.h>
 
 //--------------------------------------------------------------------
 // WiFi
-const char *ssid = "Tjoms";         // Enter your Wi-Fi name
-const char *password = "grovt123";  // Enter Wi-Fi password
+const char *ssid = "Tjoms";        // Enter your Wi-Fi name
+const char *password = "grovt123"; // Enter Wi-Fi password
 
 static const int USS_ENABLED = D0;
 
-void setup() {
+void setup()
+{
 
   pinMode(USS_ENABLED, OUTPUT);
   digitalWrite(USS_ENABLED, HIGH);
@@ -29,6 +31,8 @@ void setup() {
   uart_write_reset();
 }
 
-void loop() {
-  //vTaskDelay(1000 / portTICK_PERIOD_MS);
+void loop()
+{
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  ble_loop();
 }
