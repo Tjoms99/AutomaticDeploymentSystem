@@ -3,30 +3,22 @@
 / {
 	#address-cells = < 0x1 >;
 	#size-cells = < 0x1 >;
-	model = "Seeed XIAO BLE Sense";
-	compatible = "seeed,xiao-ble", "seeed,xiao-ble-sense";
+	model = "Nordic nRF9160 DK NRF52840";
+	compatible = "nordic,nrf9160-dk-nrf52840";
 	chosen {
 		zephyr,entropy = &cryptocell;
 		zephyr,flash-controller = &flash_controller;
-		zephyr,console = &usb_cdc_acm_uart;
-		zephyr,shell-uart = &usb_cdc_acm_uart;
-		zephyr,uart-mcumgr = &usb_cdc_acm_uart;
-		zephyr,bt-mon-uart = &usb_cdc_acm_uart;
-		zephyr,bt-c2h-uart = &usb_cdc_acm_uart;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,uart-mcumgr = &uart0;
+		zephyr,bt-mon-uart = &uart0;
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
-		zephyr,code-partition = &code_partition;
+		zephyr,code-partition = &slot0_partition;
 		zephyr,ieee802154 = &ieee802154;
 	};
 	aliases {
-		led0 = &led0;
-		led1 = &led1;
-		led2 = &led2;
-		pwm-led0 = &pwm_led0;
-		bootloader-led0 = &led0;
-		mcuboot-led0 = &led0;
 		watchdog0 = &wdt0;
-		spi-flash0 = &p25q16h;
 	};
 	soc {
 		#address-cells = < 0x1 >;
@@ -100,7 +92,7 @@
 				status = "okay";
 			};
 		};
-		uart0: xiao_serial: uart@40002000 {
+		uart0: uart@40002000 {
 			compatible = "nordic,nrf-uarte";
 			reg = < 0x40002000 0x1000 >;
 			interrupts = < 0x2 0x1 >;
@@ -115,20 +107,11 @@
 			#address-cells = < 0x1 >;
 			#size-cells = < 0x0 >;
 			reg = < 0x40003000 0x1000 >;
-			clock-frequency = < 0x61a80 >;
+			clock-frequency = < 0x186a0 >;
 			interrupts = < 0x3 0x1 >;
-			status = "okay";
-			pinctrl-0 = < &i2c0_default >;
-			pinctrl-1 = < &i2c0_sleep >;
-			pinctrl-names = "default", "sleep";
-			lsm6ds3tr_c: lsm6ds3tr-c@6a {
-				compatible = "st,lsm6dsl";
-				reg = < 0x6a >;
-				irq-gpios = < &gpio0 0xb 0x0 >;
-				status = "okay";
-			};
+			status = "disabled";
 		};
-		spi0: xiao_spi: spi@40003000 {
+		spi0: spi@40003000 {
 			compatible = "nordic,nrf-spim";
 			#address-cells = < 0x1 >;
 			#size-cells = < 0x0 >;
@@ -138,17 +121,14 @@
 			easydma-maxcnt-bits = < 0x10 >;
 			status = "disabled";
 		};
-		i2c1: xiao_i2c: i2c@40004000 {
-			compatible = "nordic,nrf-twi";
+		i2c1: i2c@40004000 {
+			compatible = "nordic,nrf-twim";
 			#address-cells = < 0x1 >;
 			#size-cells = < 0x0 >;
 			reg = < 0x40004000 0x1000 >;
 			clock-frequency = < 0x186a0 >;
 			interrupts = < 0x4 0x1 >;
-			status = "okay";
-			pinctrl-0 = < &i2c1_default >;
-			pinctrl-1 = < &i2c1_sleep >;
-			pinctrl-names = "default", "sleep";
+			status = "disabled";
 		};
 		spi1: spi@40004000 {
 			compatible = "nordic,nrf-spim";
@@ -176,7 +156,7 @@
 			compatible = "nordic,nrf-saadc";
 			reg = < 0x40007000 0x1000 >;
 			interrupts = < 0x7 0x1 >;
-			status = "okay";
+			status = "disabled";
 			#io-channel-cells = < 0x1 >;
 		};
 		timer0: timer@40008000 {
@@ -205,7 +185,7 @@
 			max-bit-width = < 0x20 >;
 			interrupts = < 0xa 0x1 >;
 			prescaler = < 0x0 >;
-			phandle = < 0xf >;
+			phandle = < 0x4 >;
 		};
 		rtc0: rtc@4000b000 {
 			compatible = "nordic,nrf-rtc";
@@ -327,12 +307,8 @@
 			compatible = "nordic,nrf-pwm";
 			reg = < 0x4001c000 0x1000 >;
 			interrupts = < 0x1c 0x1 >;
-			status = "okay";
+			status = "disabled";
 			#pwm-cells = < 0x3 >;
-			pinctrl-0 = < &pwm0_default >;
-			pinctrl-1 = < &pwm0_sleep >;
-			pinctrl-names = "default", "sleep";
-			phandle = < 0x11 >;
 		};
 		pdm0: pdm@4001d000 {
 			compatible = "nordic,nrf-pdm";
@@ -360,21 +336,21 @@
 					compatible = "fixed-partitions";
 					#address-cells = < 0x1 >;
 					#size-cells = < 0x1 >;
-					sd_partition: partition@0 {
-						label = "softdevice";
-						reg = < 0x0 0x27000 >;
+					boot_partition: partition@0 {
+						label = "mcuboot";
+						reg = < 0x0 0xc000 >;
 					};
-					code_partition: partition@27000 {
-						label = "code_partition";
-						reg = < 0x27000 0xc5000 >;
+					slot0_partition: partition@c000 {
+						label = "image-0";
+						reg = < 0xc000 0x76000 >;
 					};
-					storage_partition: partition@ec000 {
+					slot1_partition: partition@82000 {
+						label = "image-1";
+						reg = < 0x82000 0x76000 >;
+					};
+					storage_partition: partition@f8000 {
 						label = "storage";
-						reg = < 0xec000 0x8000 >;
-					};
-					boot_partition: partition@f4000 {
-						label = "adafruit_boot";
-						reg = < 0xf4000 0xc000 >;
+						reg = < 0xf8000 0x8000 >;
 					};
 				};
 			};
@@ -404,17 +380,14 @@
 			#pwm-cells = < 0x3 >;
 		};
 		spi2: spi@40023000 {
-			compatible = "nordic,nrf-spi";
+			compatible = "nordic,nrf-spim";
 			#address-cells = < 0x1 >;
 			#size-cells = < 0x0 >;
 			reg = < 0x40023000 0x1000 >;
 			interrupts = < 0x23 0x1 >;
 			max-frequency = < 0x7a1200 >;
 			easydma-maxcnt-bits = < 0x10 >;
-			status = "okay";
-			pinctrl-0 = < &spi2_default >;
-			pinctrl-1 = < &spi2_sleep >;
-			pinctrl-names = "default", "sleep";
+			status = "disabled";
 		};
 		rtc2: rtc@40024000 {
 			compatible = "nordic,nrf-rtc";
@@ -433,7 +406,7 @@
 			interrupts = < 0x25 0x1 >;
 			status = "disabled";
 		};
-		usbd: zephyr_udc0: usbd@40027000 {
+		usbd: usbd@40027000 {
 			compatible = "nordic,nrf-usbd";
 			reg = < 0x40027000 0x1000 >;
 			interrupts = < 0x27 0x1 >;
@@ -442,10 +415,7 @@
 			num-out-endpoints = < 0x7 >;
 			num-isoin-endpoints = < 0x1 >;
 			num-isoout-endpoints = < 0x1 >;
-			status = "okay";
-			usb_cdc_acm_uart: cdc-acm-uart {
-				compatible = "zephyr,cdc-acm-uart";
-			};
+			status = "disabled";
 		};
 		uart1: uart@40028000 {
 			compatible = "nordic,nrf-uarte";
@@ -460,22 +430,7 @@
 			reg = < 0x40029000 0x1000 >, < 0x12000000 0x8000000 >;
 			reg-names = "qspi", "qspi_mm";
 			interrupts = < 0x29 0x1 >;
-			status = "okay";
-			pinctrl-0 = < &qspi_default >;
-			pinctrl-1 = < &qspi_sleep >;
-			pinctrl-names = "default", "sleep";
-			p25q16h: p25q16h@0 {
-				compatible = "nordic,qspi-nor";
-				reg = < 0x0 >;
-				sck-frequency = < 0x632ea00 >;
-				quad-enable-requirements = "S2B1v1";
-				jedec-id = [ 85 60 15 ];
-				sfdp-bfp = [ E5 20 F1 FF FF FF FF 00 44 EB 08 6B 08 3B 80 BB EE FF FF FF FF FF 00 FF FF FF 00 FF 0C 20 0F 52 10 D8 08 81 ];
-				size = < 0x1000000 >;
-				has-dpd;
-				t-enter-dpd = < 0xbb8 >;
-				t-exit-dpd = < 0x1f40 >;
-			};
+			status = "disabled";
 		};
 		pwm3: pwm@4002d000 {
 			compatible = "nordic,nrf-pwm";
@@ -503,7 +458,7 @@
 			#gpio-cells = < 0x2 >;
 			status = "okay";
 			port = < 0x0 >;
-			phandle = < 0x6 >;
+			phandle = < 0x5 >;
 		};
 		gpio1: gpio@50000300 {
 			compatible = "nordic,nrf-gpio";
@@ -513,7 +468,7 @@
 			ngpios = < 0x10 >;
 			status = "okay";
 			port = < 0x1 >;
-			phandle = < 0x10 >;
+			phandle = < 0x6 >;
 		};
 		cryptocell: crypto@5002a000 {
 			compatible = "nordic,nrf-cc310";
@@ -533,94 +488,17 @@
 		uart0_default: uart0_default {
 			phandle = < 0x2 >;
 			group1 {
-				psels = < 0x2b >;
+				psels = < 0x5 >, < 0x20007 >;
 			};
 			group2 {
-				psels = < 0x1002c >;
+				psels = < 0x10003 >, < 0x30028 >;
 				bias-pull-up;
 			};
 		};
 		uart0_sleep: uart0_sleep {
 			phandle = < 0x3 >;
 			group1 {
-				psels = < 0x2b >, < 0x1002c >;
-				low-power-enable;
-			};
-		};
-		i2c0_default: i2c0_default {
-			phandle = < 0x4 >;
-			group1 {
-				psels = < 0xc0007 >, < 0xb001b >;
-			};
-		};
-		i2c0_sleep: i2c0_sleep {
-			phandle = < 0x5 >;
-			group1 {
-				psels = < 0xc0007 >, < 0xb001b >;
-				low-power-enable;
-			};
-		};
-		i2c1_default: i2c1_default {
-			phandle = < 0x7 >;
-			group1 {
-				psels = < 0xc0004 >, < 0xb0005 >;
-			};
-		};
-		i2c1_sleep: i2c1_sleep {
-			phandle = < 0x8 >;
-			group1 {
-				psels = < 0xc0004 >, < 0xb0005 >;
-				low-power-enable;
-			};
-		};
-		pwm0_default: pwm0_default {
-			phandle = < 0x9 >;
-			group1 {
-				psels = < 0x160011 >;
-				nordic,invert;
-			};
-		};
-		pwm0_sleep: pwm0_sleep {
-			phandle = < 0xa >;
-			group1 {
-				psels = < 0x160011 >;
-				low-power-enable;
-			};
-		};
-		spi2_default: spi2_default {
-			phandle = < 0xb >;
-			group1 {
-				psels = < 0x4002d >, < 0x5002f >, < 0x6002e >;
-			};
-		};
-		spi2_sleep: spi2_sleep {
-			phandle = < 0xc >;
-			group1 {
-				psels = < 0x4002d >, < 0x5002f >, < 0x6002e >;
-				low-power-enable;
-			};
-		};
-		spi3_default: spi3_default {
-			group1 {
-				psels = < 0x40015 >, < 0x50014 >, < 0x60018 >;
-			};
-		};
-		spi3_sleep: spi3_sleep {
-			group1 {
-				psels = < 0x40015 >, < 0x50014 >, < 0x60018 >;
-				low-power-enable;
-			};
-		};
-		qspi_default: qspi_default {
-			phandle = < 0xd >;
-			group1 {
-				psels = < 0x1d0015 >, < 0x1f0014 >, < 0x200018 >, < 0x210016 >, < 0x220017 >, < 0x1e0019 >;
-			};
-		};
-		qspi_sleep: qspi_sleep {
-			phandle = < 0xe >;
-			group1 {
-				psels = < 0x1d0015 >, < 0x1f0014 >, < 0x200018 >, < 0x210016 >, < 0x220017 >, < 0x1e0019 >;
+				psels = < 0x5 >, < 0x10003 >, < 0x20007 >, < 0x30028 >;
 				low-power-enable;
 			};
 		};
@@ -652,39 +530,84 @@
 		clock-prescaler = < 0x0 >;
 		#pwm-cells = < 0x3 >;
 	};
-	xiao_d: connector {
-		compatible = "seeed,xiao-gpio";
+	interface_to_nrf9160: gpio-interface {
+		compatible = "nordic,nrf9160dk-nrf52840-interface";
 		#gpio-cells = < 0x2 >;
-		gpio-map-mask = < 0xffffffff 0xffffffc0 >;
-		gpio-map-pass-thru = < 0x0 0x3f >;
-		gpio-map = < 0x0 0x0 &gpio0 0x2 0x0 >, < 0x1 0x0 &gpio0 0x3 0x0 >, < 0x2 0x0 &gpio0 0x1c 0x0 >, < 0x3 0x0 &gpio0 0x1d 0x0 >, < 0x4 0x0 &gpio0 0x4 0x0 >, < 0x5 0x0 &gpio0 0x5 0x0 >, < 0x6 0x0 &gpio1 0xb 0x0 >, < 0x7 0x0 &gpio1 0xc 0x0 >, < 0x8 0x0 &gpio1 0xd 0x0 >, < 0x9 0x0 &gpio1 0xe 0x0 >, < 0xa 0x0 &gpio1 0xf 0x0 >;
+		gpio-map-mask = < 0xf 0x0 >;
+		gpio-map-pass-thru = < 0x0 0xffffffff >;
+		gpio-map = < 0x0 0x0 &gpio0 0x11 0x0 >, < 0x1 0x0 &gpio0 0x14 0x0 >, < 0x2 0x0 &gpio0 0xf 0x0 >, < 0x3 0x0 &gpio0 0x16 0x0 >, < 0x4 0x0 &gpio1 0x4 0x0 >, < 0x5 0x0 &gpio1 0x2 0x0 >, < 0x6 0x0 &gpio1 0xd 0x0 >, < 0x7 0x0 &gpio1 0xb 0x0 >, < 0x8 0x0 &gpio1 0xf 0x0 >;
+		phandle = < 0x7 >;
 	};
-	leds {
-		compatible = "gpio-leds";
-		led0: led_0 {
-			gpios = < &gpio0 0x1a 0x1 >;
-			label = "Red LED";
-		};
-		led1: led_1 {
-			gpios = < &gpio0 0x1e 0x1 >;
-			label = "Green LED";
-		};
-		led2: led_2 {
-			gpios = < &gpio0 0x6 0x1 >;
-			label = "Blue LED";
-		};
+	reset_input: gpio-reset {
+		compatible = "nordic,nrf9160dk-nrf52840-reset";
+		gpios = < &interface_to_nrf9160 0x5 0x20 >;
+		status = "disabled";
 	};
-	pwmleds {
-		compatible = "pwm-leds";
-		pwm_led0: pwm_led_0 {
-			pwms = < &pwm0 0x0 0x1312d00 0x1 >;
+	board-control {
+		vcom0_pins_routing: switch-nrf91-uart1 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0xe 0x1 >;
+			status = "okay";
 		};
-	};
-	lsm6ds3tr-c-en {
-		compatible = "regulator-fixed-sync", "regulator-fixed";
-		enable-gpios = < &gpio1 0x8 0x0 >;
-		regulator-name = "LSM6DS3TR_C_EN";
-		regulator-boot-on;
-		startup-delay-us = < 0x384 >;
+		vcom2_pins_routing: switch-nrf91-uart2 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0xc 0x0 >, < &gpio0 0xc 0x0 >;
+			status = "okay";
+		};
+		led1_pin_routing: switch-nrf91-led1 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0x5 0x1 >;
+			status = "okay";
+		};
+		led2_pin_routing: switch-nrf91-led2 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0x7 0x1 >;
+			status = "okay";
+		};
+		led3_pin_routing: switch-nrf91-led3 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0x1 0x1 >;
+			status = "okay";
+		};
+		led4_pin_routing: switch-nrf91-led4 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0x3 0x1 >;
+			status = "okay";
+		};
+		switch1_pin_routing: switch-nrf91-switch1 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0x9 0x1 >;
+			status = "okay";
+		};
+		switch2_pin_routing: switch-nrf91-switch2 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio0 0x8 0x1 >;
+			status = "okay";
+		};
+		button1_pin_routing: switch-nrf91-button1 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio0 0x6 0x1 >;
+			status = "okay";
+		};
+		button2_pin_routing: switch-nrf91-button2 {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio0 0x1a 0x1 >;
+			status = "okay";
+		};
+		nrf_interface_pins_0_2_routing: switch-nrf-if0-2-ctrl {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio0 0xd 0x0 >;
+			status = "disabled";
+		};
+		nrf_interface_pins_3_5_routing: switch-nrf-if3-5-ctrl {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio0 0x18 0x0 >;
+			status = "disabled";
+		};
+		nrf_interface_pins_6_8_routing: switch-nrf-if6-8-ctrl {
+			compatible = "nordic,nrf9160dk-optional-routing";
+			control-gpios = < &gpio1 0xa 0x0 >;
+			status = "disabled";
+		};
 	};
 };

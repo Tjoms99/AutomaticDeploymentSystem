@@ -132,3 +132,13 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/zephyr/subsys/usb/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/zephyr/subsys/bluetooth/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/zephyr/subsys/net/cmake_install.cmake")
+endif()
+

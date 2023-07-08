@@ -42,3 +42,13 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/modules/nrfxlib/nrfxlib/crypto/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/modules/nrfxlib/nrfxlib/softdevice_controller/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/modules/nrfxlib/nrfxlib/mpsl/cmake_install.cmake")
+endif()
+

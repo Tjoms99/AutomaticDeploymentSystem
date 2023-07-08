@@ -39,6 +39,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/modules/nrf/drivers/mpsl/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("F:/AutomaticDeploymentSystem/src/Drum_relay_system/build/modules/nrf/drivers/hw_cc310/cmake_install.cmake")
 endif()
 

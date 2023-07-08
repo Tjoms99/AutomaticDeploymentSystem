@@ -1,5 +1,5 @@
 # Generated file that can be used to preload variant images
-set(BOARD "xiao_ble_sense" CACHE INTERNAL "NCS child image controlled")
+set(BOARD "nrf9160dk_nrf52840" CACHE INTERNAL "NCS child image controlled")
 set(BOARD_ROOT "f:/automaticdeploymentsystem/src/drum_relay_system;C:/ncs/v2.4.0/nrf;C:/ncs/v2.4.0/zephyr" CACHE INTERNAL "NCS child image controlled")
 set(CACHED_CONF_FILE "F:/AutomaticDeploymentSystem/src/Drum_relay_system/prj.conf" CACHE INTERNAL "NCS child image controlled")
 set(CONF_FILE_BUILD_TYPE "" CACHE INTERNAL "NCS child image controlled")

@@ -317,9 +317,9 @@ C:\ncs\v2.4.0\zephyr\arch\arm\core\aarch32\mmu\Kconfig
 C:\ncs\v2.4.0\zephyr\arch\arm\core\aarch32\mpu\Kconfig
 C:\ncs\v2.4.0\zephyr\arch\common\Kconfig
 C:\ncs\v2.4.0\zephyr\boards\Kconfig
-C:\ncs\v2.4.0\zephyr\boards\arm\xiao_ble\Kconfig
-C:\ncs\v2.4.0\zephyr\boards\arm\xiao_ble\Kconfig.board
-C:\ncs\v2.4.0\zephyr\boards\arm\xiao_ble\Kconfig.defconfig
+C:\ncs\v2.4.0\zephyr\boards\arm\nrf9160dk_nrf52840\Kconfig
+C:\ncs\v2.4.0\zephyr\boards\arm\nrf9160dk_nrf52840\Kconfig.board
+C:\ncs\v2.4.0\zephyr\boards\arm\nrf9160dk_nrf52840\Kconfig.defconfig
 C:\ncs\v2.4.0\zephyr\boards\shields\adafruit_2_8_tft_touch_v2\Kconfig.defconfig
 C:\ncs\v2.4.0\zephyr\boards\shields\adafruit_2_8_tft_touch_v2\Kconfig.shield
 C:\ncs\v2.4.0\zephyr\boards\shields\adafruit_pca9685\Kconfig.shield

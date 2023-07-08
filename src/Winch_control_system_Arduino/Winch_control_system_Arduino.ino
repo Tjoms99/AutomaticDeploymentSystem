@@ -21,12 +21,14 @@ void setup()
 
   // For the USB, just use Serial as normal:
   Serial.begin(115200);
+  Serial.println("Before init");
 
   uart_begin();
   WiFi.begin(ssid, password);
   ble_begin();
   mqtt_begin();
 
+  Serial.println("Initialized");
   uart_register_callback_data_ready(publish_data);
   uart_write_reset();
 }

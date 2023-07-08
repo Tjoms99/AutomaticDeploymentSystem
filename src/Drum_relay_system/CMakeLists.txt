@@ -6,5 +6,6 @@ project(peripheral)
 
 target_sources(app PRIVATE
   src/main.c
-  src/gpio/leds.c
+  #src/gpio/leds.c
+  src/bluetooth/bluetooth.c
 )
