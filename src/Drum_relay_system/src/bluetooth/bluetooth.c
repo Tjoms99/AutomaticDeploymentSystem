@@ -24,10 +24,25 @@ static uint8_t discover_func(struct bt_conn *conn,
                              const struct bt_gatt_attr *attr,
                              struct bt_gatt_discover_params *params);
 
+//-------------------------------------------------------------------------------------------------
+// BLUETOOTH DEFAULTS
 #define BT_LE_CONN_PARAM_LONG_TIMEOUT BT_LE_CONN_PARAM(BT_GAP_INIT_CONN_INT_MIN, \
                                                        BT_GAP_INIT_CONN_INT_MAX, \
                                                        0, 1000) // N*10ms
 
+static struct bt_conn *default_conn;
+static struct bt_uuid_128 uuid128 = BT_UUID_INIT_128(0);
+static struct bt_gatt_discover_params discover_params;
+
+enum SERVICES
+{
+    SERVICE_DATA,
+    SERVICE_CONTROL,
+    SERVICES_MAX, // !!SHOULD ALWAYS BE LAST!!
+
+};
+typedef enum SERVICES services_t;
+static services_t service;
 //-------------------------------------------------------------------------------------------------
 // DATA SERVICE & CHARACTERISTICS
 #define uuid_data_service_val BT_UUID_128_ENCODE(0x561721cd, 0xdbb7, 0x462d, 0xa651, 0x8f542da25b61)
@@ -39,6 +54,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 #define BT_UUID_DEPTH BT_UUID_DECLARE_128(uuid_depth_characteristic_val)
 #define BT_UUID_PRESSURE BT_UUID_DECLARE_128(uuid_pressure_characteristic_val)
 #define BT_UUID_TEMPERATURE BT_UUID_DECLARE_128(uuid_temperature_characteristic_val)
+
+#define WRITE_CHARACTERISTICS_MAX 3
+static struct bt_gatt_chrc characteristic_params[WRITE_CHARACTERISTICS_MAX];
 
 //-------------------------------------------------------------------------------------------------
 // CONTROL SERVICE & CHARACTERISTICS
@@ -56,32 +74,22 @@ static uint8_t discover_func(struct bt_conn *conn,
 #define BT_UUID_12V_ON BT_UUID_DECLARE_128(uuid_12v_on_characteristic_val)
 #define BT_UUID_SAMPLING_TIME BT_UUID_DECLARE_128(uuid_sampling_time_characteristic_val)
 
-typedef uint8_t (*notify_function_callback_t)(struct bt_conn *conn, struct bt_gatt_subscribe_params *params, const void *data, uint16_t length);
-
-#define NOTIFY_CHARACTERISTICS_MAX 5
-static struct bt_uuid *control_characteristics_uuid[NOTIFY_CHARACTERISTICS_MAX];
-static notify_function_callback_t notify_callbacks[NOTIFY_CHARACTERISTICS_MAX];
-static struct bt_gatt_subscribe_params subscribe_control_characteristics[NOTIFY_CHARACTERISTICS_MAX];
-
-enum DISCOVER_PHASE
+enum CONTROL_CHARACTERISTIC
 {
-    DISC_PHASE_SERVICE, /* Looking for Service UUIDs */
-    DISC_PHASE_CHRC,    /* Looking for Characteristic UUIDs */
-    DISC_PHASE_CCCD,    /* Looking for CCCDs */
-};
-typedef enum DISCOVER_PHASE discover_phase_t;
-/* Phase of attribute discovery process */
-static discover_phase_t discover_phase;
-static uint16_t cccd_handle; /* Handle to Notify CCCD for Report */
-static uint16_t ctrl_handle; /* Handle for Control Characteristic */
-static uint16_t rpt_handle;  /* Handle for Report Characteristic */
+    CONTROL_SYSTEM_ON,
+    CONTROL_SAMPLING_ON,
+    CONTROL_RS232_ON,
+    CONTROL_12V_ON,
+    CONTROL_SAMPLING_TIME,
+    CONTROL_CHARACTERISTICS_MAX, // !!SHOULD ALWAYS BE LAST!!
 
-static struct bt_conn *default_conn;
-static struct bt_uuid_128 uuid128 = BT_UUID_INIT_128(0);
-static struct bt_gatt_discover_params discover_params;
-static struct bt_gatt_subscribe_params subscribe_params[NOTIFY_CHARACTERISTICS_MAX];
-static volatile uint8_t service = 0;
-static volatile uint8_t characteristic = 0;
+};
+typedef enum CONTROL_CHARACTERISTIC control_characteristic_t;
+static control_characteristic_t control_characteristic;
+
+typedef uint8_t (*notify_function_callback_t)(struct bt_conn *conn, struct bt_gatt_subscribe_params *params, const void *data, uint16_t length);
+static notify_function_callback_t notify_callbacks[CONTROL_CHARACTERISTICS_MAX];
+static struct bt_gatt_subscribe_params subscribe_params[CONTROL_CHARACTERISTICS_MAX];
 
 static uint8_t notify_func(struct bt_conn *conn,
                            struct bt_gatt_subscribe_params *params,
@@ -155,16 +163,17 @@ static void print_chrc_props(uint8_t properties)
     printk("\n");
 }
 
-void discover_service(uint8_t target_service)
+void discover_service(services_t target_service)
 {
-    if (target_service == 0)
+    if (target_service == SERVICE_DATA)
     {
         memcpy(&uuid128, BT_UUID_DATA, sizeof(uuid128));
     }
-    else
+    else if (target_service == SERVICE_CONTROL)
     {
         memcpy(&uuid128, BT_UUID_CONTROL, sizeof(uuid128));
     }
+
     discover_params.uuid = &uuid128.uuid;
     discover_params.func = discover_func;
     discover_params.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE;
@@ -175,25 +184,25 @@ void discover_service(uint8_t target_service)
     err ? printk("Discover failed (err %d)\n", err) : printk("Discover Service...\n");
 }
 
-void discover_control_characteristic(uint8_t target_characteristic,
+void discover_control_characteristic(control_characteristic_t target_characteristic,
                                      struct bt_conn *conn,
                                      const struct bt_gatt_attr *attr)
 {
     switch (target_characteristic)
     {
-    case 0:
+    case CONTROL_SYSTEM_ON:
         memcpy(&uuid128, BT_UUID_SYSTEM_ON, sizeof(uuid128));
         break;
-    case 1:
+    case CONTROL_SAMPLING_ON:
         memcpy(&uuid128, BT_UUID_SAMPLING_ON, sizeof(uuid128));
         break;
-    case 2:
+    case CONTROL_RS232_ON:
         memcpy(&uuid128, BT_UUID_RS232_ON, sizeof(uuid128));
         break;
-    case 3:
+    case CONTROL_12V_ON:
         memcpy(&uuid128, BT_UUID_12V_ON, sizeof(uuid128));
         break;
-    case 4:
+    case CONTROL_SAMPLING_TIME:
         memcpy(&uuid128, BT_UUID_SAMPLING_TIME, sizeof(uuid128));
         break;
     }
@@ -206,6 +215,17 @@ void discover_control_characteristic(uint8_t target_characteristic,
     err ? printk("Discover failed (err %d)\n", err) : printk("Discover Chacateristic...\n");
 }
 
+void subscribe_to_characteristic(struct bt_conn *conn,
+                                 const struct bt_gatt_attr *attr)
+{
+    subscribe_params[control_characteristic].notify = notify_func;
+    subscribe_params[control_characteristic].value = BT_GATT_CCC_NOTIFY;
+    subscribe_params[control_characteristic].ccc_handle = attr->handle;
+
+    int err = bt_gatt_subscribe(conn, &subscribe_params[control_characteristic]);
+    (err && err != -EALREADY) ? printk("Subscribe failed (err %d)\n", err) : printk("[SUBSCRIBED]\n");
+}
+
 void discover_description(struct bt_conn *conn,
                           const struct bt_gatt_attr *attr)
 {
@@ -214,10 +234,10 @@ void discover_description(struct bt_conn *conn,
     discover_params.uuid = &uuid128.uuid;
     discover_params.start_handle = attr->handle + 2;
     discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-    subscribe_params[characteristic].value_handle = bt_gatt_attr_value_handle(attr);
+    subscribe_params[control_characteristic].value_handle = bt_gatt_attr_value_handle(attr);
 
     int err = bt_gatt_discover(conn, &discover_params);
-    err ? printk("Discover failed (err %d)\n", err) : printk("Discover Chacateristic...\n");
+    err ? printk("Discover failed (err %d)\n", err) : printk("Discover Description...\n");
 }
 
 static uint8_t discover_func(struct bt_conn *conn,
@@ -243,32 +263,34 @@ static uint8_t discover_func(struct bt_conn *conn,
     {
     case BT_GATT_DISCOVER_SECONDARY:
     case BT_GATT_DISCOVER_PRIMARY:
-        if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
+        if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_DATA))
         {
-            discover_control_characteristic(characteristic, conn, attr);
+            printk("Service data");
+            // discover_control_characteristic(characteristic, conn, attr);
+        }
+        else if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
+        {
+            discover_control_characteristic(control_characteristic, conn, attr);
         }
         break;
     case BT_GATT_DISCOVER_CHARACTERISTIC:
-        if (service == 1)
+        if (service == SERVICE_CONTROL)
         {
             discover_description(conn, attr);
         }
         break;
     case BT_GATT_DISCOVER_DESCRIPTOR:
-        subscribe_params[characteristic].notify = notify_func;
-        subscribe_params[characteristic].value = BT_GATT_CCC_NOTIFY;
-        subscribe_params[characteristic].ccc_handle = attr->handle;
+        subscribe_to_characteristic(conn, attr);
 
-        err = bt_gatt_subscribe(conn, &subscribe_params[characteristic]);
-        (err && err != -EALREADY) ? printk("Subscribe failed (err %d)\n", err) : printk("[SUBSCRIBED]\n");
-
-        characteristic++;
-
-        if (characteristic == 5)
+        control_characteristic++;
+        if (control_characteristic == CONTROL_CHARACTERISTICS_MAX)
         {
             return BT_GATT_ITER_STOP;
         }
-        discover_service(1);
+        else
+        {
+            discover_service(SERVICE_CONTROL);
+        }
 
         break;
     }
@@ -388,8 +410,8 @@ static void connected(struct bt_conn *conn, uint8_t err)
     }
 
     printk("Connected: %s\n", addr);
-    service = 1;
-    characteristic = 0;
+    service = SERVICE_CONTROL;
+    control_characteristic = CONTROL_SYSTEM_ON;
 
     discover_service(service);
 
@@ -424,7 +446,6 @@ void bluetooth_init(void)
 {
     int err;
 
-    control_characteristics_uuid[0] = BT_UUID_SYSTEM_ON;
     err = bt_enable(NULL);
     if (err)
     {
