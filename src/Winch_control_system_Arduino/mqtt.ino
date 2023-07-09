@@ -61,6 +61,8 @@ void callback(char *topic, byte *payload, unsigned int length) {
   if (strcmp(topic, topic_system) == 0) {
     mqtt_populate_data(SYSTEM_ON, payload, length);
     digitalWrite(USS_ENABLED, payload[0] == '1' ? HIGH : LOW);
+    ble_notify_system_on(payload, length);
+
   } else if (strcmp(topic, topic_sampling) == 0) {
     mqtt_populate_data(SAMPLING_ON, payload, length);
     uart_write_sample();
@@ -69,16 +71,15 @@ void callback(char *topic, byte *payload, unsigned int length) {
   } else if (strcmp(topic, topic_rs232) == 0) {
     mqtt_populate_data(RS232_ON, payload, length);
     uart_write_rs232();
+    ble_notify_rs232_on(payload, length);
+
   } else if (strcmp(topic, topic_12v) == 0) {
     mqtt_populate_data(VOLT12_ON, payload, length);
     uart_write_12v();
+    ble_notify_12v_on(payload, length);
+
   } else if (strcmp(topic, topic_sampling_interval) == 0) {
     mqtt_populate_data(SAMPLING_INTERVAL, payload, length);
-    Serial.println();
-    Serial.println(mqtt_data[SAMPLING_INTERVAL][0]);
-    Serial.println(mqtt_data[SAMPLING_INTERVAL][1]);
-    Serial.println(mqtt_data[SAMPLING_INTERVAL][2]);
-
     ble_notify_sampling_time(payload, length);
     uart_write_sample_time(mqtt_data[SAMPLING_INTERVAL]);
   } else if (strcmp(topic, topic_target_depth) == 0) {

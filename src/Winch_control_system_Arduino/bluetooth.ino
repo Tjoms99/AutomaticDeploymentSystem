@@ -31,6 +31,7 @@ NimBLECharacteristic *pCharacteristic_rs232_on;
 NimBLECharacteristic *pCharacteristic_12v_on;
 NimBLECharacteristic *pCharacteristic_sampling_time;
 
+bool ble_finished = false;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 std::string value = "0";
@@ -83,20 +84,23 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
       str += " Subscribed to notifications and indications for ";
     }
     str += std::string(pCharacteristic->getUUID()).c_str();
-
+    ble_finished = true;
     Serial.println(str);
   };
 };
 
 static CharacteristicCallbacks chrCallbacks;
 
+bool ble_is_finished(){
+  return  ble_finished;
+
+}
 void ble_begin(void) {
 
   NimBLEDevice::init("Winch Control System");
   NimBLEDevice::setPower(ESP_PWR_LVL_P9);  // Default +3db, now +9db
 
   pServer = NimBLEDevice::createServer();
-  NimBLEDescriptor *pDescriptor = nullptr;
 
   //-------------------------------------------------------------------------------------------------
   // DATA
@@ -125,7 +129,6 @@ void ble_begin(void) {
   pCharacteristic_12v_on->setCallbacks(&chrCallbacks);
   pCharacteristic_sampling_time->setCallbacks(&chrCallbacks);
 
-
   pService_control->start();
   pCharacteristic_system_on->setValue("1");
   pCharacteristic_sampling_on->setValue("1");
@@ -146,18 +149,42 @@ void ble_begin(void) {
 
 
   pAdvertising->start();
-}
 
-void ble_notify_sampling_time(byte *sampling_time, uint8_t length) {
-  pCharacteristic_sampling_time->setValue(sampling_time, length);
+  pCharacteristic_system_on->notify();
+  pCharacteristic_sampling_on->notify();
+  pCharacteristic_rs232_on->notify();
+  pCharacteristic_12v_on->notify();
   pCharacteristic_sampling_time->notify();
 }
 
-void ble_notify_sampling_on(byte *sampling_on, uint8_t length) {
-  pCharacteristic_sampling_time->setValue(sampling_on, length);
+
+
+void ble_notify_system_on(byte *state, uint8_t length) {
+  pCharacteristic_system_on->setValue(state, length);
+  pCharacteristic_system_on->notify();
+}
+
+void ble_notify_sampling_on(byte *state, uint8_t length) {
+  pCharacteristic_sampling_on->setValue(state, length);
+  pCharacteristic_sampling_on->notify();
+}
+
+void ble_notify_rs232_on(byte *state, uint8_t length) {
+  pCharacteristic_rs232_on->setValue(state, length);
+  pCharacteristic_rs232_on->notify();
+}
+
+void ble_notify_12v_on(byte *state, uint8_t length) {
+  pCharacteristic_12v_on->setValue(state, length);
+  pCharacteristic_12v_on->notify();
+}
+
+void ble_notify_sampling_time(byte *state, uint8_t length) {
+  pCharacteristic_sampling_time->setValue(state, length);
   pCharacteristic_sampling_time->notify();
 }
-void ble_loop() { 
+
+void ble_loop() {
 
   /*
     pCharacteristic_system_on->notify();

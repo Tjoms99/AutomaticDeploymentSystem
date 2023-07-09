@@ -53,6 +53,13 @@ static void start_scan(void);
 #define BT_UUID_12V_ON BT_UUID_DECLARE_128(uuid_12v_on_characteristic_val)
 #define BT_UUID_SAMPLING_TIME BT_UUID_DECLARE_128(uuid_sampling_time_characteristic_val)
 
+typedef uint8_t (*notify_function_callback_t)(struct bt_conn *conn, struct bt_gatt_subscribe_params *params, const void *data, uint16_t length);
+
+#define NOTIFY_CHARACTERISTICS_MAX 5
+static struct bt_uuid *control_characteristics_uuid[NOTIFY_CHARACTERISTICS_MAX];
+static notify_function_callback_t notify_callbacks[NOTIFY_CHARACTERISTICS_MAX];
+static struct bt_gatt_subscribe_params subscribe_control_characteristics[NOTIFY_CHARACTERISTICS_MAX];
+
 enum DISCOVER_PHASE
 {
     DISC_PHASE_SERVICE, /* Looking for Service UUIDs */
@@ -81,8 +88,17 @@ static uint8_t notify_func(struct bt_conn *conn,
         params->value_handle = 0U;
         return BT_GATT_ITER_STOP;
     }
+    char *data_s = data;
 
-    printk("[NOTIFICATION] data %p length %u\n", data, length);
+    // Set end of string value to ignore the rest of the pointer value.
+    data_s[length] = '\0';
+
+    printk("[NOTIFICATION] data ");
+    printk("%s", data_s);
+    printk(" length %u\n", length);
+
+    // Consume data
+    memset(data, '\0', sizeof(data));
 
     return BT_GATT_ITER_CONTINUE;
 }
@@ -159,7 +175,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 
     if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
     {
-        memcpy(&uuid128, BT_UUID_SAMPLING_ON, sizeof(uuid128));
+        memcpy(&uuid128, BT_UUID_SAMPLING_TIME, sizeof(uuid128));
         discover_params.uuid = &uuid128.uuid;
         discover_params.start_handle = attr->handle + 1;
         discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
@@ -170,7 +186,7 @@ static uint8_t discover_func(struct bt_conn *conn,
             printk("Discover failed (err %d)\n", err);
         }
     }
-    else if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_SAMPLING_ON))
+    else if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_SAMPLING_TIME))
     {
         memcpy(&uuid128, BT_UUID_GATT_CCC, sizeof(uuid128));
         discover_params.uuid = &uuid128.uuid;
@@ -259,7 +275,7 @@ static void device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type,
     printk("Device found: %s (RSSI %d)\n", addr_str, rssi);
 
     /* connect only to devices in close proximity */
-    if (rssi < -70)
+    if (rssi < -60)
     {
         return;
     }
