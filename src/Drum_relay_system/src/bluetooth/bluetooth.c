@@ -20,6 +20,9 @@
 #include <zephyr/sys/byteorder.h>
 
 static void start_scan(void);
+static uint8_t discover_func(struct bt_conn *conn,
+                             const struct bt_gatt_attr *attr,
+                             struct bt_gatt_discover_params *params);
 
 #define BT_LE_CONN_PARAM_LONG_TIMEOUT BT_LE_CONN_PARAM(BT_GAP_INIT_CONN_INT_MIN, \
                                                        BT_GAP_INIT_CONN_INT_MAX, \
@@ -76,7 +79,9 @@ static uint16_t rpt_handle;  /* Handle for Report Characteristic */
 static struct bt_conn *default_conn;
 static struct bt_uuid_128 uuid128 = BT_UUID_INIT_128(0);
 static struct bt_gatt_discover_params discover_params;
-static struct bt_gatt_subscribe_params subscribe_params;
+static struct bt_gatt_subscribe_params subscribe_params[NOTIFY_CHARACTERISTICS_MAX];
+static volatile uint8_t service = 0;
+static volatile uint8_t characteristic = 0;
 
 static uint8_t notify_func(struct bt_conn *conn,
                            struct bt_gatt_subscribe_params *params,
@@ -93,9 +98,9 @@ static uint8_t notify_func(struct bt_conn *conn,
     // Set end of string value to ignore the rest of the pointer value.
     data_s[length] = '\0';
 
-    printk("[NOTIFICATION] data ");
-    printk("%s", data_s);
-    printk(" length %u\n", length);
+    printk("[NOTIFICATION] handle %x\n", params->value_handle);
+    printk("Data %s\n", data_s);
+    printk("Length %u\n", length);
 
     // Consume data
     memset(data, '\0', sizeof(data));
@@ -150,6 +155,71 @@ static void print_chrc_props(uint8_t properties)
     printk("\n");
 }
 
+void discover_service(uint8_t target_service)
+{
+    if (target_service == 0)
+    {
+        memcpy(&uuid128, BT_UUID_DATA, sizeof(uuid128));
+    }
+    else
+    {
+        memcpy(&uuid128, BT_UUID_CONTROL, sizeof(uuid128));
+    }
+    discover_params.uuid = &uuid128.uuid;
+    discover_params.func = discover_func;
+    discover_params.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE;
+    discover_params.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE;
+    discover_params.type = BT_GATT_DISCOVER_PRIMARY;
+
+    int err = bt_gatt_discover(default_conn, &discover_params);
+    err ? printk("Discover failed (err %d)\n", err) : printk("Discover Service...\n");
+}
+
+void discover_control_characteristic(uint8_t target_characteristic,
+                                     struct bt_conn *conn,
+                                     const struct bt_gatt_attr *attr)
+{
+    switch (target_characteristic)
+    {
+    case 0:
+        memcpy(&uuid128, BT_UUID_SYSTEM_ON, sizeof(uuid128));
+        break;
+    case 1:
+        memcpy(&uuid128, BT_UUID_SAMPLING_ON, sizeof(uuid128));
+        break;
+    case 2:
+        memcpy(&uuid128, BT_UUID_RS232_ON, sizeof(uuid128));
+        break;
+    case 3:
+        memcpy(&uuid128, BT_UUID_12V_ON, sizeof(uuid128));
+        break;
+    case 4:
+        memcpy(&uuid128, BT_UUID_SAMPLING_TIME, sizeof(uuid128));
+        break;
+    }
+
+    discover_params.uuid = &uuid128.uuid;
+    discover_params.start_handle = attr->handle + 1;
+    discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
+
+    int err = bt_gatt_discover(conn, &discover_params);
+    err ? printk("Discover failed (err %d)\n", err) : printk("Discover Chacateristic...\n");
+}
+
+void discover_description(struct bt_conn *conn,
+                          const struct bt_gatt_attr *attr)
+{
+
+    memcpy(&uuid128, BT_UUID_GATT_CCC, sizeof(uuid128));
+    discover_params.uuid = &uuid128.uuid;
+    discover_params.start_handle = attr->handle + 2;
+    discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
+    subscribe_params[characteristic].value_handle = bt_gatt_attr_value_handle(attr);
+
+    int err = bt_gatt_discover(conn, &discover_params);
+    err ? printk("Discover failed (err %d)\n", err) : printk("Discover Chacateristic...\n");
+}
+
 static uint8_t discover_func(struct bt_conn *conn,
                              const struct bt_gatt_attr *attr,
                              struct bt_gatt_discover_params *params)
@@ -168,56 +238,41 @@ static uint8_t discover_func(struct bt_conn *conn,
         (void)memset(params, 0, sizeof(*params));
         return BT_GATT_ITER_STOP;
     }
-    else
+
+    switch (params->type)
     {
-        printk("Discover in progress\n");
+    case BT_GATT_DISCOVER_SECONDARY:
+    case BT_GATT_DISCOVER_PRIMARY:
+        if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
+        {
+            discover_control_characteristic(characteristic, conn, attr);
+        }
+        break;
+    case BT_GATT_DISCOVER_CHARACTERISTIC:
+        if (service == 1)
+        {
+            discover_description(conn, attr);
+        }
+        break;
+    case BT_GATT_DISCOVER_DESCRIPTOR:
+        subscribe_params[characteristic].notify = notify_func;
+        subscribe_params[characteristic].value = BT_GATT_CCC_NOTIFY;
+        subscribe_params[characteristic].ccc_handle = attr->handle;
+
+        err = bt_gatt_subscribe(conn, &subscribe_params[characteristic]);
+        (err && err != -EALREADY) ? printk("Subscribe failed (err %d)\n", err) : printk("[SUBSCRIBED]\n");
+
+        characteristic++;
+
+        if (characteristic == 5)
+        {
+            return BT_GATT_ITER_STOP;
+        }
+        discover_service(1);
+
+        break;
     }
 
-    if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
-    {
-        memcpy(&uuid128, BT_UUID_SAMPLING_TIME, sizeof(uuid128));
-        discover_params.uuid = &uuid128.uuid;
-        discover_params.start_handle = attr->handle + 1;
-        discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
-
-        err = bt_gatt_discover(conn, &discover_params);
-        if (err)
-        {
-            printk("Discover failed (err %d)\n", err);
-        }
-    }
-    else if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_SAMPLING_TIME))
-    {
-        memcpy(&uuid128, BT_UUID_GATT_CCC, sizeof(uuid128));
-        discover_params.uuid = &uuid128.uuid;
-        discover_params.start_handle = attr->handle + 2;
-        discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
-        subscribe_params.value_handle = bt_gatt_attr_value_handle(attr);
-
-        err = bt_gatt_discover(conn, &discover_params);
-        if (err)
-        {
-            printk("Discover failed (err %d)\n", err);
-        }
-    }
-    else
-    {
-        subscribe_params.notify = notify_func;
-        subscribe_params.value = BT_GATT_CCC_NOTIFY;
-        subscribe_params.ccc_handle = attr->handle;
-
-        err = bt_gatt_subscribe(conn, &subscribe_params);
-        if (err && err != -EALREADY)
-        {
-            printk("Subscribe failed (err %d)\n", err);
-        }
-        else
-        {
-            printk("[SUBSCRIBED]\n");
-        }
-
-        return BT_GATT_ITER_STOP;
-    }
     return BT_GATT_ITER_STOP;
 
     /*
@@ -333,21 +388,11 @@ static void connected(struct bt_conn *conn, uint8_t err)
     }
 
     printk("Connected: %s\n", addr);
+    service = 1;
+    characteristic = 0;
 
-    memcpy(&uuid128, BT_UUID_CONTROL, sizeof(uuid128));
-    discover_params.uuid = &uuid128.uuid; //&uuid128.uuid;
-    discover_params.func = discover_func;
-    discover_params.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE;
-    discover_params.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE;
-    discover_params.type = BT_GATT_DISCOVER_PRIMARY;
+    discover_service(service);
 
-    err = bt_gatt_discover(default_conn, &discover_params);
-
-    if (err)
-    {
-        printk("Discover failed(err %d)\n", err);
-        return;
-    }
     // bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
 }
 
@@ -379,6 +424,7 @@ void bluetooth_init(void)
 {
     int err;
 
+    control_characteristics_uuid[0] = BT_UUID_SYSTEM_ON;
     err = bt_enable(NULL);
     if (err)
     {
