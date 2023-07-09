@@ -21,10 +21,14 @@ int main(void)
 
 	while (1)
 	{
+		bluetooth_write_data(DATA_DEPTH, "-1.321", 6);
+		bluetooth_write_data(DATA_PRESSURE, "103123", 6);
+		bluetooth_write_data(DATA_TEMPERATURE, "24.123", 6);
+		k_msleep(SLEEP_TIME_MS);
+
 		/*
 		leds_toggle_red();
 
-		k_msleep(SLEEP_TIME_MS);
 		leds_toggle_green();
 		k_msleep(SLEEP_TIME_MS);
 		leds_toggle_blue();
