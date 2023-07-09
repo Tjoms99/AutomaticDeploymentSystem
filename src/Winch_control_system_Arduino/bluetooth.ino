@@ -37,29 +37,51 @@ bool oldDeviceConnected = false;
 std::string value = "0";
 
 /** Handler class for characteristic actions */
-class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
-  void onRead(NimBLECharacteristic *pCharacteristic) {
-    Serial.print(pCharacteristic->getUUID().toString().c_str());
-    Serial.print(": onRead(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
+class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
+{
+  void onRead(NimBLECharacteristic *pCharacteristic){
+
+      /*
+      Serial.print(pCharacteristic->getUUID().toString().c_str());
+      Serial.print(": onRead(), value: ");
+      Serial.println(pCharacteristic->getValue().c_str());
+      */
   };
 
-  void onWrite(NimBLECharacteristic *pCharacteristic) {
+  void onWrite(NimBLECharacteristic *pCharacteristic)
+  {
+    const char *uuid = pCharacteristic->getUUID().toString().c_str();
+    if (strcmp(CHARACTERISTIC_UUID_DEPTH, uuid) == 0)
+    {
+      publish_depth(pCharacteristic->getValue().c_str());
+    }
+    else if (strcmp(CHARACTERISTIC_UUID_PRESSURE, uuid) == 0)
+    {
+      publish_pressure(pCharacteristic->getValue().c_str());
+    }
+    else if (strcmp(CHARACTERISTIC_UUID_TEMPERATURE, uuid) == 0)
+    {
+      publish_temperature(pCharacteristic->getValue().c_str());
+    }
+    /*
     Serial.print(pCharacteristic->getUUID().toString().c_str());
     Serial.print(": onWrite(), value: ");
-    Serial.println(pCharacteristic->getValue().c_str());
+    Serial.println(pCharacteristic->getValue().c_str()); */
   };
+
   /** Called before notification or indication is sent,
-     *  the value can be changed here before sending if desired.
-     */
-  void onNotify(NimBLECharacteristic *pCharacteristic) {
+   *  the value can be changed here before sending if desired.
+   */
+  void onNotify(NimBLECharacteristic *pCharacteristic)
+  {
     Serial.println("Sending notification to clients");
   };
 
   /** The status returned in status is defined in NimBLECharacteristic.h.
-     *  The value returned in code is the NimBLE host return code.
-     */
-  void onStatus(NimBLECharacteristic *pCharacteristic, Status status, int code) {
+   *  The value returned in code is the NimBLE host return code.
+   */
+  void onStatus(NimBLECharacteristic *pCharacteristic, Status status, int code)
+  {
     String str = ("Notification/Indication status code: ");
     str += status;
     str += ", return code: ";
@@ -69,18 +91,26 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
     Serial.println(str);
   };
 
-  void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue) {
+  void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue)
+  {
     String str = "Client ID: ";
     str += desc->conn_handle;
     str += " Address: ";
     str += std::string(NimBLEAddress(desc->peer_ota_addr)).c_str();
-    if (subValue == 0) {
+    if (subValue == 0)
+    {
       str += " Unsubscribed to ";
-    } else if (subValue == 1) {
+    }
+    else if (subValue == 1)
+    {
       str += " Subscribed to notfications for ";
-    } else if (subValue == 2) {
+    }
+    else if (subValue == 2)
+    {
       str += " Subscribed to indications for ";
-    } else if (subValue == 3) {
+    }
+    else if (subValue == 3)
+    {
       str += " Subscribed to notifications and indications for ";
     }
     str += std::string(pCharacteristic->getUUID()).c_str();
@@ -91,14 +121,15 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
 
 static CharacteristicCallbacks chrCallbacks;
 
-bool ble_is_finished(){
-  return  ble_finished;
-
+bool ble_is_finished()
+{
+  return ble_finished;
 }
-void ble_begin(void) {
+void ble_begin(void)
+{
 
   NimBLEDevice::init("Winch Control System");
-  NimBLEDevice::setPower(ESP_PWR_LVL_P9);  // Default +3db, now +9db
+  NimBLEDevice::setPower(ESP_PWR_LVL_P9); // Default +3db, now +9db
 
   pServer = NimBLEDevice::createServer();
 
@@ -108,6 +139,10 @@ void ble_begin(void) {
   pCharacteristic_depth = pService_data->createCharacteristic(CHARACTERISTIC_UUID_DEPTH, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
   pCharacteristic_pressure = pService_data->createCharacteristic(CHARACTERISTIC_UUID_PRESSURE, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
   pCharacteristic_temperature = pService_data->createCharacteristic(CHARACTERISTIC_UUID_TEMPERATURE, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
+
+  pCharacteristic_depth->setCallbacks(&chrCallbacks);
+  pCharacteristic_pressure->setCallbacks(&chrCallbacks);
+  pCharacteristic_temperature->setCallbacks(&chrCallbacks);
 
   pService_data->start();
   pCharacteristic_depth->setValue("-0.12");
@@ -136,17 +171,12 @@ void ble_begin(void) {
   pCharacteristic_12v_on->setValue("0");
   pCharacteristic_sampling_time->setValue(value);
 
-
-
-
-
   //-------------------------------------------------------------------------------------------------
   // ADVERTISING
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
 
   pAdvertising->addServiceUUID(SERVICE_UUID_DATA);
   pAdvertising->addServiceUUID(SERVICE_UUID_CONTROL);
-
 
   pAdvertising->start();
 
@@ -157,34 +187,38 @@ void ble_begin(void) {
   pCharacteristic_sampling_time->notify();
 }
 
-
-
-void ble_notify_system_on(byte *state, uint8_t length) {
+void ble_notify_system_on(byte *state, uint8_t length)
+{
   pCharacteristic_system_on->setValue(state, length);
   pCharacteristic_system_on->notify();
 }
 
-void ble_notify_sampling_on(byte *state, uint8_t length) {
+void ble_notify_sampling_on(byte *state, uint8_t length)
+{
   pCharacteristic_sampling_on->setValue(state, length);
   pCharacteristic_sampling_on->notify();
 }
 
-void ble_notify_rs232_on(byte *state, uint8_t length) {
+void ble_notify_rs232_on(byte *state, uint8_t length)
+{
   pCharacteristic_rs232_on->setValue(state, length);
   pCharacteristic_rs232_on->notify();
 }
 
-void ble_notify_12v_on(byte *state, uint8_t length) {
+void ble_notify_12v_on(byte *state, uint8_t length)
+{
   pCharacteristic_12v_on->setValue(state, length);
   pCharacteristic_12v_on->notify();
 }
 
-void ble_notify_sampling_time(byte *state, uint8_t length) {
+void ble_notify_sampling_time(byte *state, uint8_t length)
+{
   pCharacteristic_sampling_time->setValue(state, length);
   pCharacteristic_sampling_time->notify();
 }
 
-void ble_loop() {
+void ble_loop()
+{
 
   /*
     pCharacteristic_system_on->notify();

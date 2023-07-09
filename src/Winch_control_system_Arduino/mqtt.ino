@@ -43,68 +43,99 @@ String client_id = "esp32-client-";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void mqtt_populate_data(int location, byte *payload, unsigned int length) {
-  for (int i = 0; i < 10; i++) {
+void mqtt_populate_data(int location, byte *payload, unsigned int length)
+{
+  for (int i = 0; i < 10; i++)
+  {
     mqtt_data[location][i] = '\0';
-    if (i < length) {
+    if (i < length)
+    {
       mqtt_data[location][i] = (char)payload[i];
     }
     Serial.print(mqtt_data[location][i]);
   }
 }
 
-void callback(char *topic, byte *payload, unsigned int length) {
+void callback(char *topic, byte *payload, unsigned int length)
+{
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
   Serial.print("Message:");
 
-  if (strcmp(topic, topic_system) == 0) {
+  if (strcmp(topic, topic_system) == 0)
+  {
     mqtt_populate_data(SYSTEM_ON, payload, length);
     digitalWrite(USS_ENABLED, payload[0] == '1' ? HIGH : LOW);
     ble_notify_system_on(payload, length);
-
-  } else if (strcmp(topic, topic_sampling) == 0) {
+  }
+  else if (strcmp(topic, topic_sampling) == 0)
+  {
     mqtt_populate_data(SAMPLING_ON, payload, length);
     uart_write_sample();
     ble_notify_sampling_on(payload, length);
-
-  } else if (strcmp(topic, topic_rs232) == 0) {
+  }
+  else if (strcmp(topic, topic_rs232) == 0)
+  {
     mqtt_populate_data(RS232_ON, payload, length);
     uart_write_rs232();
     ble_notify_rs232_on(payload, length);
-
-  } else if (strcmp(topic, topic_12v) == 0) {
+  }
+  else if (strcmp(topic, topic_12v) == 0)
+  {
     mqtt_populate_data(VOLT12_ON, payload, length);
     uart_write_12v();
     ble_notify_12v_on(payload, length);
-
-  } else if (strcmp(topic, topic_sampling_interval) == 0) {
+  }
+  else if (strcmp(topic, topic_sampling_interval) == 0)
+  {
     mqtt_populate_data(SAMPLING_INTERVAL, payload, length);
     ble_notify_sampling_time(payload, length);
     uart_write_sample_time(mqtt_data[SAMPLING_INTERVAL]);
-  } else if (strcmp(topic, topic_target_depth) == 0) {
+  }
+  else if (strcmp(topic, topic_target_depth) == 0)
+  {
     mqtt_populate_data(TARGET_TIME, payload, length);
     uart_write_init_depth();
-  } else if (strcmp(topic, topic_target_time) == 0) {
+  }
+  else if (strcmp(topic, topic_target_time) == 0)
+  {
     mqtt_populate_data(TARGET_DEPTH, payload, length);
   }
 
   Serial.println();
   Serial.println("-----------------------");
 }
+void publish_depth(const char *depth)
+{
+  client.publish(topic_depth, depth, true);
+}
 
-void publish_data(char temperature[6], char pressure[6], char depth[6]) {
+void publish_pressure(const char *pressure)
+{
+  client.publish(topic_pressure, pressure, true);
+}
+
+void publish_temperature(const char *temperature)
+{
+  client.publish(topic_temperature, temperature, true);
+}
+
+void publish_data(char temperature[6], char pressure[6], char depth[6])
+{
   client.publish(topic_depth, depth, true);
   client.publish(topic_temperature, temperature, true);
   client.publish(topic_pressure, pressure, true);
   client.publish(topic_battery, "69", true);
 }
 
-void mqtt_task(void *arg) {
-  while (1) {
+void mqtt_task(void *arg)
+{
+  while (1)
+  {
     client.loop();
     // If connection failed, or connection lost, or connection timeout, retry the connection.
-    if (client.state() < 0) {
+    if (client.state() < 0)
+    {
       client.connect(client_id.c_str(), mqtt_username, mqtt_password);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
@@ -112,7 +143,8 @@ void mqtt_task(void *arg) {
   }
 }
 
-void mqtt_begin() {
+void mqtt_begin()
+{
   Serial.println("MQTT STARTED!");
 
   // connecting to a mqtt broker
@@ -120,7 +152,8 @@ void mqtt_begin() {
   client.setCallback(callback);
 
   client_id += String(WiFi.macAddress());
-  while (!client.connected()) {
+  while (!client.connected())
+  {
     Serial.println("Connecting..");
     client.connect(client_id.c_str(), mqtt_username, mqtt_password);
     vTaskDelay(500 / portTICK_PERIOD_MS);
