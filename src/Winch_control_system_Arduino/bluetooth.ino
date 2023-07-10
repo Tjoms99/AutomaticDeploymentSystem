@@ -41,15 +41,19 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
 {
   void onRead(NimBLECharacteristic *pCharacteristic){
 
-      /*
+      
       Serial.print(pCharacteristic->getUUID().toString().c_str());
       Serial.print(": onRead(), value: ");
       Serial.println(pCharacteristic->getValue().c_str());
-      */
+      
   };
 
   void onWrite(NimBLECharacteristic *pCharacteristic)
   {
+     Serial.print(pCharacteristic->getUUID().toString().c_str());
+      Serial.print(": onWrite(), value: ");
+      Serial.println(pCharacteristic->getValue().c_str());
+
     const char *uuid = pCharacteristic->getUUID().toString().c_str();
     if (strcmp(CHARACTERISTIC_UUID_DEPTH, uuid) == 0)
     {

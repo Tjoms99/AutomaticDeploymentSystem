@@ -182,6 +182,8 @@ int main(void)
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
             max3471_transmit('b');
+            max3471_transmit('\n');
+
             UCA0IE &= ~UCRXIE; // disable RX UART INT
 
             SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
@@ -196,6 +198,8 @@ int main(void)
 
             UCA0IE |= UCRXIE; // enable RX UART INT
             max3471_transmit('r');
+            max3471_transmit('\n');
+
         }
 
         // Enter low-power mode

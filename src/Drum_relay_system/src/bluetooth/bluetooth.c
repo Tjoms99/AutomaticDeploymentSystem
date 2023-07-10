@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "bluetooth.h"
+#include "../rs485/rs485.h"
 
 #include <zephyr/types.h>
 #include <stddef.h>

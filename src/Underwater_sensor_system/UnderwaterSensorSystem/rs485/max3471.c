@@ -90,7 +90,6 @@ void max3471_recieve(char *data)
 
 void max3471_transmit_6_bytes(char *data, char tag)
 {
-  max3471_transmit(12);
   max3471_transmit(tag);
   max3471_transmit(data[0]);
   max3471_transmit(data[1]);
@@ -98,4 +97,5 @@ void max3471_transmit_6_bytes(char *data, char tag)
   max3471_transmit(data[3]);
   max3471_transmit(data[4]);
   max3471_transmit(data[5]);
+  max3471_transmit('\n');
 }

@@ -5,27 +5,30 @@
  */
 
 #include <zephyr/kernel.h>
-
-// #include "gpio/leds.h"
+#include <zephyr/sys/printk.h>
+#include "gpio/leds.h"
 #include "bluetooth/bluetooth.h"
+#include "rs485/rs485.h"
 
 /* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS 1000
+#define SLEEP_TIME_MS 5000
 
 int main(void)
 {
 	// Show init status 1
-	// leds_init();
+	leds_init();
+	rs485_init();
 	bluetooth_init();
+	leds_set_blue(1);
 	// Led green on successful initialization.
 
 	while (1)
 	{
-		bluetooth_write_data(DATA_DEPTH, "-1.321", 6);
-		bluetooth_write_data(DATA_PRESSURE, "103123", 6);
-		bluetooth_write_data(DATA_TEMPERATURE, "24.123", 6);
 		k_msleep(SLEEP_TIME_MS);
 
+		// rs485_write("4");
+
+		// uart_print_depth();
 		/*
 		leds_toggle_red();
 
@@ -35,5 +38,6 @@ int main(void)
 		k_msleep(SLEEP_TIME_MS);
 	*/
 	}
+
 	return 0;
 }
