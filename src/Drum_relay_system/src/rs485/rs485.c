@@ -14,40 +14,47 @@ static struct k_work_delayable work_uart_write_delayed;
 K_MSGQ_DEFINE(msgq_write, MSG_SIZE, 20, 4);
 K_MSGQ_DEFINE(msgq_write_delayed, MSG_SIZE, 20, 4);
 
-void work_rs485_write(struct k_work *work)
+static void work_rs485_write(struct k_work *work)
 {
     char *message;
 
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 1);
     k_usleep(1);
 
-    while (k_msgq_get(&msgq_write, &message, K_NO_WAIT) == 0)
-    {
-        uart_write(message);
-    }
+    k_msgq_get(&msgq_write, &message, K_NO_WAIT);
 
-    k_msleep(1);
+    uart_write(message);
+
+    k_usleep(25);
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 0);
 }
 
-void work_rs485_write_delayed(struct k_work *work)
+static void work_rs485_write_delayed(struct k_work *work)
 {
     char *message;
 
+    k_msgq_get(&msgq_write_delayed, &message, K_NO_WAIT);
+
+    uart_write(message);
+}
+
+void rs485_tx_enable()
+{
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 1);
     k_usleep(1);
+}
 
-    while (k_msgq_get(&msgq_write_delayed, &message, K_NO_WAIT) == 0)
-    {
-        uart_write(message);
-    }
-
+void rs485_tx_disable()
+{
     k_msleep(1);
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 0);
 }
-
 void rs485_write(char *message)
 {
+    rs485_tx_enable();
+    uart_write(message);
+    rs485_tx_disable();
+    /*
     // Underwater sensor system is sampling and has disabled uart rx interrupt.
     // Takes approx 70ms to finish.
     if (uart_get_is_busy())
@@ -59,7 +66,7 @@ void rs485_write(char *message)
     {
         k_msgq_put(&msgq_write, &message, K_NO_WAIT);
         k_work_submit(&work_uart_write);
-    }
+    }*/
 }
 
 void rs485_init()

@@ -7,7 +7,7 @@ typedef void (*uart_callback_uss_ready)(char *data);
 void uart_init(void);
 
 bool uart_get_is_busy(void);
-void uart_print_depth(void);
+
 void uart_write(char *message);
 
 #endif

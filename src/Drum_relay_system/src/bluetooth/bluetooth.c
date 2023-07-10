@@ -7,6 +7,7 @@
  */
 #include "bluetooth.h"
 #include "../rs485/rs485.h"
+#include "../rs485/uart.h"
 
 #include <zephyr/types.h>
 #include <stddef.h>
@@ -80,6 +81,7 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 static control_characteristic_t control_characteristic;
 static struct bt_gatt_subscribe_params subscribe_params[CONTROL_CHARACTERISTICS_MAX];
 
+bool is_initialized = false;
 //-------------------------------------------------------------------------------------------------
 typedef uint8_t (*notify_function_callback_t)(struct bt_conn *conn,
                                               struct bt_gatt_subscribe_params *params,
@@ -89,9 +91,12 @@ static notify_function_callback_t notify_callbacks[CONTROL_CHARACTERISTICS_MAX];
 
 //-------------------------------------------------------------------------------------------------
 // FUNCTIONS
-
 void bluetooth_write_data(data_characteristic_t charecteristic, uint8_t *data, uint8_t length)
 {
+    if (!is_initialized)
+    {
+        return;
+    }
     bt_gatt_write_without_response(default_conn, characteristic_value_handlers[charecteristic], data, length, false);
 }
 
@@ -105,17 +110,27 @@ static uint8_t notify_func(struct bt_conn *conn,
         params->value_handle = 0U;
         return BT_GATT_ITER_STOP;
     }
-    char *data_s = data;
+
+    if (!is_initialized)
+    {
+        return BT_GATT_ITER_CONTINUE;
+    }
+    static char *data_s;
+    data_s = data;
 
     // Set end of string value to ignore the rest of the pointer value.
-    data_s[length] = '\0';
+    // data_s[length] = '\0';
 
-    printk("[NOTIFICATION] handle %x\n", params->value_handle);
-    printk("Data %s\n", data_s);
-    printk("Length %u\n", length);
+    if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
+    {
+        data_s = "4\0";
+        printk("FOUND SAMPLING\n");
+        rs485_write("4");
+    }
 
-    // Consume data
-    memset(data, '\0', sizeof(data));
+    // printk("[NOTIFICATION] handle %x\n", params->value_handle);
+    // printk("Data %s\n", data_s);
+    // printk("Length %u\n", length);
 
     return BT_GATT_ITER_CONTINUE;
 }
@@ -288,6 +303,7 @@ static uint8_t discover_func(struct bt_conn *conn,
     {
         printk("Discover complete\n");
         (void)memset(params, 0, sizeof(*params));
+        is_initialized = true;
         return BT_GATT_ITER_STOP;
     }
 
@@ -487,6 +503,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
     bt_conn_unref(default_conn);
     default_conn = NULL;
+    is_initialized = false;
 
     start_scan();
 }

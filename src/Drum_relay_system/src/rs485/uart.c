@@ -1,4 +1,5 @@
 #include "uart.h"
+#include "rs485.h"
 #include "../bluetooth/bluetooth.h"
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/uart.h>
@@ -45,6 +46,7 @@ static void serial_cb(const struct device *dev, void *user_data)
         if (rx_buf_pos == -1)
         {
             message_tag = c;
+            printk("%c", c);
         }
 
         switch (c)
@@ -75,10 +77,10 @@ static void serial_cb(const struct device *dev, void *user_data)
                 bluetooth_write_data(DATA_TEMPERATURE, &rx_buf, rx_buf_pos);
             }
 
-            /* reset the buffer (it was copied to the msgq) */
+            /* reset the buffer (it was sendt over BLE) */
             rx_buf_pos = -1;
-            printk("\n\r");
             break;
+
         default:
             if (rx_buf_pos == -1)
             {
@@ -88,8 +90,6 @@ static void serial_cb(const struct device *dev, void *user_data)
             rx_buf[rx_buf_pos++] = c;
             printk("%c", c);
         }
-
-        /* else: characters beyond buffer size are dropped */
     }
 }
 
