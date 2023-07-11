@@ -134,27 +134,6 @@ void set_pressure_at_zero_depth()
     SYSTEM_FLAG ^= DEPTH_ZERO;
 }
 
-// Sample pressure and temperature once
-void continuous_mode()
-{
-    static float tsys01_temperature = 0;
-    static float ms5847_30ba_pressure = 0;
-    static float ms5847_30ba_depth = 0;
-
-    sensors_get_values(&tsys01_temperature, &ms5847_30ba_pressure, &ms5847_30ba_depth);
-
-    set_temperature_current_register(tsys01_temperature);
-    set_temperature_next_register(tsys01_temperature);
-
-    set_pressure_current_register(ms5847_30ba_pressure);
-    set_pressure_next_register(ms5847_30ba_pressure);
-
-    set_depth_current_register(ms5847_30ba_depth);
-    set_depth_next_register(ms5847_30ba_depth);
-
-    print_current_values();
-}
-
 int main(void)
 {
     // Activated by default to trigger every 32ms, should be first.
@@ -174,7 +153,7 @@ int main(void)
     power_init();
     sensors_init();
 
-    continuous_mode();
+    sensors_sample();
     set_pressure_at_zero_depth();
     // RS485 Rx does not work when LPMx > 1
     // Reason: DC0 takes to long to start up / drifts
@@ -193,7 +172,7 @@ int main(void)
 
             SYSTEM_FLAG &DEPTH_ZERO ? set_pressure_at_zero_depth() : __no_operation;
 
-            SYSTEM_FLAG &CONTINUOUS_MODE ? continuous_mode() : __no_operation;
+            SYSTEM_FLAG &CONTINUOUS_MODE ? sensors_sample_and_print() : __no_operation;
 
             SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
 

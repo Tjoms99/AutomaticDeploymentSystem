@@ -12,4 +12,3 @@ void print_current_values(void);
 void print_temperature_register(void);
 
 #endif
-
