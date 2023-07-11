@@ -4,6 +4,7 @@
 #include <rs485/print.h>
 #include <rs232/icl3221.h>
 #include <clock/clock.h>
+#include <clock/watchdog.h>
 #include <power/power.h>
 
 #include <stdint.h>
@@ -15,7 +16,8 @@
 #include <storage/memory.h>
 #define TIMER_1S 0x7FFF /// 7FFF 1s
 
-volatile uint8_t SYSTEM_FLAG = 0;
+#pragma PERSISTENT(SYSTEM_FLAG)
+uint8_t SYSTEM_FLAG = 0;
 volatile uint8_t rs485_rx_data = 0;
 volatile uint8_t rs232_rx_data = 0;
 
@@ -155,13 +157,13 @@ void continuous_mode()
 
 int main(void)
 {
-    WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
+    // Activated by default to trigger every 32ms, should be first.
+    watchdog_hold();
 
     clock_init_16mhz();
     timer_init();
     i2c_init();
 
-    power_init();
     max3471_init();
     max3471_set_mode(0);
 
@@ -169,15 +171,16 @@ int main(void)
     icl3221_set_mode(1);
     icl3221_turn_on();
 
+    power_init();
     sensors_init();
-    // Set sensor values
+
     continuous_mode();
     set_pressure_at_zero_depth();
-
     // RS485 Rx does not work when LPMx > 1
     // Reason: DC0 takes to long to start up / drifts
     while (1)
     {
+        watchdog_kick();
 
         if (SYSTEM_FLAG & SYSTEM_ON)
         {
@@ -186,7 +189,7 @@ int main(void)
 
             UCA0IE &= ~UCRXIE; // disable RX UART INT
 
-            SYSTEM_FLAG &VOLT12_ENABLE ? power(0xFF) : power(0x00);
+            SYSTEM_FLAG &VOLT12_ENABLE ? power(1) : power(0);
 
             SYSTEM_FLAG &DEPTH_ZERO ? set_pressure_at_zero_depth() : __no_operation;
 
@@ -199,9 +202,10 @@ int main(void)
             UCA0IE |= UCRXIE; // enable RX UART INT
             max3471_transmit('r');
             max3471_transmit('\n');
-
         }
 
+        // Triggered again as SYSTEM_ON triggers exacly at the same time (every second) as the watchdog.
+        watchdog_kick();
         // Enter low-power mode
         __bis_SR_register(LPM1_bits | GIE);
     }

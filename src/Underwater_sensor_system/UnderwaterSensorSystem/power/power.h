@@ -3,6 +3,6 @@
 #include <stdint.h>
 
 void power(uint8_t on);
-void power_init();
+void power_init(void);
 
 #endif
