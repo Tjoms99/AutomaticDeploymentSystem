@@ -126,7 +126,7 @@ void state_machine_loop()
         // Check flags
         SYSTEM_FLAG &VOLT12_ENABLE ? power(1) : power(0);
 
-        SYSTEM_FLAG &DEPTH_ZERO ? set_pressure_at_zero_depth() : __no_operation;
+        SYSTEM_FLAG &DEPTH_ZERO ? sensors_set_depth_zero() : __no_operation;
 
         SYSTEM_FLAG &CONTINUOUS_MODE ? sensors_sample_and_print() : __no_operation;
 

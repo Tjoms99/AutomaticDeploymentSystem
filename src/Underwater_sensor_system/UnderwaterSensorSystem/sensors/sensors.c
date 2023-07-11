@@ -10,7 +10,7 @@
 #include <storage/memory.h>
 #include <rs485/print.h>
 
-static float pressure_at_zero_depth = 0;
+static float pressure_at_depth_zero = 0;
 
 static void sensors_get_values(float *temperature, float *pressure, float *depth)
 {
@@ -41,13 +41,13 @@ static void sensors_get_values(float *temperature, float *pressure, float *depth
 
     // CALCULATE VALUES
     ms5847_30ba_calculate(pressure, temperature, ms5847_30ba_adc_pressure, ms5847_30ba_adc_temperature);
-    ms5847_30ba_get_depth(depth, *pressure, pressure_at_zero_depth);
+    ms5847_30ba_get_depth(depth, *pressure, pressure_at_depth_zero);
     tsys01_calculate_temperature(temperature, tsys01_adc);
 }
 
-void sensors_pressure_at_zero_depth(float pressure)
+static void sensors_set_pressure_at_depth_zero(float pressure)
 {
-    pressure_at_zero_depth = pressure;
+    pressure_at_depth_zero = pressure;
 }
 
 // Sample pressure and temperature once
@@ -73,6 +73,13 @@ void sensors_sample_and_print()
 {
     sensors_sample();
     print_current_values();
+}
+
+void sensors_set_depth_zero()
+{
+    static float ms5847_30ba_pressure = 0;
+    get_pressure_current_register(&ms5847_30ba_pressure);
+    sensors_set_pressure_at_depth_zero(ms5847_30ba_pressure);
 }
 
 void sensors_init()

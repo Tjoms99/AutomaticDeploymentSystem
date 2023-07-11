@@ -8,12 +8,12 @@
 #ifndef SENSORS_SENSORS_H_
 #define SENSORS_SENSORS_H_
 
-void sensors_pressure_at_zero_depth(float pressure);
+void sensors_sample(void);
 
-void sensors_sample();
+void sensors_sample_and_print(void);
 
-void sensors_sample_and_print();
+void sensors_set_depth_zero(void);
 
-void sensors_init();
+void sensors_init(void);
 
 #endif /* SENSORS_SENSORS_H_ */

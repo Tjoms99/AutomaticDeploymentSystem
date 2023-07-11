@@ -17,14 +17,6 @@ volatile uint8_t system_flags = 0;
 volatile uint8_t rs485_rx_data = 0;
 volatile uint8_t rs232_rx_data = 0;
 
-// Sample pressure and temperature once
-void set_pressure_at_zero_depth()
-{
-    static float ms5847_30ba_pressure = 0;
-    get_pressure_current_register(&ms5847_30ba_pressure);
-    sensors_pressure_at_zero_depth(ms5847_30ba_pressure);
-}
-
 int main(void)
 {
     //---------------------------------
@@ -54,7 +46,7 @@ int main(void)
     //---------------------------------
     // Initialize values
     sensors_sample();
-    set_pressure_at_zero_depth();
+    sensors_set_depth_zero();
 
     while (1)
     {
