@@ -126,11 +126,13 @@ void state_machine_loop()
         // Check flags
         SYSTEM_FLAG &VOLT12_ENABLE ? power(1) : power(0);
 
+        SYSTEM_FLAG &RS232_ENABLE ? icl3221_turn_on() : icl3221_turn_off();
+
         SYSTEM_FLAG &DEPTH_ZERO ? sensors_set_depth_zero() : __no_operation;
 
         SYSTEM_FLAG &CONTINUOUS_MODE ? sensors_sample_and_print() : __no_operation;
 
-        SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
+        // SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
 
         // Reset toggle flags
         state_machine_remove_flag(SYSTEM_ON);
@@ -163,6 +165,8 @@ void state_machine_reset()
     SYSTEM_TIMER_INTERRUPT_COUNTER = 0;
 }
 
+//-------------------------------------------------------------------------------
+// Interrupt Service Routine for TIMER0_B0 CCR0 register
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Timer_A_CCR0_ISR(void)
 {
