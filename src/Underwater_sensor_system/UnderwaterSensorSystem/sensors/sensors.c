@@ -67,8 +67,6 @@ void sensors_sample()
 
     set_depth_current_register(ms5847_30ba_depth);
     set_depth_next_register(ms5847_30ba_depth);
-
-    print_current_values();
 }
 
 void sensors_sample_and_print()

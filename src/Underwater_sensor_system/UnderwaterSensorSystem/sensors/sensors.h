@@ -12,7 +12,7 @@ void sensors_pressure_at_zero_depth(float pressure);
 
 void sensors_sample();
 
-void sensors_sample_print();
+void sensors_sample_and_print();
 
 void sensors_init();
 

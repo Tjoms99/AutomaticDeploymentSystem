@@ -6,18 +6,20 @@
 #include <clock/clock.h>
 #include <clock/watchdog.h>
 #include <power/power.h>
-
-#include <stdint.h>
-
 #include <sensors/pressure/MS5837_30BA.h>
 #include <sensors/sensors.h>
-
 #include <i2c/i2c.h>
 #include <storage/memory.h>
+#include <stdint.h>
+
 #define TIMER_1S 0x7FFF /// 7FFF 1s
 
+// Initializes value on code load.
+// Retains value during reset or power off.
+// Usefull to keep state even though the watchdog has kicked.
 #pragma PERSISTENT(SYSTEM_FLAG)
 uint8_t SYSTEM_FLAG = 0;
+
 volatile uint8_t rs485_rx_data = 0;
 volatile uint8_t rs232_rx_data = 0;
 
