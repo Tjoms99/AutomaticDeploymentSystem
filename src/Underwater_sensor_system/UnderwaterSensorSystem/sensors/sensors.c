@@ -9,14 +9,10 @@
 #include <sensors/temperature/TSYS01.h>
 #include <storage/memory.h>
 #include <rs485/print.h>
-static float pressure_at_zero_depth = 0;
-void sensors_init()
-{
-    tsys01_init();
-    ms5847_30ba_init();
-}
 
-void sensors_get_values(float *temperature, float *pressure, float *depth)
+static float pressure_at_zero_depth = 0;
+
+static void sensors_get_values(float *temperature, float *pressure, float *depth)
 {
     float ms5847_30ba_depth = 0;
     float tsys01_adc = 0;
@@ -79,4 +75,10 @@ void sensors_sample_and_print()
 {
     sensors_sample();
     print_current_values();
+}
+
+void sensors_init()
+{
+    tsys01_init();
+    ms5847_30ba_init();
 }
