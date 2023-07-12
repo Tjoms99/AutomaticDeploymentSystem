@@ -9,6 +9,7 @@
 #include <sensors/temperature/TSYS01.h>
 #include <storage/memory.h>
 #include <rs485/print.h>
+#include "sensors.h"
 
 static float pressure_at_depth_zero = 0;
 

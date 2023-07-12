@@ -13,7 +13,6 @@
 #include <state_machine/state_machine.h>
 #include <stdint.h>
 
-volatile uint8_t system_flags = 0;
 volatile uint8_t rs485_rx_data = 0;
 volatile uint8_t rs232_rx_data = 0;
 
@@ -55,7 +54,7 @@ int main(void)
         watchdog_kick();
 
         // Enter low-power mode
-        // RS485 Rx does not work when LPMx > 1
+        // RS485 RX interrupt does not work when LPMx > 1
         // Reason: DC0 takes to long to start up / drifts
         __bis_SR_register(LPM1_bits | GIE);
     }

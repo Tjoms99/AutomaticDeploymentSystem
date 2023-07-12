@@ -56,7 +56,7 @@ void icl3221_init()
 
   // Configure UART settings
   UCA1CTLW0 |= UCSWRST;       // SW reset
-  UCA1CTLW0 |= UCSSEL__SMCLK; // SMCLK = BRCLK (115200 BAUD)
+  UCA1CTLW0 |= UCSSEL__SMCLK; // SMCLK = BRCLK
   icl3221_set_mode(1);
 
   PM5CTL0 &= ~LOCKLPM5;  // turn on I/O
