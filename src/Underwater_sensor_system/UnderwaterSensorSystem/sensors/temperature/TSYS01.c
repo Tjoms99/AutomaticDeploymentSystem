@@ -12,6 +12,8 @@
 
 #define TIMER_33MS 10813 // 33ms
 
+static uint8_t is_finished_converting = 0;
+
 static void timer_init()
 {
 
@@ -50,7 +52,12 @@ void tsys01_wait_for_conversion()
     TB0CCR1 = TB0R + TIMER_33MS; // set compare register
     if (TB0R + TIMER_33MS > TB0CCR0)
         TB0CCR1 = TIMER_33MS - (TB0CCR0 - TB0R); // in case of overflow when setting register
+
     __bis_SR_register(LPM1_bits | GIE);
+    while(!is_finished_converting);
+
+    is_finished_converting = 0;
+    TB0CCTL1 |= CCIE; // disable interrupt
 }
 
 void tsys01_start_convertion()
@@ -126,6 +133,7 @@ __interrupt void Timer_CCR1_ISR(void)
     {
     case 0x02:
         __bic_SR_register_on_exit(LPM1_bits);
+        is_finished_converting = 1;
         break;
     default:
         break;

@@ -53,6 +53,10 @@ class SystemController extends ValueNotifier {
 
   //---------------------------GET STATE------------------------------------
 
+  bool getTrue() {
+    return true;
+  }
+
   bool getIsOnSystem() {
     return isOnSystem.value;
   }
@@ -66,6 +70,13 @@ class SystemController extends ValueNotifier {
 
   int getSamplingInterval() {
     return _samplingInterval;
+  }
+
+  //---------------------------SET STATE------------------------------------
+
+  void setDepthInit() {
+    mqtt.publishMessage(Topics.depthInit, '1');
+    //mqtt.publishMessage(Topics.depthInit, '0');
   }
 
   //---------------------------TOGGLE-----------------------------------------

@@ -17,6 +17,7 @@ abstract class Topics {
   static const String pressure = "AutomaticDeploymentSystem/USS/pressure";
   static const String battery = "AutomaticDeploymentSystem/USS/battery";
   //Publish topics
+  static const String depthInit = "AutomaticDeploymentSystem/USS/depth_init";
   static const String rs232 = "AutomaticDeploymentSystem/USS/rs232";
   static const String volt = "AutomaticDeploymentSystem/USS/12v";
   static const String samplingInterval =

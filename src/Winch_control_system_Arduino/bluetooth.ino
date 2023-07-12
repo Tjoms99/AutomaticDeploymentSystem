@@ -20,6 +20,7 @@ NimBLECharacteristic *pCharacteristic_temperature;
 #define SERVICE_UUID_CONTROL "97ef73d0-8c29-424f-829a-1a2c78ae506a"
 #define CHARACTERISTIC_UUID_SYSTEM_ON "b1cdad8d-31b9-4f80-b0d6-294b1519b524"
 #define CHARACTERISTIC_UUID_SAMPLING_ON "fdd5a88d-df71-4b57-93c6-01ed143c3c3d"
+#define CHARACTERISTIC_UUID_DEPTH_INIT "972b390a-7f72-4620-a866-e99ed2b49e65"
 #define CHARACTERISTIC_UUID_RS232_ON "8d1a814d-2889-4ce2-a228-ec44a9053bb8"
 #define CHARACTERISTIC_UUID_12V_ON "2932a5b9-faee-4d50-b6da-b82b5b9739ad"
 #define CHARACTERISTIC_UUID_SAMPLING_TIME "c45c93cb-aec4-4590-8b65-9ee695aa8e40"
@@ -27,6 +28,7 @@ NimBLECharacteristic *pCharacteristic_temperature;
 NimBLEService *pService_control;
 NimBLECharacteristic *pCharacteristic_system_on;
 NimBLECharacteristic *pCharacteristic_sampling_on;
+NimBLECharacteristic *pCharacteristic_depth_init;
 NimBLECharacteristic *pCharacteristic_rs232_on;
 NimBLECharacteristic *pCharacteristic_12v_on;
 NimBLECharacteristic *pCharacteristic_sampling_time;
@@ -158,19 +160,22 @@ void ble_begin(void)
   pService_control = pServer->createService(SERVICE_UUID_CONTROL);
   pCharacteristic_system_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SYSTEM_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_sampling_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+  pCharacteristic_depth_init = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_rs232_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_RS232_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_12v_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_12V_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_sampling_time = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_TIME, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
   pCharacteristic_system_on->setCallbacks(&chrCallbacks);
   pCharacteristic_sampling_on->setCallbacks(&chrCallbacks);
+  pCharacteristic_depth_init->setCallbacks(&chrCallbacks);
   pCharacteristic_rs232_on->setCallbacks(&chrCallbacks);
   pCharacteristic_12v_on->setCallbacks(&chrCallbacks);
   pCharacteristic_sampling_time->setCallbacks(&chrCallbacks);
 
   pService_control->start();
   pCharacteristic_system_on->setValue("1");
-  pCharacteristic_sampling_on->setValue("1");
+  pCharacteristic_sampling_on->setValue("0");
+  pCharacteristic_depth_init->setValue("0");
   pCharacteristic_rs232_on->setValue("0");
   pCharacteristic_12v_on->setValue("0");
   pCharacteristic_sampling_time->setValue(value);
@@ -201,6 +206,12 @@ void ble_notify_sampling_on(byte *state, uint8_t length)
 {
   pCharacteristic_sampling_on->setValue(state, length);
   pCharacteristic_sampling_on->notify();
+}
+
+void ble_notify_depth_init(byte *state, uint8_t length)
+{
+  pCharacteristic_depth_init->setValue(state, length);
+  pCharacteristic_depth_init->notify();
 }
 
 void ble_notify_rs232_on(byte *state, uint8_t length)

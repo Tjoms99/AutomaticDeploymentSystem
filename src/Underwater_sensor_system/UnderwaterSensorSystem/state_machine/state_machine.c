@@ -128,9 +128,9 @@ void state_machine_loop()
 
         SYSTEM_FLAG &RS232_ENABLE ? icl3221_turn_on() : icl3221_turn_off();
 
-        SYSTEM_FLAG &DEPTH_ZERO ? sensors_set_depth_zero() : __no_operation;
-
         SYSTEM_FLAG &CONTINUOUS_MODE ? sensors_sample_and_print() : __no_operation;
+
+        SYSTEM_FLAG &DEPTH_ZERO ? sensors_set_depth_zero() : __no_operation;
 
         // SYSTEM_FLAG &PRINT_ALL_REGISTERS ? print_temperature_register() : __no_operation;
 

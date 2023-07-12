@@ -25,7 +25,7 @@ int main(void)
 	while (1)
 	{
 		k_msleep(SLEEP_TIME_MS);
-		rs485_write("4");
+		// rs485_write("4");
 
 		// uart_print_depth();
 		/*

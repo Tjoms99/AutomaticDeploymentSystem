@@ -67,6 +67,7 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 #define uuid_control_service_val BT_UUID_128_ENCODE(0x97ef73d0, 0x8c29, 0x424f, 0x829a, 0x1a2c78ae506a)
 #define uuid_system_on_characteristic_val BT_UUID_128_ENCODE(0xb1cdad8d, 0x31b9, 0x4f80, 0xb0d6, 0x294b1519b524)
 #define uuid_sampling_on_characteristic_val BT_UUID_128_ENCODE(0xfdd5a88d, 0xdf71, 0x4b57, 0x93c6, 0x01ed143c3c3d)
+#define uuid_depth_init_characteristic_val BT_UUID_128_ENCODE(0x972b390a, 0x7f72, 0x4620, 0xa866, 0xe99ed2b49e65)
 #define uuid_rs232_on_characteristic_val BT_UUID_128_ENCODE(0x8d1a814d, 0x2889, 0x4ce2, 0xa228, 0xec44a9053bb8)
 #define uuid_12v_on_characteristic_val BT_UUID_128_ENCODE(0x2932a5b9, 0xfaee, 0x4d50, 0Xb6da, 0xb82b5b9739ad)
 #define uuid_sampling_time_characteristic_val BT_UUID_128_ENCODE(0xc45c93cb, 0xaec4, 0x4590, 0x8b65, 0x9ee695aa8e40)
@@ -119,15 +120,44 @@ static uint8_t notify_func(struct bt_conn *conn,
     data_s = data;
 
     // Set end of string value to ignore the rest of the pointer value.
-    // data_s[length] = '\0';
+    data_s[length] = '\0';
 
-    if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
+    if (subscribe_params[CONTROL_SYSTEM_ON].value_handle == params->value_handle)
     {
-        data_s = "4\0";
+        printk("FOUND SYSTEM\n");
+        rs485_write("7");
+    }
+
+    else if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
+    {
         printk("FOUND SAMPLING\n");
         rs485_write("4");
     }
 
+    else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
+    {
+        printk("FOUND DEPTH INIT\n");
+        rs485_write("3");
+    }
+
+    else if (subscribe_params[CONTROL_RS232_ON].value_handle == params->value_handle)
+    {
+        printk("FOUND RS232\n");
+        rs485_write("1");
+    }
+
+    else if (subscribe_params[CONTROL_12V_ON].value_handle == params->value_handle)
+    {
+        printk("FOUND 12V\n");
+        rs485_write("0");
+    }
+
+    else if (subscribe_params[CONTROL_SAMPLING_TIME].value_handle == params->value_handle)
+    {
+        printk("FOUND SAMPLING TIME %s\n", data_s);
+        rs485_write("2");
+        rs485_write(data_s);
+    }
     // printk("[NOTIFICATION] handle %x\n", params->value_handle);
     // printk("Data %s\n", data_s);
     // printk("Length %u\n", length);
@@ -240,6 +270,9 @@ void discover_control_characteristic(control_characteristic_t target_characteris
         memcpy(&uuid128, BT_UUID_SYSTEM_ON, sizeof(uuid128));
         break;
     case CONTROL_SAMPLING_ON:
+        memcpy(&uuid128, BT_UUID_SAMPLING_ON, sizeof(uuid128));
+        break;
+    case CONTROL_DEPTH_INIT:
         memcpy(&uuid128, BT_UUID_SAMPLING_ON, sizeof(uuid128));
         break;
     case CONTROL_RS232_ON:

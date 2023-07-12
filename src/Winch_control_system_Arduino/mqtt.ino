@@ -17,6 +17,7 @@ const char *topic_temperature = "AutomaticDeploymentSystem/USS/temperature";
 const char *topic_pressure = "AutomaticDeploymentSystem/USS/pressure";
 const char *topic_battery = "AutomaticDeploymentSystem/USS/battery";
 // Subscribe topics
+const char *topic_depth_init = "AutomaticDeploymentSystem/USS/depth_init";
 const char *topic_sampling_interval = "AutomaticDeploymentSystem/USS/sampling_interval";
 const char *topic_rs232 = "AutomaticDeploymentSystem/USS/rs232";
 const char *topic_12v = "AutomaticDeploymentSystem/USS/12v";
@@ -64,42 +65,36 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   if (strcmp(topic, topic_system) == 0)
   {
-    mqtt_populate_data(SYSTEM_ON, payload, length);
     digitalWrite(USS_ENABLED, payload[0] == '1' ? HIGH : LOW);
     ble_notify_system_on(payload, length);
   }
   else if (strcmp(topic, topic_sampling) == 0)
   {
-    mqtt_populate_data(SAMPLING_ON, payload, length);
-    uart_write_sample();
+
     ble_notify_sampling_on(payload, length);
+  }
+  else if (strcmp(topic, topic_depth_init) == 0)
+  {
+    ble_notify_depth_init(payload, length);
   }
   else if (strcmp(topic, topic_rs232) == 0)
   {
-    mqtt_populate_data(RS232_ON, payload, length);
-    uart_write_rs232();
     ble_notify_rs232_on(payload, length);
   }
   else if (strcmp(topic, topic_12v) == 0)
   {
-    mqtt_populate_data(VOLT12_ON, payload, length);
-    uart_write_12v();
     ble_notify_12v_on(payload, length);
   }
   else if (strcmp(topic, topic_sampling_interval) == 0)
   {
-    mqtt_populate_data(SAMPLING_INTERVAL, payload, length);
     ble_notify_sampling_time(payload, length);
-    uart_write_sample_time(mqtt_data[SAMPLING_INTERVAL]);
   }
   else if (strcmp(topic, topic_target_depth) == 0)
   {
-    mqtt_populate_data(TARGET_TIME, payload, length);
     uart_write_init_depth();
   }
   else if (strcmp(topic, topic_target_time) == 0)
   {
-    mqtt_populate_data(TARGET_DEPTH, payload, length);
   }
 
   Serial.println();
@@ -164,6 +159,7 @@ void mqtt_begin()
   client.subscribe(topic_system);
   client.subscribe(topic_sampling);
   client.subscribe(topic_sampling_interval);
+  client.subscribe(topic_depth_init);
   client.subscribe(topic_rs232);
   client.subscribe(topic_12v);
   client.subscribe(topic_target_depth);

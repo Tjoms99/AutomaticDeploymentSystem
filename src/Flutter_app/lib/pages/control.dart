@@ -42,6 +42,14 @@ class _ControlPageState extends State<ControlPage> {
               getStatus: widget.systemController.getIsSampling,
             ),
             Controlcard(
+              label: 'INIT DEPTH',
+              textEnable: "",
+              textDisable: "",
+              enabled: ValueNotifier(true),
+              callback: widget.systemController.setDepthInit,
+              getStatus: widget.systemController.getTrue,
+            ),
+            Controlcard(
               label: 'RS232',
               textEnable: "ON",
               textDisable: "OFF",
@@ -59,6 +67,7 @@ class _ControlPageState extends State<ControlPage> {
               getStatus:
                   widget.systemController.underwaterSensorSystem.getIsOn12V,
             ),
+
             /*
             Controlcard(
               label: 'MODE STATUS',
