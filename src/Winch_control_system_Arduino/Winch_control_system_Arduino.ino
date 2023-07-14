@@ -1,4 +1,5 @@
-extern "C" {
+extern "C"
+{
 #include "uart.h"
 }
 #include <WiFi.h>
@@ -7,12 +8,13 @@ extern "C" {
 
 //--------------------------------------------------------------------
 // WiFi
-const char *ssid = "Tjoms";         // Enter your Wi-Fi name
-const char *password = "grovt123";  // Enter Wi-Fi password
+const char *ssid = "Tjoms";        // Enter your Wi-Fi name
+const char *password = "grovt123"; // Enter Wi-Fi password
 
 static const int USS_ENABLED = D0;
 volatile bool ble_finised = false;
-void setup() {
+void setup()
+{
 
   pinMode(USS_ENABLED, OUTPUT);
   digitalWrite(USS_ENABLED, HIGH);
@@ -21,21 +23,18 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Before init");
 
-
   ble_begin();
   vTaskDelay(2000 / portTICK_PERIOD_MS);
 
-  uart_begin();
   WiFi.begin(ssid, password);
   mqtt_begin();
 
   Serial.println("Initialized");
-  uart_register_callback_data_ready(publish_data);
-  uart_write_reset();
 }
 
-void loop() {
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+void loop()
+{
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
 
   ble_loop();
 }

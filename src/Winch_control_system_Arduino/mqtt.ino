@@ -91,7 +91,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   else if (strcmp(topic, topic_target_depth) == 0)
   {
-    uart_write_init_depth();
+    //ADD
   }
   else if (strcmp(topic, topic_target_time) == 0)
   {
