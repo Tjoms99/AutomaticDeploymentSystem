@@ -24,8 +24,6 @@ void setup()
   Serial.println("Before init");
 
   ble_begin();
-  vTaskDelay(2000 / portTICK_PERIOD_MS);
-
   WiFi.begin(ssid, password);
   mqtt_begin();
 
@@ -35,6 +33,4 @@ void setup()
 void loop()
 {
   vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-  ble_loop();
 }

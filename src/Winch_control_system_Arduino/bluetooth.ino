@@ -34,27 +34,21 @@ NimBLECharacteristic *pCharacteristic_12v_on;
 NimBLECharacteristic *pCharacteristic_sampling_time;
 
 bool ble_finished = false;
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
 std::string value = "0";
 
 /** Handler class for characteristic actions */
 class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
 {
   void onRead(NimBLECharacteristic *pCharacteristic){
-
-      
-      Serial.print(pCharacteristic->getUUID().toString().c_str());
-      Serial.print(": onRead(), value: ");
-      Serial.println(pCharacteristic->getValue().c_str());
-      
+      /*
+        Serial.print(pCharacteristic->getUUID().toString().c_str());
+        Serial.print(": onRead(), value: ");
+        Serial.println(pCharacteristic->getValue().c_str());
+      */
   };
 
   void onWrite(NimBLECharacteristic *pCharacteristic)
   {
-     Serial.print(pCharacteristic->getUUID().toString().c_str());
-      Serial.print(": onWrite(), value: ");
-      Serial.println(pCharacteristic->getValue().c_str());
 
     const char *uuid = pCharacteristic->getUUID().toString().c_str();
     if (strcmp(CHARACTERISTIC_UUID_DEPTH, uuid) == 0)
@@ -120,22 +114,20 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
       str += " Subscribed to notifications and indications for ";
     }
     str += std::string(pCharacteristic->getUUID()).c_str();
-    ble_finished = true;
     Serial.println(str);
   };
 };
 
 static CharacteristicCallbacks chrCallbacks;
 
-bool ble_is_finished()
-{
-  return ble_finished;
-}
 void ble_begin(void)
 {
 
   NimBLEDevice::init("Winch Control System");
   NimBLEDevice::setPower(ESP_PWR_LVL_P9); // Default +3db, now +9db
+  NimBLEDevice::setSecurityRespKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
+  NimBLEDevice::setSecurityIOCap(BLE_HS_IO_NO_INPUT_OUTPUT); // set display output capability
+  NimBLEDevice::setSecurityAuth(true, true, true);
 
   pServer = NimBLEDevice::createServer();
 
@@ -230,35 +222,4 @@ void ble_notify_sampling_time(byte *state, uint8_t length)
 {
   pCharacteristic_sampling_time->setValue(state, length);
   pCharacteristic_sampling_time->notify();
-}
-
-void ble_loop()
-{
-
-  /*
-    pCharacteristic_system_on->notify();
-  pCharacteristic_sampling_on->notify();
-  pCharacteristic_rs232_on->notify();
-  pCharacteristic_12v_on->notify();
-  pCharacteristic_sampling_time->notify();*/
-  // notify changed value
-  // if (deviceConnected)
-  // {
-
-  //  value++;
-  //  }
-  //  disconnecting
-  /*  if (!deviceConnected && oldDeviceConnected)
-      {
-          delay(500);                  // give the bluetooth stack the chance to get things ready
-          pServer->startAdvertising(); // restart advertising
-          Serial.println("start advertising");
-          oldDeviceConnected = deviceConnected;
-      }
-      // connecting
-      if (deviceConnected && !oldDeviceConnected)
-      {
-          // do stuff here on connecting
-          oldDeviceConnected = deviceConnected;
-      } */
 }
