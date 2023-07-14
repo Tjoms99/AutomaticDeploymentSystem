@@ -1,6 +1,8 @@
 import 'package:automatic_deployment_system_app/components/control_card.dart';
+import 'package:automatic_deployment_system_app/components/control_textfield.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
+import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +16,79 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
+  final TextEditingController _targetDepthController = TextEditingController();
+  final TextEditingController _targetTimeController = TextEditingController();
+  final TextEditingController _samplingIntController = TextEditingController();
+
+  @override
+  void initState() {
+    _targetDepthController.text = "6.9";
+    _targetTimeController.text = "120";
+    _samplingIntController.text = "1";
+
+    super.initState();
+  }
+
+  void updateTargetDepth() {
+    double targetDepth = 0;
+
+    try {
+      targetDepth = double.parse(_targetDepthController.text);
+      widget.systemController.setTargetDepth(targetDepth);
+      widget.systemController.mqtt
+          .publishMessage(Topics.targetDepth, targetDepth.toString());
+    } catch (e) {}
+  }
+
+  void updateTargetTime() {
+    int targetTime = 0;
+
+    try {
+      targetTime = int.parse(_targetTimeController.text);
+      widget.systemController.setTargetTime(targetTime);
+      widget.systemController.mqtt
+          .publishMessage(Topics.targetTime, targetTime.toString());
+    } catch (e) {}
+  }
+
+  void updateSamplingInterval() {
+    int seconds = 1;
+    try {
+      seconds = int.parse(_samplingIntController.text);
+      widget.systemController.setSamplingInterval(seconds);
+      widget.systemController.mqtt
+          .publishMessage(Topics.samplingInterval, seconds.toString());
+    } catch (e) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultWidget(
       widgets: [
         const Header(label: 'Control', enableUndertext: true),
+        SizedBox(height: SizeConfig.blockSizeVertical! * 4),
+        Wrap(
+          runSpacing: 20.0,
+          spacing: 20.0,
+          alignment: WrapAlignment.start,
+          children: [
+            ControlTextfield(
+              label: "TARGET\nDEPTH (m)",
+              controller: _targetDepthController,
+              callback: updateTargetDepth,
+            ),
+            ControlTextfield(
+              label: "TARGET\nTIME (s)",
+              controller: _targetTimeController,
+              callback: updateTargetTime,
+            ),
+            ControlTextfield(
+              label: "SAMPLING\nINTERVAL (s)",
+              controller: _samplingIntController,
+              callback: updateSamplingInterval,
+            ),
+          ],
+        ),
         SizedBox(height: SizeConfig.blockSizeVertical! * 4),
         Wrap(
           runSpacing: 20.0,

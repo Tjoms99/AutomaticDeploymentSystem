@@ -16,7 +16,7 @@ class _DefaultContainerState extends State<DefaultContainer> {
     return Container(
       alignment: Alignment.centerLeft,
       width: SizeConfig.screenWidth,
-      constraints: const BoxConstraints(minWidth: 200.0),
+      constraints: const BoxConstraints(minWidth: 200.0, maxWidth: 200),
       padding: const EdgeInsets.only(
           top: 20.0, left: 20.0, bottom: 20.0, right: 40.0),
       decoration: BoxDecoration(

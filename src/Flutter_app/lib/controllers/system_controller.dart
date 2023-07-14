@@ -9,6 +9,9 @@ class SystemController extends ValueNotifier {
   late ValueNotifier<int> currentPage = ValueNotifier(0);
   late USSController underwaterSensorSystem = USSController();
   late MQTTController mqtt = MQTTController();
+  double _targetDepth = 6.9;
+  int _targetTime = 85;
+  int _samplingInterval = 1;
 
   SystemController() : super(null);
 
@@ -18,7 +21,6 @@ class SystemController extends ValueNotifier {
   ValueNotifier<bool> isOnSystem = ValueNotifier(true);
   ValueNotifier<bool> isSampling = ValueNotifier(true);
   //TIMER
-  int _samplingInterval = 1;
   late Timer systemTimer;
   int systemUpdateIntervalMS = 100;
   int _currentTime = 0;
@@ -68,15 +70,34 @@ class SystemController extends ValueNotifier {
     return isSampling.value;
   }
 
+  double getTargetDepth() {
+    return _targetDepth;
+  }
+
+  int getTargetTime() {
+    return _targetTime;
+  }
+
   int getSamplingInterval() {
     return _samplingInterval;
   }
 
   //---------------------------SET STATE------------------------------------
 
+  void setTargetDepth(double depth) {
+    _targetDepth = depth;
+  }
+
+  void setTargetTime(int time) {
+    _targetTime = time;
+  }
+
+  void setSamplingInterval(int interval) {
+    _samplingInterval = interval;
+  }
+
   void setDepthInit() {
     mqtt.publishMessage(Topics.depthInit, '1');
-    //mqtt.publishMessage(Topics.depthInit, '0');
   }
 
   //---------------------------TOGGLE-----------------------------------------
@@ -130,11 +151,6 @@ class SystemController extends ValueNotifier {
 
   void setTimeLeft(int seconds) {
     _timeLeft = seconds;
-  }
-
-  //---------------------------UPDATE TIMER-----------------------------------
-  void updateTimer(int seconds) {
-    _samplingInterval = seconds;
   }
 
   //---------------------------UPDATE DATA-----------------------------------
