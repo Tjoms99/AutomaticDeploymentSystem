@@ -122,42 +122,44 @@ static uint8_t notify_func(struct bt_conn *conn,
     // Set end of string value to ignore the rest of the pointer value.
     data_s[length] = '\0';
 
-    if (subscribe_params[CONTROL_SYSTEM_ON].value_handle == params->value_handle)
-    {
-        printk("FOUND SYSTEM\n");
-        rs485_write("7");
-    }
-
-    else if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
+    if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
     {
         printk("FOUND SAMPLING\n");
-        rs485_write("4");
-    }
-
-    else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
-    {
-        printk("FOUND DEPTH INIT\n");
-        rs485_write("3");
-    }
-
-    else if (subscribe_params[CONTROL_RS232_ON].value_handle == params->value_handle)
-    {
-        printk("FOUND RS232\n");
-        rs485_write("1");
-    }
-
-    else if (subscribe_params[CONTROL_12V_ON].value_handle == params->value_handle)
-    {
-        printk("FOUND 12V\n");
-        rs485_write("0");
+        rs485_write("a");
     }
 
     else if (subscribe_params[CONTROL_SAMPLING_TIME].value_handle == params->value_handle)
     {
         printk("FOUND SAMPLING TIME %s\n", data_s);
-        rs485_write("2");
+        rs485_write("b");
         rs485_write(data_s);
+        rs485_write("b");
     }
+
+    else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
+    {
+        printk("FOUND DEPTH INIT\n");
+        rs485_write("c");
+    }
+
+    else if (subscribe_params[CONTROL_RS232_ON].value_handle == params->value_handle)
+    {
+        printk("FOUND RS232\n");
+        rs485_write("d");
+    }
+
+    else if (subscribe_params[CONTROL_12V_ON].value_handle == params->value_handle)
+    {
+        printk("FOUND 12V\n");
+        rs485_write("e");
+    }
+
+    else if (subscribe_params[CONTROL_SYSTEM_ON].value_handle == params->value_handle)
+    {
+        printk("FOUND SYSTEM\n");
+        rs485_write("f");
+    }
+
     // printk("[NOTIFICATION] handle %x\n", params->value_handle);
     // printk("Data %s\n", data_s);
     // printk("Length %u\n", length);
@@ -375,7 +377,6 @@ static uint8_t discover_func(struct bt_conn *conn,
             break;
 
         case SERVICE_CONTROL:
-
             if (control_characteristic == CONTROL_CHARACTERISTICS_MAX)
             {
                 // Remove discovery parameters (ENDS DISCOVERY)

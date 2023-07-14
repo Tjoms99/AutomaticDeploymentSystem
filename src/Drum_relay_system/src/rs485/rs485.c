@@ -51,6 +51,12 @@ void rs485_tx_disable()
 }
 void rs485_write(char *message)
 {
+    while (uart_get_is_busy())
+    {
+        printk("UART busy");
+        k_msleep(30);
+    }
+
     rs485_tx_enable();
     uart_write(message);
     rs485_tx_disable();
