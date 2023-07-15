@@ -13,12 +13,6 @@ typedef MQTTCallback = void Function(String data);
 class MQTTController extends ValueNotifier {
   ValueNotifier<bool> isConnected = ValueNotifier(false);
 
-  // Value notifiers
-  String depth = '0';
-  String temperature = '0';
-  String pressure = '0';
-  String battery = '0';
-
   MQTTController() : super(null);
   // Client to be initialized
   late MqttServerClient client;
@@ -36,6 +30,15 @@ class MQTTController extends ValueNotifier {
   void subscribeToTopics() {
     if (client.connectionStatus!.state != MqttConnectionState.connected) return;
 
+    client.subscribe(Topics.system, MqttQos.atLeastOnce);
+    client.subscribe(Topics.sampling, MqttQos.atLeastOnce);
+    client.subscribe(Topics.rs232, MqttQos.atLeastOnce);
+    client.subscribe(Topics.volt, MqttQos.atLeastOnce);
+
+    client.subscribe(Topics.targetDepth, MqttQos.atLeastOnce);
+    client.subscribe(Topics.targetTime, MqttQos.atLeastOnce);
+    client.subscribe(Topics.samplingInterval, MqttQos.atLeastOnce);
+
     client.subscribe(Topics.depth, MqttQos.atLeastOnce);
     client.subscribe(Topics.temperature, MqttQos.atLeastOnce);
     client.subscribe(Topics.pressure, MqttQos.atLeastOnce);
@@ -45,24 +48,40 @@ class MQTTController extends ValueNotifier {
   void updateData(String topic, String message) {
     try {
       switch (topic) {
-        case Topics.depth:
-          depth = message;
-          callbacks.elementAt(SensorType.DEPTH.index)(depth);
+        case Topics.system:
+          callbacks.elementAt(TopicsE.SYSTEM.index)(message);
           break;
-
+        case Topics.sampling:
+          callbacks.elementAt(TopicsE.SAMPLING.index)(message);
+          break;
+        case Topics.rs232:
+          callbacks.elementAt(TopicsE.RS232.index)(message);
+          break;
+        case Topics.volt:
+          callbacks.elementAt(TopicsE.VOLT.index)(message);
+          break;
+        case Topics.targetDepth:
+          callbacks.elementAt(TopicsE.TARGET_DEPTH.index)(message);
+          break;
+        case Topics.targetTime:
+          callbacks.elementAt(TopicsE.TARGET_TIME.index)(message);
+          break;
+        case Topics.samplingInterval:
+          callbacks.elementAt(TopicsE.SAMPLING_INTERVAL.index)(message);
+          break;
+        case Topics.depth:
+          callbacks.elementAt(TopicsE.DEPTH.index)(message);
+          break;
         case Topics.temperature:
-          temperature = message;
-          callbacks.elementAt(SensorType.TEMPERATURE.index)(temperature);
+          callbacks.elementAt(TopicsE.TEMPERATURE.index)(message);
           break;
 
         case Topics.pressure:
-          pressure = message;
-          callbacks.elementAt(SensorType.PRESSURE.index)(pressure);
+          callbacks.elementAt(TopicsE.PRESSURE.index)(message);
           break;
 
         case Topics.battery:
-          battery = message;
-          callbacks.elementAt(SensorType.BATTERY.index)(battery);
+          callbacks.elementAt(TopicsE.BATTERY.index)(message);
           break;
 
         default:

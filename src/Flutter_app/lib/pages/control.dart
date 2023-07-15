@@ -22,11 +22,23 @@ class _ControlPageState extends State<ControlPage> {
 
   @override
   void initState() {
-    _targetDepthController.text = "6.9";
-    _targetTimeController.text = "120";
-    _samplingIntController.text = "1";
+    _targetDepthController.text =
+        widget.systemController.getTargetDepth().toString();
+    _targetTimeController.text =
+        widget.systemController.getTargetTime().toString();
+    _samplingIntController.text =
+        widget.systemController.getSamplingInterval().toString();
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _targetDepthController.dispose();
+    _targetTimeController.dispose();
+    _samplingIntController.dispose();
+
+    super.dispose();
   }
 
   void updateTargetDepth() {
@@ -59,6 +71,13 @@ class _ControlPageState extends State<ControlPage> {
       widget.systemController.mqtt
           .publishMessage(Topics.samplingInterval, seconds.toString());
     } catch (e) {}
+  }
+
+  void reset() {
+    widget.systemController.resetSystem();
+    _targetDepthController.text = "0.0";
+    _targetTimeController.text = "0";
+    _samplingIntController.text = "1";
   }
 
   @override
@@ -96,12 +115,20 @@ class _ControlPageState extends State<ControlPage> {
           alignment: WrapAlignment.start,
           children: [
             Controlcard(
-              label: 'SYSTEM',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: widget.systemController.isOnSystem,
-              callback: widget.systemController.toggleSystem,
-              getStatus: widget.systemController.getIsOnSystem,
+              label: 'RESET SYSTEM',
+              textEnable: "",
+              textDisable: "",
+              enabled: ValueNotifier(true),
+              callback: reset,
+              getStatus: widget.systemController.getTrue,
+            ),
+            Controlcard(
+              label: 'RESET DEPTH',
+              textEnable: "",
+              textDisable: "",
+              enabled: ValueNotifier(true),
+              callback: widget.systemController.resetDepth,
+              getStatus: widget.systemController.getTrue,
             ),
             Controlcard(
               label: 'SAMPLING',
@@ -110,14 +137,6 @@ class _ControlPageState extends State<ControlPage> {
               enabled: widget.systemController.isSampling,
               callback: widget.systemController.toggleSampling,
               getStatus: widget.systemController.getIsSampling,
-            ),
-            Controlcard(
-              label: 'INIT DEPTH',
-              textEnable: "",
-              textDisable: "",
-              enabled: ValueNotifier(true),
-              callback: widget.systemController.setDepthInit,
-              getStatus: widget.systemController.getTrue,
             ),
             Controlcard(
               label: 'RS232',

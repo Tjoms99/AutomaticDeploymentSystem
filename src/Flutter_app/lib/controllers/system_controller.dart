@@ -10,7 +10,7 @@ class SystemController extends ValueNotifier {
   late USSController underwaterSensorSystem = USSController();
   late MQTTController mqtt = MQTTController();
   double _targetDepth = 6.9;
-  int _targetTime = 85;
+  int _targetTime = 120;
   int _samplingInterval = 1;
 
   SystemController() : super(null);
@@ -31,6 +31,28 @@ class SystemController extends ValueNotifier {
     underwaterSensorSystem.initState();
     mqtt.connect();
 
+    //MUST BE REGISTERED ACCORDING TO TopicsE INDEXING
+    mqtt.registerCallback((data) {
+      updateSystem(data);
+    });
+    mqtt.registerCallback((data) {
+      updateSampling(data);
+    });
+    mqtt.registerCallback((data) {
+      updateRS232(data);
+    });
+    mqtt.registerCallback((data) {
+      updateVolt(data);
+    });
+    mqtt.registerCallback((data) {
+      setTargetDepth(double.parse(data));
+    });
+    mqtt.registerCallback((data) {
+      setTargetTime(int.parse(data));
+    });
+    mqtt.registerCallback((data) {
+      setSamplingInterval(int.parse(data));
+    });
     mqtt.registerCallback((data) {
       underwaterSensorSystem.updateDepth(data);
     });
@@ -42,6 +64,10 @@ class SystemController extends ValueNotifier {
     });
     mqtt.registerCallback((data) {
       underwaterSensorSystem.updateBattery(data);
+    });
+
+    mqtt.registerCallback((data) {
+      updateVolt(data);
     });
 
     systemTimer = Timer.periodic(
@@ -64,9 +90,6 @@ class SystemController extends ValueNotifier {
   }
 
   bool getIsSampling() {
-    if (_timeLeft <= 0) {
-      toggleSampling();
-    }
     return isSampling.value;
   }
 
@@ -96,29 +119,34 @@ class SystemController extends ValueNotifier {
     _samplingInterval = interval;
   }
 
-  void setDepthInit() {
+  void resetDepth() {
     mqtt.publishMessage(Topics.depthInit, '1');
+  }
+
+  void resetSystem() {
+    //Only used to update MQTT values to sync App and actual state
+    isSampling.value = false;
+    underwaterSensorSystem.isOnRS232.value = false;
+    underwaterSensorSystem.isOn12V.value = false;
+    setTargetDepth(0.0);
+    setTargetTime(120);
+    setSamplingInterval(1);
+    mqtt.publishMessage(Topics.sampling, '0');
+    mqtt.publishMessage(Topics.rs232, '0');
+    mqtt.publishMessage(Topics.volt, '0');
+    mqtt.publishMessage(Topics.targetDepth, "0.0");
+    mqtt.publishMessage(Topics.targetTime, "0");
+    mqtt.publishMessage(Topics.samplingInterval, '1');
+
+    notifyListeners();
+    //Reset system
+    mqtt.publishMessage(Topics.system, '1');
   }
 
   //---------------------------TOGGLE-----------------------------------------
 
-  void toggleSystem() {
-    isOnSystem.value = !isOnSystem.value;
-    isOnSystem.value
-        ? mqtt.publishMessage(Topics.system, '1')
-        : mqtt.publishMessage(Topics.system, '0');
-    underwaterSensorSystem.resetCharts();
-
-    notifyListeners();
-  }
-
   void toggleSampling() {
     isSampling.value = !isSampling.value;
-
-    if (_timeLeft <= 0) {
-      isSampling.value = false;
-      _currentTime = 0;
-    }
 
     isSampling.value
         ? mqtt.publishMessage(Topics.sampling, '1')
@@ -160,5 +188,26 @@ class SystemController extends ValueNotifier {
     for (var i = 0; i < callbacks.length; i++) {
       callbacks.elementAt(i)();
     }
+  }
+
+  void updateSystem(String data) {
+    isOnSystem.value = int.parse(data) == 1 ? true : false;
+    notifyListeners();
+  }
+
+  void updateSampling(String data) {
+    isSampling.value = int.parse(data) == 1 ? true : false;
+    notifyListeners();
+  }
+
+  void updateRS232(String data) {
+    underwaterSensorSystem.isOnRS232.value =
+        int.parse(data) == 1 ? true : false;
+    notifyListeners();
+  }
+
+  void updateVolt(String data) {
+    underwaterSensorSystem.isOn12V.value = int.parse(data) == 1 ? true : false;
+    notifyListeners();
   }
 }

@@ -1,4 +1,19 @@
 // MQTT Topics
+enum TopicsE {
+  SYSTEM,
+  SAMPLING,
+  RS232,
+  VOLT,
+  TARGET_DEPTH,
+  TARGET_TIME,
+  SAMPLING_INTERVAL,
+  DEPTH,
+  TEMPERATURE,
+  PRESSURE,
+  BATTERY,
+  DEPTH_INIT,
+}
+
 abstract class Topics {
   //--------------------------------------------------------------------
   // APPLICATION TOPICS
