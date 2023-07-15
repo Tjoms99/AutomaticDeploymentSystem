@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 class Header extends StatelessWidget {
   final String label;
   final bool enableUndertext;
+  final double textSize;
 
-  const Header({super.key, required this.label, required this.enableUndertext});
+  const Header({
+    super.key,
+    required this.label,
+    required this.enableUndertext,
+    this.textSize = 30,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +21,7 @@ class Header extends StatelessWidget {
       children: [
         PrimaryText(
           text: label,
-          size: 30.0,
+          size: textSize,
           fontWeight: FontWeight.w700,
         ),
         enableUndertext

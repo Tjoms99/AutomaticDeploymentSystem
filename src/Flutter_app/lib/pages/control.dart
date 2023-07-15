@@ -1,5 +1,6 @@
 import 'package:automatic_deployment_system_app/components/control_card.dart';
 import 'package:automatic_deployment_system_app/components/control_textfield.dart';
+import 'package:automatic_deployment_system_app/components/defualt_control_layout.dart';
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
@@ -85,12 +86,8 @@ class _ControlPageState extends State<ControlPage> {
     return DefaultWidget(
       widgets: [
         const Header(label: 'Control', enableUndertext: true),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-        Wrap(
-          runSpacing: 20.0,
-          spacing: 20.0,
-          alignment: WrapAlignment.start,
-          children: [
+        DefaultControlLayout(
+          widgets: [
             ControlTextfield(
               label: "TARGET\nDEPTH (m)",
               controller: _targetDepthController,
@@ -107,13 +104,10 @@ class _ControlPageState extends State<ControlPage> {
               callback: updateSamplingInterval,
             ),
           ],
+          label: "Parameter",
         ),
-        SizedBox(height: SizeConfig.blockSizeVertical! * 4),
-        Wrap(
-          runSpacing: 20.0,
-          spacing: 20.0,
-          alignment: WrapAlignment.start,
-          children: [
+        DefaultControlLayout(
+          widgets: [
             Controlcard(
               label: 'RESET SYSTEM',
               textEnable: "",
@@ -130,34 +124,11 @@ class _ControlPageState extends State<ControlPage> {
               callback: widget.systemController.resetDepth,
               getStatus: widget.systemController.getTrue,
             ),
-            Controlcard(
-              label: 'SAMPLING',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: widget.systemController.isSampling,
-              callback: widget.systemController.toggleSampling,
-              getStatus: widget.systemController.getIsSampling,
-            ),
-            Controlcard(
-              label: 'RS232',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: widget.systemController.underwaterSensorSystem.isOnRS232,
-              callback: widget.systemController.toggleRS232,
-              getStatus:
-                  widget.systemController.underwaterSensorSystem.getIsOnRS232,
-            ),
-            Controlcard(
-              label: '12V',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: widget.systemController.underwaterSensorSystem.isOn12V,
-              callback: widget.systemController.toggle12V,
-              getStatus:
-                  widget.systemController.underwaterSensorSystem.getIsOn12V,
-            ),
+          ],
+          label: "Button",
+        ),
 
-            /*
+        /*
             Controlcard(
               label: 'MODE STATUS',
               textEnable: "AUTOMATIC",
@@ -197,7 +168,36 @@ class _ControlPageState extends State<ControlPage> {
               enabled: true,
             ),
             */
+        DefaultControlLayout(
+          widgets: [
+            Controlcard(
+              label: 'SAMPLING',
+              textEnable: "ON",
+              textDisable: "OFF",
+              enabled: widget.systemController.isSampling,
+              callback: widget.systemController.toggleSampling,
+              getStatus: widget.systemController.getIsSampling,
+            ),
+            Controlcard(
+              label: 'RS232',
+              textEnable: "ON",
+              textDisable: "OFF",
+              enabled: widget.systemController.underwaterSensorSystem.isOnRS232,
+              callback: widget.systemController.toggleRS232,
+              getStatus:
+                  widget.systemController.underwaterSensorSystem.getIsOnRS232,
+            ),
+            Controlcard(
+              label: '12V',
+              textEnable: "ON",
+              textDisable: "OFF",
+              enabled: widget.systemController.underwaterSensorSystem.isOn12V,
+              callback: widget.systemController.toggle12V,
+              getStatus:
+                  widget.systemController.underwaterSensorSystem.getIsOn12V,
+            ),
           ],
+          label: "Toggle",
         ),
       ],
     );
