@@ -65,7 +65,6 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   if (strcmp(topic, topic_system) == 0)
   {
-    digitalWrite(USS_ENABLED, payload[0] == '1' ? HIGH : LOW);
     ble_notify_system_on(payload, length);
   }
   else if (strcmp(topic, topic_sampling) == 0)
@@ -134,7 +133,7 @@ void mqtt_task(void *arg)
       client.connect(client_id.c_str(), mqtt_username, mqtt_password);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    vTaskDelay(20 / portTICK_PERIOD_MS);
   }
 }
 
@@ -156,7 +155,6 @@ void mqtt_begin()
 
   Serial.println("Connected!");
   //  subscribe
-  client.subscribe(topic_system);
   client.subscribe(topic_sampling);
   client.subscribe(topic_sampling_interval);
   client.subscribe(topic_depth_init);
@@ -164,6 +162,8 @@ void mqtt_begin()
   client.subscribe(topic_12v);
   client.subscribe(topic_target_depth);
   client.subscribe(topic_target_time);
+  client.subscribe(topic_system); //!!MUST be last. Used for sync!!
+
 
   xTaskCreate(mqtt_task, "mqtt_task", 2048, NULL, 9, NULL);
 }
