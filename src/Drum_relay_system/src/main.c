@@ -9,6 +9,7 @@
 #include "gpio/leds.h"
 #include "bluetooth/bluetooth.h"
 #include "rs485/rs485.h"
+#include "gpio/battery.h"
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS 5000
@@ -20,11 +21,16 @@ int main(void)
 	rs485_init();
 	bluetooth_init();
 	leds_set_blue(1);
+	battery_init();
 	// Led green on successful initialization.
 
 	while (1)
 	{
+		battery_charge_start();
 		k_msleep(SLEEP_TIME_MS);
+		battery_charge_stop();
+		k_msleep(SLEEP_TIME_MS);
+
 		// rs485_write("4");
 
 		// uart_print_depth();
