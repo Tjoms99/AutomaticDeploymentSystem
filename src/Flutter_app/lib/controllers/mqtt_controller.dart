@@ -1,5 +1,4 @@
 import "package:automatic_deployment_system_app/config/mqtt_topics.dart";
-import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
 import "package:flutter/material.dart";
 import "package:mqtt_client/mqtt_client.dart";
 import "package:mqtt_client/mqtt_server_client.dart";

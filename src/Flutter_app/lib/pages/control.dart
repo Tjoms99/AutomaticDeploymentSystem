@@ -4,7 +4,6 @@ import 'package:automatic_deployment_system_app/components/defualt_control_layou
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
 import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
-import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -109,6 +108,22 @@ class _ControlPageState extends State<ControlPage> {
         DefaultControlLayout(
           widgets: [
             Controlcard(
+              label: 'START WINCH',
+              textEnable: "",
+              textDisable: "",
+              enabled: ValueNotifier(true),
+              callback: reset,
+              getStatus: widget.systemController.getTrue,
+            ),
+            Controlcard(
+              label: 'STOP WINCH',
+              textEnable: "",
+              textDisable: "",
+              enabled: ValueNotifier(true),
+              callback: reset,
+              getStatus: widget.systemController.getTrue,
+            ),
+            Controlcard(
               label: 'RESET SYSTEM',
               textEnable: "",
               textDisable: "",
@@ -141,26 +156,7 @@ class _ControlPageState extends State<ControlPage> {
               textDisable: "STOPPED",
               enabled: true,
             ),
-            Controlcard(
-              label: 'REEL',
-              textEnable: "REELING",
-              textDisable: "NOP",
-              enabled: true,
-            ),
-            Controlcard(
-              label: 'RELEASE',
-              textEnable: "RELEASING",
-              textDisable: "NOP",
-              enabled: true,
-            ),
 
-            //Should only be triggers....
-            Controlcard(
-              label: 'RESET',
-              textEnable: "ON",
-              textDisable: "OFF",
-              enabled: true,
-            ),
             Controlcard(
               label: 'UPDATE STATE',
               textEnable: "ON",
@@ -195,6 +191,14 @@ class _ControlPageState extends State<ControlPage> {
               callback: widget.systemController.toggle12V,
               getStatus:
                   widget.systemController.underwaterSensorSystem.getIsOn12V,
+            ),
+            Controlcard(
+              label: 'WINCH MODE',
+              textEnable: "AUTOMATIC",
+              textDisable: "MANUAL",
+              enabled: ValueNotifier(true),
+              callback: () {},
+              getStatus: widget.systemController.getTrue,
             ),
           ],
           label: "Toggle",

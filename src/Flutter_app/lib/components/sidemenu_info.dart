@@ -1,6 +1,5 @@
 import 'package:automatic_deployment_system_app/components/defualt_widget.dart';
 import 'package:automatic_deployment_system_app/components/header.dart';
-import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
 import 'package:automatic_deployment_system_app/config/size_config.dart';
 import 'package:automatic_deployment_system_app/controllers/system_controller.dart';
 import 'package:automatic_deployment_system_app/style/colors.dart';
