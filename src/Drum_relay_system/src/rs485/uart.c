@@ -1,6 +1,6 @@
 #include "uart.h"
-#include "rs485.h"
 #include "../bluetooth/bluetooth.h"
+
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/uart.h>
 #include <string.h>

@@ -2,6 +2,11 @@
 #define __BLE_H__
 #include <stdint.h>
 
+/**
+ * @brief Characteristics defined in the Data service.
+ *
+ * @note Expected to write data to these characteristics.
+ */
 enum DATA_CHARACTERISTIC
 {
     DATA_DEPTH,
@@ -12,6 +17,12 @@ enum DATA_CHARACTERISTIC
 };
 typedef enum DATA_CHARACTERISTIC data_characteristic_t;
 
+/**
+ * @brief Characteristics defined in the Control service.
+ *
+ * @note Expected to get notified when data is being written to these characteristics by the server.
+ * Should be handeled in the notify callback function.
+ */
 enum CONTROL_CHARACTERISTIC
 {
     CONTROL_SYSTEM_ON,
@@ -25,7 +36,24 @@ enum CONTROL_CHARACTERISTIC
 };
 typedef enum CONTROL_CHARACTERISTIC control_characteristic_t;
 
-void bluetooth_write_data(data_characteristic_t charecteristic, uint8_t *data, uint8_t length);
-void bluetooth_init(void);
+/**
+ * @brief Writes to a bluetooth characteristic.
+ *
+ * @param[in] characteristic Type of data characteristic.
+ *
+ * @param[in] data Pointer to data/message to be transmitted.
+ *
+ * @param[in] length Lenght of data pointer in bytes.
+ *
+ * @retval 0 if successful. Negative errno number on error.
+ */
+int bluetooth_write_data(data_characteristic_t characteristic, uint8_t *data, uint8_t length);
+
+/**
+ * @brief Initialize RS485.
+ *
+ * @retval 0 if successful. Negative errno number on error.
+ */
+int bluetooth_init(void);
 
 #endif
