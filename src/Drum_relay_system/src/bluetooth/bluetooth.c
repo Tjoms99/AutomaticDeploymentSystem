@@ -119,6 +119,7 @@ static uint8_t notify_func(struct bt_conn *conn,
     // Set end of string value to ignore the rest of the pointer value.
     data_s[length] = '\0';
 
+    // Writes data to the Underwater Sensor System using its API format.
     if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
     {
         printk("FOUND SAMPLING\n");
