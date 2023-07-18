@@ -83,6 +83,10 @@ int leds_init()
     ret |= gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_ACTIVE);
     ret |= gpio_pin_configure_dt(&led_blue, GPIO_OUTPUT_ACTIVE);
 
+    ret |= gpio_pin_set_dt(&led_red, 0);
+    ret |= gpio_pin_set_dt(&led_green, 0);
+    ret |= gpio_pin_set_dt(&led_blue, 0);
+
     if (ret)
     {
         printk("GPIO configure failed!");
@@ -90,10 +94,6 @@ int leds_init()
     }
 
     is_initialized = true;
-
-    ret |= gpio_pin_set_dt(&led_red, 0);
-    ret |= gpio_pin_set_dt(&led_green, 0);
-    ret |= gpio_pin_set_dt(&led_blue, 0);
 
     return ret;
 }

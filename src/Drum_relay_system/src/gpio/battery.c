@@ -2,31 +2,52 @@
 #include <zephyr/drivers/gpio.h>
 #include "battery.h"
 
-static const struct device *const gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
-
 #define GPIO_BATTERY_CHARGE_SPEED 13
 #define GPIO_BATTERY_CHARGING_ENABLE 17
 
 #define VOLT_PER_STEP (0.003515625F) // 3.6 reference and 10 bit resolution
 
-void battery_fast_charge()
+static const struct device *const gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+static uint8_t is_initialized = false;
+
+int battery_set_fast_charge()
 {
-    gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, 1); // FAST charge 100mA
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, 1); // FAST charge 100mA
 }
 
-void battery_slow_charge()
+int battery_set_slow_charge()
 {
-    gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, 0); // SLOW charge 50mA
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, 0); // SLOW charge 50mA
 }
 
-void battery_charge_start()
+int battery_charge_start()
 {
-    gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, 1);
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, 1);
 }
 
-void battery_charge_stop()
+int battery_charge_stop()
 {
-    gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, 0);
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, 0);
 }
 
 float battery_get_voltage()
@@ -53,20 +74,31 @@ float battery_get_percentage()
     return volt_percent;
 }
 
-void battery_init()
+int battery_init()
 {
+    int ret = 0;
+
     if (!device_is_ready(gpio_dev))
     {
         printk("GPIO device not found!");
-        return;
+        return -EIO;
     }
 
-    gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, GPIO_OUTPUT);
+    ret |= gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, GPIO_OUTPUT);
+    ret |= gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, GPIO_OUTPUT | GPIO_ACTIVE_LOW);
+    ret |= battery_set_fast_charge();
 
-    gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, GPIO_OUTPUT | GPIO_ACTIVE_LOW);
-    battery_fast_charge();
+    if (ret)
+    {
+        printk("GPIO configure failed!");
+        return ret;
+    }
+
+    is_initialized = true;
+
+    return ret;
 }
-/* TODO: STOLEN FROM SOMEWHERE, INTEGRATE!!
+/* TODO: STOLEN FROM ARDUINO LIBRARY, INTEGRATE!!
 Xiao::Xiao() {
   pinMode(VBAT_ENABLE, OUTPUT);
   pinMode(BAT_CHARGE_STATE, INPUT);
