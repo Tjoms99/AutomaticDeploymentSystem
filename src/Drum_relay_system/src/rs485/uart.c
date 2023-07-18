@@ -103,6 +103,8 @@ void uart_write(char *message)
 
 int uart_init()
 {
+    int ret = 0;
+
     if (!device_is_ready(uart_dev))
     {
         printk("UART device not found!");
@@ -116,14 +118,24 @@ int uart_init()
         .data_bits = UART_CFG_DATA_BITS_8,
         .flow_ctrl = UART_CFG_FLOW_CTRL_NONE};
 
-    int err = uart_configure(uart_dev, &uart_cfg);
+    ret |= uart_configure(uart_dev, &uart_cfg);
 
-    if (err == -ENOSYS)
+    if (ret == -ENOSYS)
     {
+        printk("UART config failed");
         return -ENOSYS;
     }
 
     // configure interrupt and callback to receive data
-    int ret = uart_irq_callback_user_data_set(uart_dev, serial_cb, NULL);
+    ret |= uart_irq_callback_user_data_set(uart_dev, serial_cb, NULL);
+
+    if (ret == -ENOSYS || ret == -ENOTSUP)
+    {
+        printk("UART callback function not implemented or API not enabled");
+        return -ENOSYS;
+    }
+
     uart_irq_rx_enable(uart_dev);
+
+    return ret;
 }

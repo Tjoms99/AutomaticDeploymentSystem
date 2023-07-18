@@ -12,14 +12,14 @@
 bool uart_get_is_busy(void);
 
 /**
- * @brief Write to the UART poll register.
+ * @brief Writes to the UART poll register.
  */
 void uart_write(char *message);
 
 /**
  * @brief Initialize UART with speed at 56000.
  *
- * @retval Negative errno number on error.
+ * @retval 0 if successful. Negative errno number on error.
  */
 int uart_init(void);
 

@@ -7,20 +7,21 @@
 static const struct device *const gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 #define GPIO_RS485_TX_ENABLE 5
 
-void rs485_tx_enable()
+static void rs485_tx_enable()
 {
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 1);
-    k_usleep(1);
+    k_usleep(1); // Delay to assure the pin transition from low to high.
 }
 
-void rs485_tx_disable()
+static void rs485_tx_disable()
 {
-    k_msleep(1);
+    k_msleep(1); // Needed due to the UART write poll register needs time to transmitt data.
     gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 0);
 }
 
 void rs485_write(char *message)
 {
+    // Wait for the RS485 bus to become available.
     while (uart_get_is_busy())
     {
         printk("UART busy");
@@ -32,16 +33,20 @@ void rs485_write(char *message)
     rs485_tx_disable();
 }
 
-void rs485_init()
+int rs485_init()
 {
+    int ret = 0;
+
     if (!device_is_ready(gpio_dev))
     {
         printk("GPIO device not found!");
-        return;
+        return -EIO;
     }
 
-    gpio_pin_configure(gpio_dev, GPIO_RS485_TX_ENABLE, GPIO_OUTPUT);
-    gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 0);
+    ret |= gpio_pin_configure(gpio_dev, GPIO_RS485_TX_ENABLE, GPIO_OUTPUT);
+    ret |= gpio_pin_set(gpio_dev, GPIO_RS485_TX_ENABLE, 0);
 
-    uart_init();
+    ret |= uart_init();
+
+    return ret;
 }
