@@ -7,20 +7,12 @@
 
 static const struct device *const uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart0));
 
-#define MSG_SIZE 16
-static char rx_buf[MSG_SIZE];
+#define MESSAGE_SIZE 16
+static char rx_buf[MESSAGE_SIZE];
 static int rx_buf_pos;
 static volatile bool uart_is_busy = true;
 
-static uart_callback_uss_ready callbacks_data[10];
-static uint8_t callback_data_n = 0;
-
-/* queue to store up to 10 messages (aligned to 4-byte boundary) */
-K_MSGQ_DEFINE(uart_msgq_depth, MSG_SIZE, 10, 4);
-K_MSGQ_DEFINE(uart_msgq_pressure, MSG_SIZE, 10, 4);
-K_MSGQ_DEFINE(uart_msgq_temperature, MSG_SIZE, 10, 4);
-
-/*
+/**
  * Read characters from UART until line end is detected. Afterwards push the
  * data to the message queue.
  */
@@ -60,10 +52,10 @@ static void serial_cb(const struct device *dev, void *user_data)
             break;
         case '\n':
         case '\r':
-            /* terminate string */
+            // terminate string
             rx_buf[rx_buf_pos++] = '\0';
 
-            /* if queue is full, message is silently dropped */
+            // Send data over BLE
             if (message_tag == 'd')
             {
                 bluetooth_write_data(DATA_DEPTH, &rx_buf, rx_buf_pos);
@@ -77,7 +69,7 @@ static void serial_cb(const struct device *dev, void *user_data)
                 bluetooth_write_data(DATA_TEMPERATURE, &rx_buf, rx_buf_pos);
             }
 
-            /* reset the buffer (it was sendt over BLE) */
+            // Reset the buffer (it was sendt over BLE)
             rx_buf_pos = -1;
             break;
 
@@ -109,15 +101,29 @@ void uart_write(char *message)
     }
 }
 
-void uart_init()
+int uart_init()
 {
     if (!device_is_ready(uart_dev))
     {
         printk("UART device not found!");
-        return;
+        return -EIO;
     }
 
-    /* configure interrupt and callback to receive data */
+    const struct uart_config uart_cfg = {
+        .baudrate = 56000,
+        .parity = UART_CFG_PARITY_NONE,
+        .stop_bits = UART_CFG_STOP_BITS_1,
+        .data_bits = UART_CFG_DATA_BITS_8,
+        .flow_ctrl = UART_CFG_FLOW_CTRL_NONE};
+
+    int err = uart_configure(uart_dev, &uart_cfg);
+
+    if (err == -ENOSYS)
+    {
+        return -ENOSYS;
+    }
+
+    // configure interrupt and callback to receive data
     int ret = uart_irq_callback_user_data_set(uart_dev, serial_cb, NULL);
     uart_irq_rx_enable(uart_dev);
 }
