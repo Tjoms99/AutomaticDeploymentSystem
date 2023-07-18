@@ -1,61 +1,99 @@
+#include "leds.h"
+
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
-
-#include "leds.h"
 
 static const struct gpio_dt_spec led_red = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 static const struct gpio_dt_spec led_green = GPIO_DT_SPEC_GET(DT_ALIAS(led1), gpios);
 static const struct gpio_dt_spec led_blue = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
 
-void leds_init()
+static uint8_t is_initialized = false;
+
+int leds_set_red(uint8_t pin_state)
 {
-    int ret;
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set_dt(&led_red, pin_state);
+}
+
+int leds_set_green(uint8_t pin_state)
+{
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set_dt(&led_green, pin_state);
+}
+
+int leds_set_blue(uint8_t pin_state)
+{
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_set_dt(&led_blue, pin_state);
+}
+
+int leds_toggle_red()
+{
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_toggle_dt(&led_red);
+}
+
+int leds_toggle_green()
+{
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_toggle_dt(&led_green);
+}
+
+int leds_toggle_blue()
+{
+    if (!is_initialized)
+    {
+        return -ECANCELED;
+    }
+
+    return gpio_pin_toggle_dt(&led_blue);
+}
+
+int leds_init()
+{
+    int ret = 0;
 
     if (!gpio_is_ready_dt(&led_red) && !gpio_is_ready_dt(&led_green) && !gpio_is_ready_dt(&led_blue))
     {
-        return 0;
+        printk("GPIO devices not found!");
+        return -EIO;
     }
 
-    ret = gpio_pin_configure_dt(&led_red, GPIO_OUTPUT_ACTIVE);
-    ret = gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_ACTIVE);
-    ret = gpio_pin_configure_dt(&led_blue, GPIO_OUTPUT_ACTIVE);
+    ret |= gpio_pin_configure_dt(&led_red, GPIO_OUTPUT_ACTIVE);
+    ret |= gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_ACTIVE);
+    ret |= gpio_pin_configure_dt(&led_blue, GPIO_OUTPUT_ACTIVE);
 
-    ret = gpio_pin_set_dt(&led_red, 0);
-    ret = gpio_pin_set_dt(&led_green, 0);
-    ret = gpio_pin_set_dt(&led_blue, 0);
-
-    if (ret < 0)
+    if (ret)
     {
-        return 0;
+        printk("GPIO configure failed!");
+        return ret;
     }
-}
 
-void leds_set_red(uint8_t pin_state)
-{
-    gpio_pin_set_dt(&led_red, pin_state);
-}
+    is_initialized = true;
 
-void leds_set_green(uint8_t pin_state)
-{
-    gpio_pin_set_dt(&led_green, pin_state);
-}
+    ret |= gpio_pin_set_dt(&led_red, 0);
+    ret |= gpio_pin_set_dt(&led_green, 0);
+    ret |= gpio_pin_set_dt(&led_blue, 0);
 
-void leds_set_blue(uint8_t pin_state)
-{
-    gpio_pin_set_dt(&led_blue, pin_state);
-}
-
-void leds_toggle_red()
-{
-    gpio_pin_toggle_dt(&led_red);
-}
-
-void leds_toggle_green()
-{
-    gpio_pin_toggle_dt(&led_green);
-}
-
-void leds_toggle_blue()
-{
-    gpio_pin_toggle_dt(&led_blue);
+    return ret;
 }
