@@ -36,14 +36,14 @@ int battery_charge_stop(void);
  *
  * @retval Battery voltage.
  */
-float battery_get_voltage(void);
+int battery_get_voltage(void);
 
 /**
  * @brief Calculates the battery percentage using the battery voltage.
  *
  * @retval Battery percentage.
  */
-float battery_get_percentage(void);
+int battery_get_percentage(void);
 
 /**
  * @brief Initialize the battery charging circuit.

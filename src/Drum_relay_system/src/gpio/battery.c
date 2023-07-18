@@ -1,15 +1,48 @@
-#include <zephyr/kernel.h>
-#include <zephyr/drivers/gpio.h>
 #include "battery.h"
+
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/adc.h>
+
+static const struct device *const gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 
 #define GPIO_BATTERY_CHARGE_SPEED 13
 #define GPIO_BATTERY_CHARGING_ENABLE 17
+#define GPIO_BATTERY_READ_ENABLE 14
+/*
+static const struct device *adc_dev = DEVICE_DT_GET(DT_NODELABEL(adc));
 
-#define VOLT_PER_STEP (0.003515625F) // 3.6 reference and 10 bit resolution
+#define ADC_RESOLUTION 10
+#define ADC_CHANNEL 7
+#define ADC_PORT SAADC_CH_PSELP_PSELP_AnalogInput0 // AIN7
+#define ADC_REFERENCE ADC_REF_INTERNAL             // 0.6V
+#define ADC_GAIN ADC_GAIN_1_5                      // ADC REFERENCE * 5 // ADC_GAIN_1_6
 
-static const struct device *const gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
+struct adc_channel_cfg channel_7_cfg = {
+    .gain = ADC_GAIN,
+    .reference = ADC_REFERENCE,
+    .acquisition_time = ADC_ACQ_TIME_DEFAULT,
+    .channel_id = ADC_CHANNEL,
+#ifdef CONFIG_ADC_NRFX_SAADC
+    .input_positive = ADC_PORT
+#endif
+};
+
+int16_t sample_buffer[1];
+struct adc_sequence sequence = {
+    .channels = BIT(ADC_CHANNEL),
+    .buffer = sample_buffer,
+    .buffer_size = sizeof(sample_buffer),
+    .resolution = ADC_RESOLUTION};
+*/
 static uint8_t is_initialized = false;
 
+static int battery_enable_read()
+{
+    return gpio_pin_set(gpio_dev, GPIO_BATTERY_READ_ENABLE, 0);
+}
 int battery_set_fast_charge()
 {
     if (!is_initialized)
@@ -50,34 +83,41 @@ int battery_charge_stop()
     return gpio_pin_set(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, 0);
 }
 
-float battery_get_voltage()
+int battery_get_voltage()
 {
-    battery_charge_stop();
-    // TODO: Read actual adc value
-    uint32_t adc_value = 750; // 10 bit
-    float adc_voltage = adc_value * VOLT_PER_STEP;
-    float battery_voltage = adc_voltage * (1000.0 / 510.0);
+    int ret = 0;
 
-    return battery_voltage;
+    // battery_charge_stop();
+    /*
+        ret |= adc_read(adc_dev, &sequence);
+        if (ret)
+        {
+            printk("ADC read failed (error %d)", ret);
+        }
+
+        int32_t mv_value = sample_buffer[0];
+        printk("ADC value: %d \n", mv_value);
+
+        int32_t adc_vref = adc_ref_internal(adc_dev);
+        ret |= adc_raw_to_millivolts(adc_vref, ADC_GAIN, ADC_RESOLUTION, &mv_value);
+        printk("ADC volt: %d mv\n", mv_value);
+
+        return mv_value;
+        */
+    return 0;
 }
 
-float battery_get_percentage()
+int battery_get_percentage()
 {
-    const float volt_reference_top = 4.2;
-    const float volt_reference_bottom = 3.6;
-    float volt_reference_difference = volt_reference_top - volt_reference_bottom;
 
-    float volt = battery_get_voltage();
-    float volt_difference = volt - volt_reference_bottom;
-    float volt_percent = volt_difference / volt_reference_difference * 100.0;
-
-    return volt_percent;
+    return 0;
 }
 
 int battery_init()
 {
     int ret = 0;
 
+    // GPIO
     if (!device_is_ready(gpio_dev))
     {
         printk("GPIO device not found!");
@@ -85,19 +125,36 @@ int battery_init()
     }
 
     ret |= gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGING_ENABLE, GPIO_OUTPUT);
+    ret |= gpio_pin_configure(gpio_dev, GPIO_BATTERY_READ_ENABLE, GPIO_OUTPUT);
     ret |= gpio_pin_configure(gpio_dev, GPIO_BATTERY_CHARGE_SPEED, GPIO_OUTPUT | GPIO_ACTIVE_LOW);
+    ret |= battery_enable_read();
     ret |= battery_set_fast_charge();
-
     if (ret)
     {
         printk("GPIO configure failed!");
         return ret;
     }
 
+    /*
+        // ADC
+        if (!device_is_ready(adc_dev))
+        {
+            printk("ADC device not found!");
+            return -EIO;
+        }
+
+        ret |= adc_channel_setup(adc_dev, &channel_7_cfg);
+
+        if (ret)
+        {
+            printk("ADC setup failed (error %d)", ret);
+        }
+    */
     is_initialized = true;
 
     return ret;
 }
+
 /* TODO: STOLEN FROM ARDUINO LIBRARY, INTEGRATE!!
 Xiao::Xiao() {
   pinMode(VBAT_ENABLE, OUTPUT);
