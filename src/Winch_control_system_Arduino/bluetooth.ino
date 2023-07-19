@@ -10,11 +10,14 @@ NimBLEServer *pServer;
 #define CHARACTERISTIC_UUID_DEPTH "0655982c-02f8-49bb-961d-4cb9984399b1"
 #define CHARACTERISTIC_UUID_PRESSURE "6e38e4a1-d667-420d-8774-87a8c319a54c"
 #define CHARACTERISTIC_UUID_TEMPERATURE "61393466-b9b0-447f-8272-1d51c378ae40"
+#define CHARACTERISTIC_UUID_BATTERY "e606c2f7-c1ab-400f-a605-e76902c3c0b8"
 
 NimBLEService *pService_data;
 NimBLECharacteristic *pCharacteristic_depth;
 NimBLECharacteristic *pCharacteristic_pressure;
 NimBLECharacteristic *pCharacteristic_temperature;
+NimBLECharacteristic *pCharacteristic_battery;
+
 //-------------------------------------------------------------------------------------------------
 // CONTROL SERVICE & CHARACTERISTICS
 #define SERVICE_UUID_CONTROL "97ef73d0-8c29-424f-829a-1a2c78ae506a"
@@ -62,6 +65,10 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
     else if (strcmp(CHARACTERISTIC_UUID_TEMPERATURE, uuid) == 0)
     {
       publish_temperature(pCharacteristic->getValue().c_str());
+    }
+        else if (strcmp(CHARACTERISTIC_UUID_BATTERY, uuid) == 0)
+    {
+      publish_battery(pCharacteristic->getValue().c_str());
     }
     /*
     Serial.print(pCharacteristic->getUUID().toString().c_str());
@@ -137,15 +144,20 @@ void ble_begin(void)
   pCharacteristic_depth = pService_data->createCharacteristic(CHARACTERISTIC_UUID_DEPTH, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
   pCharacteristic_pressure = pService_data->createCharacteristic(CHARACTERISTIC_UUID_PRESSURE, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
   pCharacteristic_temperature = pService_data->createCharacteristic(CHARACTERISTIC_UUID_TEMPERATURE, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
+  pCharacteristic_battery = pService_data->createCharacteristic(CHARACTERISTIC_UUID_BATTERY, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
 
   pCharacteristic_depth->setCallbacks(&chrCallbacks);
   pCharacteristic_pressure->setCallbacks(&chrCallbacks);
   pCharacteristic_temperature->setCallbacks(&chrCallbacks);
+  pCharacteristic_battery->setCallbacks(&chrCallbacks);
+
 
   pService_data->start();
   pCharacteristic_depth->setValue("-0.12");
   pCharacteristic_pressure->setValue("100310");
   pCharacteristic_temperature->setValue("24.31");
+  pCharacteristic_battery->setValue("69");
+
 
   //-------------------------------------------------------------------------------------------------
   // CONTROL

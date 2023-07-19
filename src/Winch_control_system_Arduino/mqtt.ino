@@ -114,6 +114,11 @@ void publish_temperature(const char *temperature)
   client.publish(topic_temperature, temperature, true);
 }
 
+void publish_battery(const char *battery)
+{
+  client.publish(topic_battery, battery, true);
+}
+
 void publish_data(char temperature[6], char pressure[6], char depth[6])
 {
   client.publish(topic_depth, depth, true);
