@@ -52,11 +52,13 @@ static services_t service;
 #define uuid_depth_characteristic_val BT_UUID_128_ENCODE(0x0655982c, 0x02f8, 0x49bb, 0x961d, 0x4cb9984399b1)
 #define uuid_pressure_characteristic_val BT_UUID_128_ENCODE(0x6e38e4a1, 0xd667, 0x420d, 0x8774, 0x87a8c319a54c)
 #define uuid_temperature_characteristic_val BT_UUID_128_ENCODE(0x61393466, 0xb9b0, 0x447f, 0x8272, 0x1d51c378ae40)
+#define uuid_battery_characteristic_val BT_UUID_128_ENCODE(0xe606c2f7, 0xc1ab, 0x400f, 0xa605, 0xe76902c3c0b8)
 
 #define BT_UUID_DATA BT_UUID_DECLARE_128(uuid_data_service_val)
 #define BT_UUID_DATA_DEPTH BT_UUID_DECLARE_128(uuid_depth_characteristic_val)
 #define BT_UUID_DATA_PRESSURE BT_UUID_DECLARE_128(uuid_pressure_characteristic_val)
 #define BT_UUID_DATA_TEMPERATURE BT_UUID_DECLARE_128(uuid_temperature_characteristic_val)
+#define BT_UUID_DATA_BATTERY BT_UUID_DECLARE_128(uuid_battery_characteristic_val)
 
 static data_characteristic_t data_characteristic;
 static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
@@ -207,6 +209,9 @@ void discover_data_characteristic(data_characteristic_t target_characteristic,
         break;
     case DATA_TEMPERATURE:
         memcpy(&uuid128, BT_UUID_DATA_TEMPERATURE, sizeof(uuid128));
+        break;
+    case DATA_BATTERY:
+        memcpy(&uuid128, BT_UUID_DATA_BATTERY, sizeof(uuid128));
         break;
     default:
         // Do nothing
