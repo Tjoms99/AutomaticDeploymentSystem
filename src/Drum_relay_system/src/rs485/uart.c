@@ -58,15 +58,15 @@ static void serial_cb(const struct device *dev, void *user_data)
             // Send data over BLE
             if (message_tag == 'd')
             {
-                bluetooth_write_data(DATA_DEPTH, &rx_buf, rx_buf_pos);
+                bluetooth_write_data(DATA_DEPTH, rx_buf, rx_buf_pos);
             }
             else if (message_tag == 'p')
             {
-                bluetooth_write_data(DATA_PRESSURE, &rx_buf, rx_buf_pos);
+                bluetooth_write_data(DATA_PRESSURE, rx_buf, rx_buf_pos);
             }
             else if (message_tag == 't')
             {
-                bluetooth_write_data(DATA_TEMPERATURE, &rx_buf, rx_buf_pos);
+                bluetooth_write_data(DATA_TEMPERATURE, rx_buf, rx_buf_pos);
             }
 
             // Reset the buffer (it was sendt over BLE)

@@ -48,7 +48,7 @@ typedef enum CONTROL_CHARACTERISTIC control_characteristic_t;
  *
  * @retval 0 if successful. Negative errno number on error.
  */
-int bluetooth_write_data(data_characteristic_t characteristic, uint8_t *data, uint8_t length);
+int bluetooth_write_data(data_characteristic_t characteristic, char *data, uint8_t length);
 
 /**
  * @brief Initialize RS485.

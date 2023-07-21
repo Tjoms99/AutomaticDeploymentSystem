@@ -138,7 +138,7 @@ void mqtt_task(void *arg)
       client.connect(client_id.c_str(), mqtt_username, mqtt_password);
       vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
-    vTaskDelay(20 / portTICK_PERIOD_MS);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 

@@ -196,7 +196,7 @@ class USSController extends ValueNotifier {
 
   //---------------------------UPDATE BATTERY---------------------------------
   void updateBattery(String data) {
-    _battery.updateCurrentData(double.parse(data) / 1000);
+    _battery.updateCurrentData(double.parse(data));
 
     int samplingInterval = 1;
     int currentTime = samplingInterval * _depth.sensorData.length;

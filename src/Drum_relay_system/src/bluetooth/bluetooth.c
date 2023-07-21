@@ -539,7 +539,7 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
     .disconnected = disconnected,
 };
 
-int bluetooth_write_data(data_characteristic_t charecteristic, uint8_t *data, uint8_t length)
+int bluetooth_write_data(data_characteristic_t charecteristic, char *data, uint8_t length)
 {
     int ret = 0;
     if (!is_initialized)
