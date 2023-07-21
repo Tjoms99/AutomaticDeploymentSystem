@@ -1,5 +1,4 @@
 #include "battery.h"
-#include "../bluetooth/bluetooth.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -54,8 +53,9 @@ typedef struct
 } BatteryState;
 
 #define BATTERY_STATES_COUNT 12
+// Assuming LiPo battery.
 // Source: https://forum.evolvapor.com/topic/65565-discharge-profiles-csv-for-2-3-18650-batteries-sony-vtc6-sammy-30q/
-BatteryState batteryStates[BATTERY_STATES_COUNT] = {
+BatteryState battery_states[BATTERY_STATES_COUNT] = {
     {4.20, 100},
     {4.16, 99},
     {4.09, 91},
@@ -76,6 +76,7 @@ static int battery_enable_read()
 {
     return gpio_pin_set(gpio_battery_dev, GPIO_BATTERY_READ_ENABLE, 0);
 }
+
 int battery_set_fast_charge()
 {
     if (!is_initialized)
@@ -125,7 +126,7 @@ int battery_get_voltage(float *battery_volt)
     int ret = 0;
 
     // Voltage divider circuit
-    const int R1 = 1037; // Originally 1M ohm, calibrated after measuring actual values. Can happen due to resistor tolerances, temperature ect..
+    const int R1 = 1037; // Originally 1M ohm, calibrated after measuring actual voltage values. Can happen due to resistor tolerances, temperature ect..
     const int R2 = 510;  // 510K ohm
 
     // ADC measure
@@ -153,6 +154,7 @@ int battery_get_voltage(float *battery_volt)
     battery_millivolt = adc_mv * ((R1 + R2) / R2);
     *battery_volt = (float)battery_millivolt / 1000.0; // From millivolt to volt.
 
+    LOG_INF("Battery: %d mV", battery_millivolt);
     return ret;
 }
 
@@ -160,34 +162,51 @@ int battery_get_percentage(int *battery_percentage, float battery_voltage)
 {
 
     // Ensure voltage is within bounds
-    if (battery_voltage > batteryStates[0].voltage)
+    if (battery_voltage > battery_states[0].voltage)
         *battery_percentage = 100;
-    if (battery_voltage < batteryStates[BATTERY_STATES_COUNT - 1].voltage)
+    if (battery_voltage < battery_states[BATTERY_STATES_COUNT - 1].voltage)
         *battery_percentage = 0;
 
     for (int i = 0; i < BATTERY_STATES_COUNT - 1; i++)
     {
         // Find the two points battery_voltage is between
-        if (batteryStates[i].voltage >= battery_voltage && battery_voltage >= batteryStates[i + 1].voltage)
+        if (battery_states[i].voltage >= battery_voltage && battery_voltage >= battery_states[i + 1].voltage)
         {
             // Linear interpolation
-            *battery_percentage = batteryStates[i].percentage +
-                                  ((battery_voltage - batteryStates[i].voltage) *
-                                   ((batteryStates[i + 1].percentage - batteryStates[i].percentage) /
-                                    (batteryStates[i + 1].voltage - batteryStates[i].voltage)));
+            *battery_percentage = battery_states[i].percentage +
+                                  ((battery_voltage - battery_states[i].voltage) *
+                                   ((battery_states[i + 1].percentage - battery_states[i].percentage) /
+                                    (battery_states[i + 1].voltage - battery_states[i].voltage)));
+
+            LOG_INF("Battery: %d %%", *battery_percentage);
+            return 0;
         }
     }
-    return 0;
+    return -ESPIPE;
 }
 
 int battery_init()
 {
     int ret = 0;
 
+    // ADC
+    if (!device_is_ready(adc_battery_dev))
+    {
+        LOG_ERR("ADC device not found!");
+        return -EIO;
+    }
+
+    ret |= adc_channel_setup(adc_battery_dev, &channel_7_cfg);
+
+    if (ret)
+    {
+        LOG_ERR("ADC setup failed (error %d)", ret);
+    }
+
     // GPIO
     if (!device_is_ready(gpio_battery_dev))
     {
-        printk("GPIO device not found!");
+        LOG_ERR("GPIO device not found!");
         return -EIO;
     }
 
@@ -197,26 +216,9 @@ int battery_init()
 
     if (ret)
     {
-        printk("GPIO configure failed!");
+        LOG_ERR("GPIO configure failed123!");
         return ret;
     }
-
-    // ADC
-    if (!device_is_ready(adc_battery_dev))
-    {
-        printk("ADC device not found!");
-        return -EIO;
-    }
-
-    ret |= adc_channel_setup(adc_battery_dev, &channel_7_cfg);
-
-    if (ret)
-    {
-        printk("ADC setup failed (error %d)", ret);
-    }
-
-    ret |= battery_enable_read();
-    ret |= battery_set_fast_charge();
 
     if (ret)
     {
@@ -226,5 +228,9 @@ int battery_init()
 
     is_initialized = true;
     LOG_INF("Initialized");
+
+    ret |= battery_enable_read();
+    ret |= battery_set_fast_charge();
+
     return ret;
 }
