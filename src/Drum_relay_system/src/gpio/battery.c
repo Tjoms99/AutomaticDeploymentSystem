@@ -6,6 +6,8 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/adc.h>
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(battery, LOG_LEVEL_INF);
 
 static const struct device *gpio_battery_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 static const struct device *adc_battery_dev = DEVICE_DT_GET(DT_NODELABEL(adc));
@@ -134,7 +136,7 @@ int battery_get_voltage(float *battery_volt)
     ret |= adc_read(adc_battery_dev, &sequence);
     if (ret)
     {
-        printk("ADC read failed (error %d)", ret);
+        LOG_WRN("ADC read failed (error %d)", ret);
     }
 
     // Get average sample value.
@@ -213,9 +215,16 @@ int battery_init()
         printk("ADC setup failed (error %d)", ret);
     }
 
-    is_initialized = true;
     ret |= battery_enable_read();
     ret |= battery_set_fast_charge();
 
+    if (ret)
+    {
+        LOG_ERR("Initialization failed (error %d)", ret);
+        return ret;
+    }
+
+    is_initialized = true;
+    LOG_INF("Initialized");
     return ret;
 }

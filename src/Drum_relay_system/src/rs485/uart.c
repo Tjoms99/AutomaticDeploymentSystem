@@ -3,6 +3,9 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/uart.h>
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(uart, LOG_LEVEL_INF);
+
 #include <string.h>
 
 static const struct device *const uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart0));
@@ -32,44 +35,50 @@ static void serial_cb(const struct device *dev, void *user_data)
 
     static char message_tag;
 
-    /* read until FIFO empty */
+    // Read until FIFO empty
     while (uart_fifo_read(uart_dev, &c, 1) == 1)
     {
         if (rx_buf_pos == -1)
         {
             message_tag = c;
-            printk("%c", c);
         }
 
         switch (c)
         {
         case 'b':
             uart_is_busy = true;
+            LOG_DBG("UART busy");
+
             break;
 
         case 'r':
             uart_is_busy = false;
+            LOG_DBG("UART ready");
+
             break;
         case '\n':
         case '\r':
-            // terminate string
+            // Terminate string
             rx_buf[rx_buf_pos++] = '\0';
-
             // Send data over BLE
             if (message_tag == 'd')
             {
                 bluetooth_write_data(DATA_DEPTH, rx_buf, rx_buf_pos);
+                LOG_INF("Depth: %s", rx_buf);
             }
             else if (message_tag == 'p')
             {
                 bluetooth_write_data(DATA_PRESSURE, rx_buf, rx_buf_pos);
+                LOG_INF("Pressure: %s", rx_buf);
             }
             else if (message_tag == 't')
             {
                 bluetooth_write_data(DATA_TEMPERATURE, rx_buf, rx_buf_pos);
+                LOG_INF("Temperature: %s", rx_buf);
             }
 
             // Reset the buffer (it was sendt over BLE)
+            // -1 because the tag will be read first and ignored, and then the data will be stored.
             rx_buf_pos = -1;
             break;
 
@@ -80,7 +89,6 @@ static void serial_cb(const struct device *dev, void *user_data)
                 break;
             }
             rx_buf[rx_buf_pos++] = c;
-            printk("%c", c);
         }
     }
 }
@@ -107,7 +115,8 @@ int uart_init()
 
     if (!device_is_ready(uart_dev))
     {
-        printk("UART device not found!");
+
+        LOG_ERR("UART device not found!");
         return -EIO;
     }
 
@@ -122,7 +131,7 @@ int uart_init()
 
     if (ret == -ENOSYS)
     {
-        printk("UART config failed");
+        LOG_ERR("UART config failed");
         return -ENOSYS;
     }
 
@@ -131,11 +140,12 @@ int uart_init()
 
     if (ret == -ENOSYS || ret == -ENOTSUP)
     {
-        printk("UART callback function not implemented or API not enabled");
+        LOG_ERR("UART callback function not implemented or API not enabled");
         return -ENOSYS;
     }
 
     uart_irq_rx_enable(uart_dev);
+    LOG_INF("Initialized");
 
     return ret;
 }

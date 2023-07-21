@@ -2,6 +2,8 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(leds, LOG_LEVEL_INF);
 
 static const struct gpio_dt_spec led_red = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 static const struct gpio_dt_spec led_green = GPIO_DT_SPEC_GET(DT_ALIAS(led1), gpios);
@@ -75,7 +77,7 @@ int leds_init()
 
     if (!gpio_is_ready_dt(&led_red) && !gpio_is_ready_dt(&led_green) && !gpio_is_ready_dt(&led_blue))
     {
-        printk("GPIO devices not found!");
+        LOG_ERR("GPIO devices not found!");
         return -EIO;
     }
 
@@ -89,9 +91,10 @@ int leds_init()
 
     if (ret)
     {
-        printk("GPIO configure failed!");
+        LOG_ERR("Initialization failed (error %d)", ret);
         return ret;
     }
+    LOG_INF("Initialized");
 
     is_initialized = true;
 

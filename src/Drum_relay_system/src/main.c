@@ -1,24 +1,20 @@
-/*
- * Copyright (c) 2016 Intel Corporation
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
-#include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
-#include <zephyr/drivers/adc.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "gpio/leds.h"
 #include "bluetooth/bluetooth.h"
 #include "rs485/rs485.h"
 #include "gpio/battery.h"
 
-struct k_work battery_work;
+#include <zephyr/kernel.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/drivers/adc.h>
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-/* 1000 msec = 1 sec */
+#include <stdio.h>
+#include <stdlib.h>
+
 #define SLEEP_TIME_MS 1000
+
+struct k_work battery_work;
 
 void battery_work_handler(struct k_work *work_tem)
 {
@@ -37,6 +33,7 @@ void battery_work_handler(struct k_work *work_tem)
 int main(void)
 {
 	int ret = 0;
+	k_msleep(SLEEP_TIME_MS); // Gives time for the terminal to connect to catch LOG's
 
 	ret |= leds_init();
 	ret |= rs485_init();
@@ -48,7 +45,11 @@ int main(void)
 
 	if (ret)
 	{
-		printk("Initialization failed");
+		LOG_ERR("Failed to initialize");
+	}
+	else
+	{
+		LOG_INF("Initialized");
 	}
 
 	k_work_init(&battery_work, battery_work_handler);

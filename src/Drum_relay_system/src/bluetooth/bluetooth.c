@@ -1,10 +1,3 @@
-/* main.c - Application main entry point */
-
-/*
- * Copyright (c) 2015-2016 Intel Corporation
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #include "bluetooth.h"
 #include "../rs485/rs485.h"
 
@@ -12,7 +5,8 @@
 #include <stddef.h>
 #include <errno.h>
 #include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(bluetooth, LOG_LEVEL_INF);
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
@@ -106,7 +100,7 @@ static uint8_t notify_func(struct bt_conn *conn,
 
     if (!data)
     {
-        printk("Unsubscribed\n");
+        LOG_INF("Unsubscribed to handle %x", params->value_handle);
         params->value_handle = 0U;
         return BT_GATT_ITER_STOP;
     }
@@ -124,13 +118,13 @@ static uint8_t notify_func(struct bt_conn *conn,
     // Writes data to the Underwater Sensor System using its API format.
     if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
     {
-        printk("FOUND SAMPLING\n");
+        LOG_INF("FOUND SAMPLING");
         rs485_write("a");
     }
 
     else if (subscribe_params[CONTROL_SAMPLING_TIME].value_handle == params->value_handle)
     {
-        printk("FOUND SAMPLING TIME %s\n", data_s);
+        LOG_INF("FOUND SAMPLING TIME %s", data_s);
         rs485_write("b");
         rs485_write(data_s);
         rs485_write("b");
@@ -138,25 +132,25 @@ static uint8_t notify_func(struct bt_conn *conn,
 
     else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
     {
-        printk("FOUND DEPTH INIT\n");
+        LOG_INF("FOUND DEPTH INIT");
         rs485_write("c");
     }
 
     else if (subscribe_params[CONTROL_RS232_ON].value_handle == params->value_handle)
     {
-        printk("FOUND RS232\n");
+        LOG_INF("FOUND RS232");
         rs485_write("d");
     }
 
     else if (subscribe_params[CONTROL_12V_ON].value_handle == params->value_handle)
     {
-        printk("FOUND 12V\n");
+        LOG_INF("FOUND 12V");
         rs485_write("e");
     }
 
     else if (subscribe_params[CONTROL_SYSTEM_ON].value_handle == params->value_handle)
     {
-        printk("FOUND SYSTEM\n");
+        LOG_INF("FOUND SYSTEM");
         rs485_write("f");
     }
 
@@ -186,7 +180,14 @@ void discover_service(services_t target_service)
     discover_params.type = BT_GATT_DISCOVER_PRIMARY;
 
     int ret = bt_gatt_discover(default_conn, &discover_params);
-    ret ? printk("Discover failed (error %d)\n", ret) : printk("Discover Service...\n");
+    if (ret)
+    {
+        LOG_ERR("Discover failed (error %d)", ret);
+    }
+    else
+    {
+        LOG_DBG("Discover Service...");
+    }
 }
 
 /**
@@ -223,7 +224,14 @@ void discover_data_characteristic(data_characteristic_t target_characteristic,
     discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
 
     int ret = bt_gatt_discover(default_conn, &discover_params);
-    ret ? printk("Discover failed (error %d)\n", ret) : printk("Discover Chacateristic...\n");
+    if (ret)
+    {
+        LOG_ERR("Discover failed (error %d)", ret);
+    }
+    else
+    {
+        LOG_DBG("Discover Chacateristic...");
+    }
 }
 
 /**
@@ -266,7 +274,14 @@ void discover_control_characteristic(control_characteristic_t target_characteris
     discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
 
     int ret = bt_gatt_discover(default_conn, &discover_params);
-    ret ? printk("Discover failed (error %d)\n", ret) : printk("Discover Chacateristic...\n");
+    if (ret)
+    {
+        LOG_ERR("Discover failed (error %d)", ret);
+    }
+    else
+    {
+        LOG_DBG("Discover Chacateristic...");
+    }
 }
 
 /**
@@ -282,7 +297,14 @@ void subscribe_to_control_characteristic(const struct bt_gatt_attr *attr)
     subscribe_params[control_characteristic].ccc_handle = attr->handle;
 
     int ret = bt_gatt_subscribe(default_conn, &subscribe_params[control_characteristic]);
-    (ret && ret != -EALREADY) ? printk("Subscribe failed (error %d)\n", ret) : printk("[SUBSCRIBED] to handle %x \n", attr->handle - 1);
+    if (ret && ret != -EALREADY)
+    {
+        LOG_ERR("Subscribe failed (error %d)", ret);
+    }
+    else
+    {
+        LOG_INF("[SUBSCRIBED] to handle %x", attr->handle);
+    }
 }
 
 /**
@@ -300,7 +322,14 @@ void discover_description(const struct bt_gatt_attr *attr)
     subscribe_params[control_characteristic].value_handle = bt_gatt_attr_value_handle(attr);
 
     int ret = bt_gatt_discover(default_conn, &discover_params);
-    ret ? printk("Discover failed (error %d)\n", ret) : printk("Discover Description...\n");
+    if (ret)
+    {
+        LOG_ERR("Discover failed (error %d)", ret);
+    }
+    else
+    {
+        LOG_DBG("Discover Description...");
+    }
 }
 
 /**
@@ -321,7 +350,9 @@ static uint8_t discover_func(struct bt_conn *conn,
 {
     if (!attr)
     {
-        printk("Discover complete\n");
+        LOG_INF("Discover complete");
+        LOG_INF("Initialized");
+
         (void)memset(params, 0, sizeof(*params));
         is_initialized = true;
         return BT_GATT_ITER_STOP;
@@ -333,17 +364,17 @@ static uint8_t discover_func(struct bt_conn *conn,
     case BT_GATT_DISCOVER_PRIMARY:
         if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_DATA))
         {
-            printk("[SERVICE] data\n");
+            LOG_DBG("[SERVICE] data");
             discover_data_characteristic(data_characteristic, attr);
         }
         else if (!bt_uuid_cmp(discover_params.uuid, BT_UUID_CONTROL))
         {
-            printk("[SERVICE] control\n");
+            LOG_DBG("[SERVICE] control");
             discover_control_characteristic(control_characteristic, attr);
         }
         break;
     case BT_GATT_DISCOVER_CHARACTERISTIC:
-        printk("[CHARACTERISTIC] handle %x \n", attr->handle + 1);
+        LOG_DBG("[CHARACTERISTIC] handle %x ", attr->handle + 1);
 
         switch (service)
         {
@@ -422,7 +453,7 @@ static void device_found(const bt_addr_le_t *addr,
     }
 
     bt_addr_le_to_str(addr, addr_str, sizeof(addr_str));
-    printk("Device found: %s (RSSI %d)\n", addr_str, rssi);
+    LOG_INF("Device found: %s (RSSI %d)", addr_str, rssi);
 
     // Connect to devices in close proximity
     if (rssi < -60)
@@ -439,7 +470,7 @@ static void device_found(const bt_addr_le_t *addr,
                             BT_LE_CONN_PARAM_LONG_TIMEOUT, &default_conn);
     if (ret)
     {
-        printk("Create conn to %s failed (%d)\n", addr_str, ret);
+        LOG_ERR("Create conn to %s failed (%d)", addr_str, ret);
         (void)start_scan();
     }
 }
@@ -457,11 +488,11 @@ static int start_scan(void)
     if (ret)
 
     {
-        printk("Scanning failed to start (err %d)\n", ret);
+        LOG_ERR("Scanning failed to start (err %d)", ret);
         return ret;
     }
 
-    printk("Scanning successfully started\n");
+    LOG_INF("Scanning successfully started");
     return ret;
 }
 
@@ -481,7 +512,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
     if (err)
     {
-        printk("Failed to connect to %s (%u)\n", addr, err);
+        LOG_ERR("Failed to connect to %s (%u)", addr, err);
 
         bt_conn_unref(default_conn);
         default_conn = NULL;
@@ -495,7 +526,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
         return;
     }
 
-    printk("Connected: %s\n", addr);
+    LOG_INF("Connected: %s", addr);
 
     // Prepare to discover service
     service = SERVICE_DATA;
@@ -524,7 +555,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
     bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 
-    printk("Disconnected: %s (reason 0x%02x)\n", addr, reason);
+    LOG_INF("Disconnected: %s (reason 0x%02x)", addr, reason);
 
     bt_conn_unref(default_conn);
     default_conn = NULL;
@@ -544,7 +575,7 @@ int bluetooth_write_data(data_characteristic_t charecteristic, char *data, uint8
     int ret = 0;
     if (!is_initialized)
     {
-        printk("Bluetooth not initialized");
+        LOG_ERR("Bluetooth not initialized, cannot write to GATT");
         return -ECANCELED;
     }
 
@@ -560,7 +591,7 @@ int bluetooth_init(void)
     ret |= bt_enable(NULL);
     if (ret)
     {
-        printk("Bluetooth enable failed (err %d)\n", ret);
+        LOG_ERR("Bluetooth enable failed (err %d)", ret);
         return ret;
     }
 
