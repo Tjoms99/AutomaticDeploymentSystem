@@ -9,26 +9,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define SLEEP_TIME_MS 1000
-
-struct k_work battery_work;
-
-void battery_work_handler(struct k_work *work_item)
-{
-	float battery_volt = 0;
-	int battery_percentage = 0;
-	int length = 4;
-	char battery_volt_s[length];
-
-	battery_get_voltage(&battery_volt);
-	battery_get_percentage(&battery_percentage, battery_volt);
-
-	sprintf(battery_volt_s, "%d", battery_percentage);
-	bluetooth_write_data(DATA_BATTERY, battery_volt_s, length);
-}
 
 int main(void)
 {
@@ -52,12 +33,9 @@ int main(void)
 		LOG_INF("Initialized");
 	}
 
-	k_work_init(&battery_work, battery_work_handler);
-
 	while (1)
 	{
 		k_msleep(SLEEP_TIME_MS);
-		k_work_submit(&battery_work);
 	}
 
 	return 0;

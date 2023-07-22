@@ -1,5 +1,13 @@
 #ifndef __BATTERY_H__
 #define __BATTERY_H__
+#include <stdint.h>
+
+/**
+ * @brief Sets the time interval for how often the battery percentage should be written to the BLE Battery characteristic.
+ *
+ * @param[in] time_ms Publishing interval.
+ */
+void battery_set_publish_interval(uint32_t time_ms);
 
 /**
  * @brief Set battery charging to fast charge (100mA).

@@ -1,4 +1,8 @@
 #include "battery.h"
+#include "../bluetooth/bluetooth.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -70,11 +74,54 @@ BatteryState battery_states[BATTERY_STATES_COUNT] = {
     {0.00, 0}  // Below safe level
 };
 
+volatile uint32_t publish_interval_ms __attribute__((section(".noinit")));
 static uint8_t is_initialized = false;
 
+/**
+ * @brief Enables battery read GPIO.
+ *
+ * @note NEEDS(!) to be set when charging as the ADC channel can be destroyed due to high voltage.
+ */
 static int battery_enable_read()
 {
     return gpio_pin_set(gpio_battery_dev, GPIO_BATTERY_READ_ENABLE, 1);
+}
+
+/**
+ * @brief Periodically sends the battery percentage over BLE
+ */
+void battery_handler()
+{
+    float battery_volt = 0;
+    int battery_percentage = 0;
+    int length = 4;
+    char battery_volt_s[length];
+
+    while (1)
+    {
+        battery_get_voltage(&battery_volt);
+        battery_get_percentage(&battery_percentage, battery_volt);
+
+        sprintf(battery_volt_s, "%d", battery_percentage);
+        bluetooth_write_data(DATA_BATTERY, battery_volt_s, length);
+
+        if (publish_interval_ms > 1000)
+        {
+            k_msleep(1000);
+            k_msleep(publish_interval_ms - 1000);
+        }
+        else
+        {
+            k_msleep(1000);
+        }
+    }
+}
+
+K_THREAD_DEFINE(battery_thread, 1024, battery_handler, NULL, NULL, NULL, 7, 0, 1000);
+
+void battery_set_publish_interval(uint32_t time_ms)
+{
+    publish_interval_ms = time_ms;
 }
 
 int battery_set_fast_charge()

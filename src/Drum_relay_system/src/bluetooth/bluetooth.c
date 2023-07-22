@@ -1,5 +1,9 @@
 #include "bluetooth.h"
 #include "../rs485/rs485.h"
+#include "../gpio/battery.h"
+
+#include <stdio.h>
+#include <string.h>
 
 #include <zephyr/types.h>
 #include <stddef.h>
@@ -128,6 +132,17 @@ static uint8_t notify_func(struct bt_conn *conn,
         rs485_write("b");
         rs485_write(data_s);
         rs485_write("b");
+
+        int length = strlen(data_s);
+        uint32_t time = 0;
+
+        // Convert string to int
+        for (int index = 0; index < length; index++)
+        {
+            time = time * 10 + (data_s[index] - '0');
+        }
+
+        battery_set_publish_interval(time * 1000); // From seconds to milliseconds.
     }
 
     else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
@@ -152,6 +167,7 @@ static uint8_t notify_func(struct bt_conn *conn,
     {
         LOG_INF("FOUND SYSTEM");
         rs485_write("f");
+        battery_set_publish_interval(1000);
     }
 
     return BT_GATT_ITER_CONTINUE;
