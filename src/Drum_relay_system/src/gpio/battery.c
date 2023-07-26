@@ -74,7 +74,7 @@ BatteryState battery_states[BATTERY_STATES_COUNT] = {
     {0.00, 0}  // Below safe level
 };
 
-volatile uint32_t publish_interval_ms __attribute__((section(".noinit")));
+static uint32_t publish_interval_ms = 1000;
 static uint8_t is_initialized = false;
 
 /**
@@ -100,20 +100,12 @@ void battery_handler()
     while (1)
     {
         battery_get_voltage(&battery_volt);
-        battery_get_percentage(&battery_percentage, battery_volt);
+        // battery_get_percentage(&battery_percentage, battery_volt);
 
-        sprintf(battery_volt_s, "%d", battery_percentage);
+        sprintf(battery_volt_s, "%d", (int)(battery_volt * 1000)); // mV
         bluetooth_write_data(DATA_BATTERY, battery_volt_s, length);
 
-        if (publish_interval_ms > 1000)
-        {
-            k_msleep(1000);
-            k_msleep(publish_interval_ms - 1000);
-        }
-        else
-        {
-            k_msleep(1000);
-        }
+        k_msleep(publish_interval_ms);
     }
 }
 
@@ -201,7 +193,7 @@ int battery_get_voltage(float *battery_volt)
     battery_millivolt = adc_mv * ((R1 + R2) / R2);
     *battery_volt = (float)battery_millivolt / 1000.0; // From millivolt to volt.
 
-    LOG_INF("Battery: %d mV", battery_millivolt);
+    LOG_INF("%d mV", battery_millivolt);
     return ret;
 }
 
@@ -225,7 +217,7 @@ int battery_get_percentage(int *battery_percentage, float battery_voltage)
                                    ((battery_states[i + 1].percentage - battery_states[i].percentage) /
                                     (battery_states[i + 1].voltage - battery_states[i].voltage)));
 
-            LOG_INF("Battery: %d %%", *battery_percentage);
+            LOG_INF("%d %%", *battery_percentage);
             return 0;
         }
     }

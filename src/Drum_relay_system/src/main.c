@@ -17,11 +17,11 @@ int main(void)
 	k_msleep(SLEEP_TIME_MS); // Gives time for the terminal to connect to catch LOG's
 
 	ret |= leds_init();
+	ret |= battery_init();
 	ret |= rs485_init();
 	ret |= bluetooth_init();
 	ret |= leds_set_blue(1);
 
-	ret |= battery_init();
 	ret |= battery_charge_start();
 
 	if (ret)
