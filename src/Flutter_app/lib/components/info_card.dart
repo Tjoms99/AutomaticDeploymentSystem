@@ -45,7 +45,7 @@ class _InfocardState extends State<Infocard> {
             valueListenable: widget.sensorData!.currentData,
             builder: ((context, value, child) {
               return PrimaryText(
-                text: widget.sensorData!.getCurrentData().toStringAsFixed(2),
+                text: widget.sensorData!.getCurrentData().toStringAsFixed(3),
                 color: AppColors.primaryBackground,
                 size: 18.0,
                 fontWeight: FontWeight.w600,
