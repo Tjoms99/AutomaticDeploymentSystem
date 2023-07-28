@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(bluetooth, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(bluetooth, LOG_LEVEL_DBG);
 
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/hci.h>
@@ -19,7 +19,6 @@ LOG_MODULE_REGISTER(bluetooth, LOG_LEVEL_INF);
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/sys/byteorder.h>
 
-static int start_scan(void);
 static uint8_t discover_func(struct bt_conn *conn,
                              const struct bt_gatt_attr *attr,
                              struct bt_gatt_discover_params *params);
@@ -70,6 +69,7 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 #define uuid_rs232_on_characteristic_val BT_UUID_128_ENCODE(0x8d1a814d, 0x2889, 0x4ce2, 0xa228, 0xec44a9053bb8)
 #define uuid_12v_on_characteristic_val BT_UUID_128_ENCODE(0x2932a5b9, 0xfaee, 0x4d50, 0Xb6da, 0xb82b5b9739ad)
 #define uuid_sampling_time_characteristic_val BT_UUID_128_ENCODE(0xc45c93cb, 0xaec4, 0x4590, 0x8b65, 0x9ee695aa8e40)
+#define uuid_ping_characteristic_val BT_UUID_128_ENCODE(0xb08d12f2, 0xb525, 0x4a26, 0x88f6, 0x30568d4be1e9)
 
 #define BT_UUID_CONTROL BT_UUID_DECLARE_128(uuid_control_service_val)
 #define BT_UUID_CONTROL_SYSTEM_ON BT_UUID_DECLARE_128(uuid_system_on_characteristic_val)
@@ -77,11 +77,13 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 #define BT_UUID_CONTROL_RS232_ON BT_UUID_DECLARE_128(uuid_rs232_on_characteristic_val)
 #define BT_UUID_CONTROL_12V_ON BT_UUID_DECLARE_128(uuid_12v_on_characteristic_val)
 #define BT_UUID_CONTROL_SAMPLING_TIME BT_UUID_DECLARE_128(uuid_sampling_time_characteristic_val)
+#define BT_UUID_CONTROL_PING BT_UUID_DECLARE_128(uuid_ping_characteristic_val)
 
 static control_characteristic_t control_characteristic;
 static struct bt_gatt_subscribe_params subscribe_params[CONTROL_CHARACTERISTICS_MAX];
 
 bool is_initialized = false;
+uint8_t ping_flag = 0;
 
 /**
  * @brief Notify callback function for subscribed characteristics.
@@ -122,13 +124,13 @@ static uint8_t notify_func(struct bt_conn *conn,
     // Writes data to the Underwater Sensor System using its API format.
     if (subscribe_params[CONTROL_SAMPLING_ON].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND SAMPLING");
+        LOG_DBG("FOUND SAMPLING");
         rs485_write("a");
     }
 
     else if (subscribe_params[CONTROL_SAMPLING_TIME].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND SAMPLING TIME %s", data_s);
+        LOG_DBG("FOUND SAMPLING TIME %s", data_s);
         rs485_write("b");
         rs485_write(data_s);
         rs485_write("b");
@@ -147,27 +149,33 @@ static uint8_t notify_func(struct bt_conn *conn,
 
     else if (subscribe_params[CONTROL_DEPTH_INIT].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND DEPTH INIT");
+        LOG_DBG("FOUND DEPTH INIT");
         rs485_write("c");
     }
 
     else if (subscribe_params[CONTROL_RS232_ON].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND RS232");
+        LOG_DBG("FOUND RS232");
         rs485_write("d");
     }
 
     else if (subscribe_params[CONTROL_12V_ON].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND 12V");
+        LOG_DBG("FOUND 12V");
         rs485_write("e");
     }
 
     else if (subscribe_params[CONTROL_SYSTEM_ON].value_handle == params->value_handle)
     {
-        LOG_INF("FOUND SYSTEM");
+        LOG_DBG("FOUND SYSTEM");
         rs485_write("f");
         battery_set_publish_interval(1000);
+    }
+
+    else if (subscribe_params[CONTROL_PING].value_handle == params->value_handle)
+    {
+        LOG_DBG("FOUND PING");
+        ping_flag = 1;
     }
 
     return BT_GATT_ITER_CONTINUE;
@@ -279,6 +287,9 @@ void discover_control_characteristic(control_characteristic_t target_characteris
         break;
     case CONTROL_SAMPLING_TIME:
         memcpy(&uuid128, BT_UUID_CONTROL_SAMPLING_TIME, sizeof(uuid128));
+        break;
+    case CONTROL_PING:
+        memcpy(&uuid128, BT_UUID_CONTROL_PING, sizeof(uuid128));
         break;
     default:
         // Do nothing
@@ -453,6 +464,7 @@ static void device_found(const bt_addr_le_t *addr,
                          uint8_t type,
                          struct net_buf_simple *ad)
 {
+    char device_to_look_for[BT_ADDR_LE_STR_LEN] = "64:E8:33:DA:D7:6A"; //"64:E8:33:DA:C5:42"
     char addr_str[BT_ADDR_LE_STR_LEN];
     int ret;
 
@@ -471,10 +483,12 @@ static void device_found(const bt_addr_le_t *addr,
     bt_addr_le_to_str(addr, addr_str, sizeof(addr_str));
     LOG_INF("Device found: %s (RSSI %d)", addr_str, rssi);
 
-    // Connect to devices in close proximity
-    if (rssi < -60)
+    for (uint8_t index = 0; index < 17; index++)
     {
-        return;
+        if (addr_str[index] != device_to_look_for[index])
+        {
+            return;
+        }
     }
 
     if (bt_le_scan_stop())
@@ -482,34 +496,15 @@ static void device_found(const bt_addr_le_t *addr,
         return;
     }
 
+    LOG_INF("Connecting..");
+
     ret = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN,
                             BT_LE_CONN_PARAM_LONG_TIMEOUT, &default_conn);
     if (ret)
     {
         LOG_ERR("Create conn to %s failed (%d)", addr_str, ret);
-        (void)start_scan();
+        (void)bluetooth_start_scan();
     }
-}
-
-/**
- * @brief Scans for BLE devices that are advertising.
- *
- * @retval 0 if successful. Negative errno number on error.
- */
-static int start_scan(void)
-{
-    int ret = 0;
-
-    ret = bt_le_scan_start(BT_LE_SCAN_PASSIVE, device_found);
-    if (ret)
-
-    {
-        LOG_ERR("Scanning failed to start (err %d)", ret);
-        return ret;
-    }
-
-    LOG_INF("Scanning successfully started");
-    return ret;
 }
 
 /**
@@ -533,7 +528,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
         bt_conn_unref(default_conn);
         default_conn = NULL;
 
-        (void)start_scan();
+        (void)bluetooth_start_scan();
         return;
     }
 
@@ -564,6 +559,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
     char addr[BT_ADDR_LE_STR_LEN];
 
+    LOG_DBG("Disconnecting...");
     if (conn != default_conn)
     {
         return;
@@ -578,13 +574,43 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
     is_initialized = false;
 
     // Restart scanning.
-    (void)start_scan();
+    (void)bluetooth_start_scan();
 }
 
 BT_CONN_CB_DEFINE(conn_callbacks) = {
     .connected = connected,
     .disconnected = disconnected,
 };
+
+int bluetooth_get_ping(uint8_t *flag)
+{
+    if (!is_initialized)
+    {
+        LOG_ERR("Bluetooth not initialized, cannot write to GATT");
+        return -ECANCELED;
+    }
+
+    *flag = ping_flag;
+    ping_flag = 0;
+
+    return 0;
+}
+
+int bluetooth_start_scan()
+{
+    int ret = 0;
+
+    ret = bt_le_scan_start(BT_LE_SCAN_PASSIVE, device_found);
+    if (ret)
+
+    {
+        LOG_ERR("Scanning failed to start (err %d)", ret);
+        return ret;
+    }
+
+    LOG_INF("Scanning successfully started");
+    return ret;
+}
 
 int bluetooth_write_data(data_characteristic_t charecteristic, char *data, uint8_t length)
 {
@@ -611,7 +637,19 @@ int bluetooth_init(void)
         return ret;
     }
 
-    ret |= start_scan();
+    ret |= bluetooth_start_scan();
 
     return ret;
+}
+
+int bluetooth_reinit(void)
+{
+    is_initialized = false;
+    ping_flag = 1;
+
+    bt_conn_unref(default_conn);
+    default_conn = NULL;
+
+    bluetooth_start_scan();
+    return 0;
 }
