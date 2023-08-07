@@ -33,19 +33,9 @@ int main(void)
 		LOG_INF("Initialized");
 	}
 
-	uint8_t ble_ping_recieved = 1;
-
 	while (1)
 	{
 		k_msleep(SLEEP_TIME_MS);
-		bluetooth_get_ping(&ble_ping_recieved);
-		if (!ble_ping_recieved)
-		{
-			// Something went wrong with the BLE connection, retry.
-			LOG_ERR("Bluetooth connection lost without warning");
-			bluetooth_reinit();
-			ble_ping_recieved = 1;
-		}
 	}
 
 	return 0;

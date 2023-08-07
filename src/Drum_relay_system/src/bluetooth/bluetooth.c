@@ -69,7 +69,6 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 #define uuid_rs232_on_characteristic_val BT_UUID_128_ENCODE(0x8d1a814d, 0x2889, 0x4ce2, 0xa228, 0xec44a9053bb8)
 #define uuid_12v_on_characteristic_val BT_UUID_128_ENCODE(0x2932a5b9, 0xfaee, 0x4d50, 0Xb6da, 0xb82b5b9739ad)
 #define uuid_sampling_time_characteristic_val BT_UUID_128_ENCODE(0xc45c93cb, 0xaec4, 0x4590, 0x8b65, 0x9ee695aa8e40)
-#define uuid_ping_characteristic_val BT_UUID_128_ENCODE(0xb08d12f2, 0xb525, 0x4a26, 0x88f6, 0x30568d4be1e9)
 
 #define BT_UUID_CONTROL BT_UUID_DECLARE_128(uuid_control_service_val)
 #define BT_UUID_CONTROL_SYSTEM_ON BT_UUID_DECLARE_128(uuid_system_on_characteristic_val)
@@ -77,7 +76,6 @@ static uint16_t characteristic_value_handlers[DATA_CHARACTERISTICS_MAX];
 #define BT_UUID_CONTROL_RS232_ON BT_UUID_DECLARE_128(uuid_rs232_on_characteristic_val)
 #define BT_UUID_CONTROL_12V_ON BT_UUID_DECLARE_128(uuid_12v_on_characteristic_val)
 #define BT_UUID_CONTROL_SAMPLING_TIME BT_UUID_DECLARE_128(uuid_sampling_time_characteristic_val)
-#define BT_UUID_CONTROL_PING BT_UUID_DECLARE_128(uuid_ping_characteristic_val)
 
 static control_characteristic_t control_characteristic;
 static struct bt_gatt_subscribe_params subscribe_params[CONTROL_CHARACTERISTICS_MAX];
@@ -170,12 +168,6 @@ static uint8_t notify_func(struct bt_conn *conn,
         LOG_DBG("FOUND SYSTEM");
         rs485_write("f");
         battery_set_publish_interval(1000);
-    }
-
-    else if (subscribe_params[CONTROL_PING].value_handle == params->value_handle)
-    {
-        LOG_DBG("FOUND PING");
-        ping_flag = 1;
     }
 
     return BT_GATT_ITER_CONTINUE;
@@ -287,9 +279,6 @@ void discover_control_characteristic(control_characteristic_t target_characteris
         break;
     case CONTROL_SAMPLING_TIME:
         memcpy(&uuid128, BT_UUID_CONTROL_SAMPLING_TIME, sizeof(uuid128));
-        break;
-    case CONTROL_PING:
-        memcpy(&uuid128, BT_UUID_CONTROL_PING, sizeof(uuid128));
         break;
     default:
         // Do nothing

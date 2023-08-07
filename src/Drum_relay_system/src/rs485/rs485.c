@@ -23,11 +23,23 @@ static void rs485_tx_disable()
 
 void rs485_write(char *message)
 {
+    static const uint8_t sleep_interval_ms = 30; // Reasonable latency to check for Underwater Sensor System.
+    static const uint8_t maximum_tries = 50;
+    uint8_t current_try = 0;
+
     // Wait for the RS485 bus to become available.
+    // Wait time = sleep_interval_ms * maximum_tries = 1 500ms
     while (uart_get_is_busy())
     {
         LOG_DBG("UART busy");
-        k_msleep(30);
+        k_msleep(sleep_interval_ms);
+
+        // Something went wrong (Probably not connected to USS).
+        if (++current_try >= maximum_tries)
+        {
+            LOG_WRN("Message '%s' discarded. UART busy / not connected to USS", message);
+            return;
+        }
     }
 
     rs485_tx_enable();

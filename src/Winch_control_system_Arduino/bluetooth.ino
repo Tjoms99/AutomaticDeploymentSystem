@@ -29,8 +29,6 @@ NimBLECharacteristic *pCharacteristic_battery;
 #define CHARACTERISTIC_UUID_RS232_ON "8d1a814d-2889-4ce2-a228-ec44a9053bb8"
 #define CHARACTERISTIC_UUID_12V_ON "2932a5b9-faee-4d50-b6da-b82b5b9739ad"
 #define CHARACTERISTIC_UUID_SAMPLING_TIME "c45c93cb-aec4-4590-8b65-9ee695aa8e40"
-#define CHARACTERISTIC_UUID_PING "b08d12f2-b525-4a26-88f6-30568d4be1e9"
-
 
 NimBLEService *pService_control;
 NimBLECharacteristic *pCharacteristic_system_on;
@@ -39,8 +37,6 @@ NimBLECharacteristic *pCharacteristic_depth_init;
 NimBLECharacteristic *pCharacteristic_rs232_on;
 NimBLECharacteristic *pCharacteristic_12v_on;
 NimBLECharacteristic *pCharacteristic_sampling_time;
-NimBLECharacteristic *pCharacteristic_ping;
-
 
 bool ble_finished = false;
 std::string value = "0";
@@ -120,15 +116,6 @@ class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
   };
 };
 
-void ble_task(void *arg){
-  while(1){
-          vTaskDelay(1000 / portTICK_PERIOD_MS);
-          pCharacteristic_ping->setValue("1");
-          pCharacteristic_ping->notify();
-
-  }
-}
-
 static CharacteristicCallbacks chrCallbacks;
 
 void ble_begin(void)
@@ -172,7 +159,6 @@ void ble_begin(void)
   pCharacteristic_rs232_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_RS232_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_12v_on = pService_control->createCharacteristic(CHARACTERISTIC_UUID_12V_ON, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
   pCharacteristic_sampling_time = pService_control->createCharacteristic(CHARACTERISTIC_UUID_SAMPLING_TIME, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
-  pCharacteristic_ping = pService_control->createCharacteristic(CHARACTERISTIC_UUID_PING, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
   pCharacteristic_system_on->setCallbacks(&chrCallbacks);
   pCharacteristic_sampling_on->setCallbacks(&chrCallbacks);
@@ -180,8 +166,6 @@ void ble_begin(void)
   pCharacteristic_rs232_on->setCallbacks(&chrCallbacks);
   pCharacteristic_12v_on->setCallbacks(&chrCallbacks);
   pCharacteristic_sampling_time->setCallbacks(&chrCallbacks);
-  pCharacteristic_ping->setCallbacks(&chrCallbacks);
-
 
   pService_control->start();
   pCharacteristic_system_on->setValue("1");
@@ -190,7 +174,6 @@ void ble_begin(void)
   pCharacteristic_rs232_on->setValue("0");
   pCharacteristic_12v_on->setValue("0");
   pCharacteristic_sampling_time->setValue(value);
-  pCharacteristic_ping->setValue("0");
 
   //-------------------------------------------------------------------------------------------------
   // ADVERTISING
@@ -206,8 +189,6 @@ void ble_begin(void)
   pCharacteristic_rs232_on->notify();
   pCharacteristic_12v_on->notify();
   pCharacteristic_sampling_time->notify();
-
-  xTaskCreate(ble_task, "ble_task", 2048, NULL, 9, NULL);
 }
 
 void ble_notify_system_on(byte *state, uint8_t length)
