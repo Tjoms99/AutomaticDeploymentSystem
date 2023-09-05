@@ -14,7 +14,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 int main(void)
 {
 	int ret = 0;
-	// k_msleep(SLEEP_TIME_MS); // Gives time for the terminal to connect to catch LOG's
+	k_msleep(SLEEP_TIME_MS * 2); // Gives time for the terminal to connect to catch LOG's
 
 	ret |= leds_init();
 	ret |= battery_init();
@@ -35,7 +35,9 @@ int main(void)
 
 	while (1)
 	{
-		k_msleep(SLEEP_TIME_MS);
+		// k_msleep(SLEEP_TIME_MS);
+		__WFE();
+		__WFI();
 	}
 
 	return 0;

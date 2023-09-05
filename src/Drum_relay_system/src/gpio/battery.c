@@ -19,7 +19,7 @@ static const struct device *adc_battery_dev = DEVICE_DT_GET(DT_NODELABEL(adc));
 #define GPIO_BATTERY_CHARGING_ENABLE 17
 #define GPIO_BATTERY_READ_ENABLE 14
 
-#define ADC_TOTAL_SAMPLES 10
+#define ADC_TOTAL_SAMPLES 20
 int16_t sample_buffer[ADC_TOTAL_SAMPLES];
 
 #define ADC_RESOLUTION 12
@@ -267,7 +267,7 @@ int battery_init()
 
     is_initialized = true;
     LOG_INF("Initialized");
-
+    ret |= battery_charge_stop();
     ret |= battery_enable_read();
     ret |= battery_set_fast_charge();
 
