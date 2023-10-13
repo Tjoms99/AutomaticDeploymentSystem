@@ -63,10 +63,15 @@ class _SideMenuInfoState extends State<SideMenuInfo> {
     } catch (e) {}
 
     int timeLeft = targetTime - currentTime;
+
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+    }
+
     widget.systemController.setTimeLeft(timeLeft);
 
-    _timeLeftController.text = "${timeLeft.toStringAsFixed(2)} s";
-    setSampling();
+    _timeLeftController.text = "${timeLeft.toStringAsFixed(0)} s";
+    setState(() {});
   }
 
   void updateSystem() {

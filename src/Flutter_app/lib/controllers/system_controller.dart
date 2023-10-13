@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:automatic_deployment_system_app/config/mqtt_topics.dart';
 import 'package:automatic_deployment_system_app/controllers/USS_controller.dart';
@@ -174,7 +175,7 @@ class SystemController extends ValueNotifier {
 
   //---------------------------SYSTEM TIMER----------------------------------
   int getCurrentTime() {
-    return _currentTime;
+    return _currentTime ~/ 10;
   }
 
   void setTimeLeft(int seconds) {
@@ -183,7 +184,9 @@ class SystemController extends ValueNotifier {
 
   //---------------------------UPDATE DATA-----------------------------------
   void updateFrontendData(Timer timer) {
-    if (!isOnSystem.value) _currentTime = 0;
+    _currentTime++; //Updated according to systemUpdateIntervalMS
+
+    if (!isOnSystem.value || !isSampling.value) _currentTime = 0;
 
     for (var i = 0; i < callbacks.length; i++) {
       callbacks.elementAt(i)();

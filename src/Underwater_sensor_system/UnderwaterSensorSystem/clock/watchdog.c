@@ -1,7 +1,7 @@
 
 #include <MSP430.h>
 
-#define WatchDog (WDTPW | WDTCNTCL | WDTSSEL__ACLK | WDTIS_4) // 16mS (depends on clock configuration)
+#define WatchDog (WDTPW | WDTCNTCL | WDTSSEL__ACLK | WDTIS_4) // 1 s (depends on clock configuration)
 
 /*
  *  Watchdog timer interval select (WDTIS_x). These bits select the watchdog timer interval to  set the WDTIFG flag or generate a PUC.
